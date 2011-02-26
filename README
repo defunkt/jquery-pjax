@@ -1,0 +1,117 @@
+## pushState + ajax = pjax
+
+        .--.
+       /    \
+      ## a  a
+      (   '._)
+       |'-- |
+     _.\___/_   ___pjax___
+   ."\> \Y/|<'.  '._.-'
+  /  \ \_\/ /  '-' /
+  | --'\_/|/ |   _/
+  |___.-' |  |`'`
+    |     |  |
+    |    / './
+   /__./` | |
+      \   | |
+       \  | |
+       ;  | |
+       /  | |
+ jgs  |___\_.\_
+      `-"--'---'
+
+
+## what is it?
+
+pjax loads content from your server into an existing page
+without reloading that entire page while ensuring permalinks,
+titles, and the back button work as expected. It enhances the
+browsing experience of your users - nothing more.
+
+
+## three ways to pjax on the client side:
+
+1. Functionally obtrusive, loading the href with ajax into data-pjax:
+
+   <a href='/explore' data-pjax='#main'>Explore</a>
+
+   $('a[data-pjax]').pjax()
+
+
+2. Slightly obtrusive, passing a container and jQuery ajax options:
+
+   <a href='/explore' class='js-pjax'>Explore</a>
+
+   $('a.js-pjax').pjax('#main', { error: function(){
+     $('.error').text('Something went wrong!')
+   })
+
+
+3. Unobtrusive, using the pjax 'loading' callback:
+
+   <div id='main'>
+     <div class='loader' style='display:none'><img src='spin.gif'></div>
+     <div class='tabs'>
+       <a href='/explore'>Explore</a>
+       <a href='/help'>Help</a>
+     </div>
+   </div>
+
+   $('a').pjax('#main', { loading: function(){
+     this == the target container == #main
+     $(this).find('.loader').show()
+   })
+
+
+## $(link).pjax( container, options )
+
+The $(link).pjax() function accepts a container, an options object,
+or both. The options are the same as jQuery's ajax options with the
+following additions:
+
+container - The selector of the container to load the reponse body into, or
+            the container itself.
+     push - Whether to pushState the URL. Defaults to true (of course).
+  loading - A callback to fire after it's been too many ms and
+            you want to ease the user's pain with a loading indicator.
+            You can also bind to the 'loading.pjax' event on container.
+
+
+## $.pjax( options )
+
+You can also just call $.pjax directly. It acts much like $.ajax, even
+returning the same thing and accepting the same options.
+
+The pjax-specific keys listed in the $(link).pjax() section work here
+as well.
+
+This pjax call:
+
+  $.pjax({
+    url: '/authors',
+    container: '#main'
+  })
+
+Roughly translates into this ajax call:
+
+  $.ajax({
+    url: '/authors?pjax=true',
+    dataType: 'html',
+    success: function(data){
+      $('#main').html( data )
+      history.pushState( null, $(data).filter('title').text(), '/authors' )
+    })
+  })
+
+
+## install it
+
+  $ cd path/to/js
+  $ curl -O https://github.com/defunkt/jquery-pjax/raw/master/jquery.pjax.js
+
+Then, in your HTML:
+
+  <script src="path/to/js/jquery.pjax.js"></script>
+
+Replace 'path/to/js' with the path to your JavaScript directory,
+e.g. 'public/javascripts'.
