@@ -132,7 +132,7 @@ jQuery.pjax = function( options ) {
 jQuery(document).one('pjax', function(){
   jQuery(window).bind('popstate', function(event){
     var state = event.state
-    if ( state && state.pjax && $(state.pjax).length )
+    if ( state && $(state.pjax).length )
       jQuery.pjax({ url: location.href, container: state.pjax, push: false })
     else
       window.location = location.href
