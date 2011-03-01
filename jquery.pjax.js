@@ -73,6 +73,8 @@ jQuery.pjax = function( options ) {
   var $ = jQuery, $container = $(options.container)
 
   var defaults = {
+    push: true,
+    replace: false,
     data: { pjax: true },
     type: 'GET',
     dataType: 'html',
@@ -92,14 +94,15 @@ jQuery.pjax = function( options ) {
       if ( title ) document.title = title
 
       if ( options.replace ) {
-        // If they asked for replaceState, give them replaceState
         window.history.replaceState( { pjax: options.container },
                                      document.title, options.url )
-      } else if ( options.push !== false ) {
-        // If they didn't explicitly disable `push`, call pushState()
+      } else if ( options.push ) {
         window.history.pushState( { pjax: options.container },
                                   document.title, options.url )
       }
+
+      if ( (options.replace || options.push ) && window._gaq )
+        _gaq.push(['_trackPageview'])
 
       // Invoke their success handler if they gave us one.
       success.apply( this, arguments )
