@@ -72,6 +72,7 @@ following additions:
 container - The selector of the container to load the reponse body into, or
             the container itself.
      push - Whether to pushState the URL. Defaults to true (of course).
+  replace - Whether to replaceState the URL. Defaults to false.
   loading - A callback to fire after it's been too many ms and
             you want to ease the user's pain with a loading indicator.
             You can also bind to the 'loading.pjax' event on container.

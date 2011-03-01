@@ -14,6 +14,7 @@
 //             you want to ease the user's pain with a loading indicator.
 //             You can also bind to the 'loading.pjax' event on container.
 //      push - Whether to pushState the URL. Defaults to true (of course).
+//   replace - Want to use replaceState instead? That's cool.
 //
 // For convenience the first parameter can be either the container or
 // the options object.
@@ -90,8 +91,11 @@ jQuery.pjax = function( options ) {
       // Make it happen.
       $(options.container).html( data )
 
-      // If they didn't explicitly disable `push`, call pushState()
-      if ( options.push !== false ) {
+      if ( options.replace ) {
+        window.history.replaceState( { pjax: options.container },
+                                     document.title, options.url )
+      } else if ( options.push !== false ) {
+        // If they didn't explicitly disable `push`, call pushState()
         window.history.pushState( { pjax: options.container },
                                   document.title, options.url )
       }
