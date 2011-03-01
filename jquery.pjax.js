@@ -91,8 +91,8 @@ jQuery.pjax = function( options ) {
       var title = $.trim( $container.find('title').remove().text() )
       if ( title ) document.title = title
 
-
       if ( options.replace ) {
+        // If they asked for replaceState, give them replaceState
         window.history.replaceState( { pjax: options.container },
                                      document.title, options.url )
       } else if ( options.push !== false ) {
