@@ -122,8 +122,8 @@ jQuery.pjax = function( options ) {
   // If we haven't found what we're looking for after a buncha ms
   // you might want to show a 'Loading...' indicator.
   setTimeout(function(){
-    if ( xhr.readyState == 4 ) return
-    $container.trigger('loading.pjax')
+    if ( xhr.readyState != 4 )
+      $container.trigger('loading.pjax')
   }, 350)
 
   $(document).trigger('pjax', xhr, options)
