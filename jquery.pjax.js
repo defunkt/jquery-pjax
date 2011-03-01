@@ -70,7 +70,7 @@ jQuery.fn.pjax = function( container, options ) {
 // Returns whatever $.ajax returns.
 jQuery.pjax = function( options ) {
   // Helper
-  var $ = jQuery
+  var $ = jQuery, $container = $(options.container)
 
   var defaults = {
     data: { pjax: true },
@@ -83,13 +83,14 @@ jQuery.pjax = function( options ) {
       if ( !$.trim(data) || /<html/i.test(data) )
         return window.location = options.url
 
+      // Make it happen.
+      $container.html( data )
+
       // If there's a <title> tag in the response, use it as
       // the page's title.
-      var title = $.trim( $(data).filter('title').remove().text() )
+      var title = $.trim( $container.find('title').remove().text() )
       if ( title ) document.title = title
 
-      // Make it happen.
-      $(options.container).html( data )
 
       if ( options.replace ) {
         window.history.replaceState( { pjax: options.container },
@@ -110,7 +111,7 @@ jQuery.pjax = function( options ) {
   delete options.success
 
   if ( options.loading )
-    $(options.container).bind('loading.pjax', options.loading)
+    $container.bind('loading.pjax', options.loading)
 
   options = $.extend( true, {}, defaults, options )
   var xhr = $.ajax( options )
@@ -119,7 +120,7 @@ jQuery.pjax = function( options ) {
   // you might want to show a 'Loading...' indicator.
   setTimeout(function(){
     if ( xhr.readyState == 4 ) return
-    $(options.container).trigger('loading.pjax')
+    $container.trigger('loading.pjax')
   }, 350)
 
   $(document).trigger('pjax', xhr, options)
