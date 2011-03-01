@@ -127,6 +127,7 @@ jQuery.pjax = function( options ) {
   return xhr
 }
 
+
 // Bind our popstate handler which takes care of the back and
 // forward buttons, but only once we've called pjax()
 jQuery(document).one('pjax', function(){
@@ -139,9 +140,11 @@ jQuery(document).one('pjax', function(){
   })
 })
 
+
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
 jQuery.event.props.push('state')
+
 
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
