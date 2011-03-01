@@ -105,6 +105,9 @@ jQuery.pjax = function( options ) {
   var success = options.success || $.noop
   delete options.success
 
+  if ( options.loading )
+    $(options.container).bind('loading.pjax', options.loading)
+
   options = $.extend( true, {}, defaults, options )
   var xhr = $.ajax( options )
 
@@ -113,7 +116,6 @@ jQuery.pjax = function( options ) {
   setTimeout(function(){
     if ( xhr.readyState == 4 ) return
     $(options.container).trigger('loading.pjax')
-    if ( options.loading ) options.loading.call( options.container )
   }, 350)
 
   $(document).trigger('pjax', xhr, options)
