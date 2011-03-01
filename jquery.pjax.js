@@ -26,7 +26,7 @@ jQuery.fn.pjax = function( container, options ) {
   if ( options )
     options.container = container
   else
-    options = container
+    options = $.isPlainObject(container) ? container : { container: container }
 
   $(this).live('click', function(){
     // Middle click, cmd click, and ctrl click should open
