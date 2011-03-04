@@ -131,6 +131,13 @@ jQuery.pjax = function( options ) {
 }
 
 
+jQuery(function(){
+  // older webkits don't fire popstate on load
+  if ( $.browser.webkit && parseInt($.browser.version) < 534 )
+    $(window).trigger('popstate')
+})
+
+
 // Bind our popstate handler which takes care of the back and
 // forward buttons, but only once we've called pjax()
 jQuery(window).bind('popstate', function(event){
