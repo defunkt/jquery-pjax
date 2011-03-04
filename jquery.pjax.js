@@ -26,7 +26,7 @@ jQuery.fn.pjax = function( container, options ) {
   if ( options )
     options.container = container
   else
-    options = $.isPlainObject(container) ? container : { container: container }
+    options = $.isPlainObject(container) ? container : {container:container}
 
   $(this).live('click', function(){
     // Middle click, cmd click, and ctrl click should open
@@ -39,7 +39,7 @@ jQuery.fn.pjax = function( container, options ) {
       container: $(this).attr('data-pjax')
     }
 
-    $.pjax( $.extend({}, defaults, options) )
+    $.pjax($.extend({}, defaults, options))
 
     return false
   })
@@ -79,14 +79,14 @@ jQuery.pjax = function( options ) {
     type: 'GET',
     dataType: 'html',
     error: function(){ window.location = options.url },
-    success: function(data){
+    success: function( data ) {
       // If we got no data or an entire web page, go directly
       // to the page and let normal error handling happen.
       if ( !$.trim(data) || /<html/i.test(data) )
         return window.location = options.url
 
       // Make it happen.
-      $container.html( data )
+      $container.html(data)
 
       // If there's a <title> tag in the response, use it as
       // the page's title.
@@ -94,18 +94,18 @@ jQuery.pjax = function( options ) {
       if ( title ) document.title = title
 
       if ( options.replace ) {
-        window.history.replaceState( { pjax: options.container },
-                                     document.title, options.url )
+        window.history.replaceState({ pjax: options.container },
+                                    document.title, options.url)
       } else if ( options.push ) {
-        window.history.pushState( { pjax: options.container },
-                                  document.title, options.url )
+        window.history.pushState({ pjax: options.container },
+                                 document.title, options.url)
       }
 
-      if ( (options.replace || options.push ) && window._gaq )
+      if ( (options.replace || options.push) && window._gaq )
         _gaq.push(['_trackPageview'])
 
       // Invoke their success handler if they gave us one.
-      success.apply( this, arguments )
+      success.apply(this, arguments)
     }
   }
 
@@ -116,8 +116,8 @@ jQuery.pjax = function( options ) {
   if ( options.loading )
     $container.bind('loading.pjax', options.loading)
 
-  options = $.extend( true, {}, defaults, options )
-  var xhr = $.ajax( options )
+  options = $.extend(true, {}, defaults, options)
+  var xhr = $.ajax(options)
 
   // If we haven't found what we're looking for after a buncha ms
   // you might want to show a 'Loading...' indicator.
@@ -133,14 +133,13 @@ jQuery.pjax = function( options ) {
 
 // Bind our popstate handler which takes care of the back and
 // forward buttons, but only once we've called pjax()
-jQuery(document).one('pjax', function(){
-  jQuery(window).bind('popstate', function(event){
-    var state = event.state
-    if ( state && $(state.pjax).length )
-      jQuery.pjax({ url: location.href, container: state.pjax, push: false })
-    else
-      window.location = location.href
-  })
+jQuery(window).bind('popstate', function(event){
+  var state = event.state
+
+  if ( state && $(state.pjax).length )
+    jQuery.pjax({ url: location.href, container: state.pjax, push: false })
+  else
+    window.location = location.href
 })
 
 
