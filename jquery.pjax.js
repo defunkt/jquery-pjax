@@ -1,3 +1,7 @@
+// jquery.pjax.js
+// copyright chris wanstrath
+// https://github.com/defunkt/pjax
+
 // When called on a link, fetches the href with ajax into the
 // container specified as the first parameter or with the data-pjax
 // attribute on the link itself.
