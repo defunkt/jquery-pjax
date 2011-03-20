@@ -135,17 +135,25 @@ jQuery.pjax = function( options ) {
 }
 
 
-var firstLoad = true
+// onpopstate fires at some point after the first page load, by design.
+// pjax only cares about the back button, so we ignore the first onpopstate.
+//
+// Of course, older webkit doesn't fire the onopopstate event on load.
+// So we have to special case. The joys.
+jQuery.pjax.firstLoad = true
 
-// // older webkits don't fire popstate on load
-if ( $.browser.webkit && parseInt($.browser.version) < 534 )
-  firstLoad = false
+if ( jQuery.browser.webkit && parseInt(jQuery.browser.version) < 534 )
+  jQuery.pjax.firstLoad = false
+
 
 // Bind our popstate handler which takes care of the back and
-// forward buttons, but only once we've called pjax()
+// forward buttons, but only once we've called pjax().
+//
+// You probably shouldn't use pjax on pages with other pushState
+// stuff yet.
 jQuery(window).bind('popstate', function(event){
-  if ( firstLoad )
-    return firstLoad = false
+  if ( jQuery.pjax.firstLoad )
+    return jQuery.pjax.firstLoad = false
 
   var state = event.state
 
@@ -164,4 +172,4 @@ jQuery.event.props.push('state')
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
   jQuery.pjax = jQuery.fn.pjax = $.noop
-}
+};
