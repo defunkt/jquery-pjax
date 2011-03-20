@@ -32,7 +32,7 @@ jQuery.fn.pjax = function( container, options ) {
   else
     options = $.isPlainObject(container) ? container : {container:container}
 
-  $(this).live('click', function(){
+  return this.live('click', function(){
     // Middle click, cmd click, and ctrl click should open
     // links in a new tab as normal.
     if ( event.which == 2 || event.metaKey )
