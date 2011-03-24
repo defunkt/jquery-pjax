@@ -23,10 +23,11 @@
 
 ## what is it?
 
-pjax loads content from your server into an existing page
-without reloading that entire page while ensuring permalinks,
-titles, and the back button work as expected. It enhances the
-browsing experience of your users - nothing more.
+pjax loads HTML from your server into the current page
+without a full reload. It's ajax with real permalinks,
+page titles, and a working back button that fully degrades.
+
+pjax enhances the browsing experience - nothing more.
 
 
 ## three ways to pjax on the client side:
@@ -66,16 +67,13 @@ browsing experience of your users - nothing more.
 ## $(link).pjax( container, options )
 
 The $(link).pjax() function accepts a container, an options object,
-or both. The options are the same as jQuery's ajax options with the
+or both. The options are the same as jQuery's $.ajax options with the
 following additions:
 
 container - The selector of the container to load the reponse body into, or
             the container itself.
      push - Whether to pushState the URL. Defaults to true (of course).
   replace - Whether to replaceState the URL. Defaults to false.
-  loading - A callback to fire after it's been too many ms and
-            you want to ease the user's pain with a loading indicator.
-            You can also bind to the 'loading.pjax' event on container.
 
 
 ## $.pjax( options )
@@ -96,13 +94,38 @@ This pjax call:
 Roughly translates into this ajax call:
 
   $.ajax({
-    url: '/authors?pjax=true',
+    url: '/authors',
     dataType: 'html',
+    beforeSend: function(xhr){
+      xhr.setRequestHeader('X-PJAX', 'true')
+    },
     success: function(data){
       $('#main').html( data )
       history.pushState( null, $(data).filter('title').text(), '/authors' )
     })
   })
+
+
+## pjax on the server side
+
+You'll want to give pjax requests a 'chrome-less' version of your page. That is,
+the page without any layout.
+
+As you can see in the "ajax call" example above, pjax sets a custom 'X-PJAX'
+header to 'true' when it makes an ajax request to make detecting it easy.
+
+In Rails, check for `request.headers['X-PJAX']`:
+
+    def my_page
+      if request.headers['X-PJAX']
+        render :layout => false
+     end
+    end
+
+
+## page titles
+
+Your HTML should also include a <title> tag if you want page titles to work.
 
 
 ## install it
