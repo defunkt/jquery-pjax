@@ -1,14 +1,14 @@
 $(function() {
-  $(':checkbox').attr('checked', !$.cookie('no-pjax'))
+  $(':checkbox').attr('checked', $.cookie('pjax'))
 
   if ( !$(':checkbox').attr('checked') )
     $.fn.pjax = $.noop
 
   $(':checkbox').change(function() {
     if ( $(this).attr('checked') )
-      $.cookie('no-pjax', null)
+      $.cookie('pjax', true)
     else
-      $.cookie('no-pjax', true)
+      $.cookie('pjax', null)
 
     window.location = location.href
   })
