@@ -10,11 +10,11 @@ module Pjax
     enable :static
 
     get '/' do
-      erb :index
+      erb :index, :layout => !pjax?
     end
 
     get '/:page.html' do
-      erb :"#{params[:page]}"
+      erb :"#{params[:page]}", :layout => !pjax?
     end
 
     helpers do
@@ -28,7 +28,7 @@ module Pjax
       end
 
       def pjax?
-        env['X-PJAX']
+        env['HTTP_X_PJAX']
       end
     end
   end

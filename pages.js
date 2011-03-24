@@ -1,4 +1,3 @@
 $(function(){
-  console.log('hey')
-
+  $('ul a').pjax('#main')
 });
