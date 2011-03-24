@@ -65,6 +65,7 @@ jQuery.fn.pjax = function( container, options ) {
 //             you want to ease the user's pain with a loading indicator.
 //             You can also bind to the 'loading.pjax' event on container.
 //      push - Whether to pushState the URL. Defaults to true (of course).
+//   replace - Want to use replaceState instead? That's cool.
 //
 // Use it just like $.ajax:
 //
