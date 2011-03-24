@@ -14,9 +14,6 @@
 //
 // container - Where to stick the response body. Usually a String selector.
 //             $(container).html(xhr.responseBody)
-//   loading - A callback to fire after it's been too many ms and
-//             you want to ease the user's pain with a loading indicator.
-//             You can also bind to the 'loading.pjax' event on container.
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
 //
@@ -61,9 +58,6 @@ jQuery.fn.pjax = function( container, options ) {
 //
 // container - Where to stick the response body.
 //             $(container).html(xhr.responseBody)
-//   loading - A callback to fire after it's been too many ms and
-//             you want to ease the user's pain with a loading indicator.
-//             You can also bind to the 'loading.pjax' event on container.
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
 //
@@ -123,18 +117,17 @@ jQuery.pjax = function( options ) {
   var success = options.success || $.noop
   delete options.success
 
-  if ( options.loading )
-    $container.bind('loading.pjax', options.loading)
-
   options = $.extend(true, {}, defaults, options)
   var xhr = $.ajax(options)
 
   // If we haven't found what we're looking for after a buncha ms
-  // you might want to show a 'Loading...' indicator.
+  // we give up.
   setTimeout(function(){
-    if ( xhr.readyState != 4 )
-      $container.trigger('loading.pjax')
-  }, 350)
+    if ( xhr.readyState != 4 ) {
+      xhr.abort()
+      window.location = options.url
+    }
+  }, 400)
 
   $(document).trigger('pjax', xhr, options)
   return xhr
