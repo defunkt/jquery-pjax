@@ -42,7 +42,7 @@ jQuery.fn.pjax = function( container, options ) {
 
     $.pjax($.extend({}, defaults, options))
 
-    return false
+    event.preventDefault()
   })
 }
 
