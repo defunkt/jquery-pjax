@@ -72,7 +72,7 @@ jQuery.pjax = function( options ) {
   var $ = jQuery, $container = $(options.container)
 
   var defaults = {
-    timeout: 400,
+    timeout: 650,
     push: true,
     replace: false,
     type: 'GET',
