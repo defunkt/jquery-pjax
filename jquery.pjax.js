@@ -72,6 +72,7 @@ jQuery.pjax = function( options ) {
   var $ = jQuery, $container = $(options.container)
 
   var defaults = {
+    timeout: 400,
     push: true,
     replace: false,
     type: 'GET',
@@ -119,15 +120,6 @@ jQuery.pjax = function( options ) {
 
   options = $.extend(true, {}, defaults, options)
   var xhr = $.ajax(options)
-
-  // If we haven't found what we're looking for after a buncha ms
-  // we give up.
-  setTimeout(function(){
-    if ( xhr.readyState != 4 ) {
-      xhr.abort()
-      window.location = options.url
-    }
-  }, 400)
 
   $(document).trigger('pjax', xhr, options)
   return xhr
