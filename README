@@ -74,7 +74,10 @@ container - The selector of the container to load the reponse body into, or
             the container itself.
      push - Whether to pushState the URL. Defaults to true (of course).
   replace - Whether to replaceState the URL. Defaults to false.
-
+  timeout - pjax sets this low, <1s. Set this higher if using a custom
+            error handler. It's in ms, so something like `timeout: 2000`
+    error - By default this callback reloads the target page once `timeout`
+            ms elapses.
 
 ## $.pjax( options )
 
@@ -100,8 +103,8 @@ Roughly translates into this ajax call:
       xhr.setRequestHeader('X-PJAX', 'true')
     },
     success: function(data){
-      $('#main').html( data )
-      history.pushState( null, $(data).filter('title').text(), '/authors' )
+      $('#main').html(data)
+      history.pushState(null, $(data).filter('title').text(), '/authors')
     })
   })
 
