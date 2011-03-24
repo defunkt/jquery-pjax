@@ -80,6 +80,7 @@ container - The selector of the container to load the reponse body into, or
     error - By default this callback reloads the target page once `timeout`
             ms elapses.
 
+
 ## $.pjax( options )
 
 You can also just call $.pjax directly. It acts much like $.ajax, even
@@ -112,8 +113,8 @@ Roughly translates into this ajax call:
 
 ## pjax on the server side
 
-You'll want to give pjax requests a 'chrome-less' version of your page. That is,
-the page without any layout.
+You'll want to give pjax requests a 'chrome-less' version of your page.
+That is, the page without any layout.
 
 As you can see in the "ajax call" example above, pjax sets a custom 'X-PJAX'
 header to 'true' when it makes an ajax request to make detecting it easy.
