@@ -29,6 +29,8 @@ page titles, and a working back button that fully degrades.
 
 pjax enhances the browsing experience - nothing more.
 
+You can find a demo at http://pjax.heroku.com/
+
 
 ## three ways to pjax on the client side:
 
