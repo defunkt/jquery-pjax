@@ -99,12 +99,12 @@ jQuery.pjax = function( options ) {
       var title = $.trim( $container.find('title').remove().text() )
       if ( title ) document.title = title
 
+      var state = { pjax: options.container }
+
       if ( options.replace ) {
-        window.history.replaceState({ pjax: options.container },
-                                    document.title, options.url)
+        window.history.replaceState(state, document.title, options.url)
       } else if ( options.push ) {
-        window.history.pushState({ pjax: options.container },
-                                 document.title, options.url)
+        window.history.pushState(state, document.title, options.url)
       }
 
       if ( (options.replace || options.push) && window._gaq )
