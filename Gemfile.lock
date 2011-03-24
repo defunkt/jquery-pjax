@@ -1,0 +1,17 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    rack (1.2.2)
+    rake (0.8.7)
+    shotgun (0.8)
+      rack (>= 1.0)
+    sinatra (1.0)
+      rack (>= 1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  rake
+  shotgun (= 0.8)
+  sinatra (= 1.0)

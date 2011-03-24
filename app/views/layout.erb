@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= @title ? "#{@title} - " : nil %> pjax</title>
+  <script src="jquery.js"></script>
+  <script src="jquery.pjax.js"></script>
+
+  <script src="pages.js"></script>
+</head>
+
+<h1>pjax</h1>
+
+<h3>It's <%= Time.now.strftime '%I:%M:%S %p' %></h3>
+
+<%= yield %>
+
+</html>
