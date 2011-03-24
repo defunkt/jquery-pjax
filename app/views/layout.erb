@@ -4,13 +4,19 @@
 <head>
   <meta charset='utf-8'>
   <title><%= @title ? "#{@title} - " : nil %> pjax</title>
+
   <script src="jquery.js"></script>
+  <script src="jquery.cookie.js"></script>
+  <script src="pages.js"></script>
+
   <script src="jquery.pjax.js"></script>
   <script type="text/javascript">
     $(function(){
+      // pjax
       $('ul a').pjax('#main')
     })
   </script>
+
   <style>
     pre{
       float:left;
@@ -19,6 +25,7 @@
       float:left;
       margin-left:-120px;
       padding-top:80px;
+      width:30%;
     }
     ul{padding-left:15px;}
   </style>
@@ -27,7 +34,7 @@
 <pre>
 
                ／￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣
-               |　It's <%= Time.now.strftime '%I:%M:%S %p' %>
+               |　<b>It's <%= Time.now.strftime '%I:%M:%S %p' %></b>
                ＼＿　 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
         .--.     (  )
        /    \   ( )
