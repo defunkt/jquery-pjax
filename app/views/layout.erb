@@ -2,16 +2,52 @@
 <html>
 
 <head>
+  <meta charset='utf-8'>
   <title><%= @title ? "#{@title} - " : nil %> pjax</title>
   <script src="jquery.js"></script>
   <script src="jquery.pjax.js"></script>
-
-  <script src="pages.js"></script>
+  <script type="text/javascript">
+    $(function(){
+      $('ul a').pjax('#main')
+    })
+  </script>
+  <style>
+    pre{
+      position:absolute;
+    }
+    #main{
+      padding-top:120px;
+      margin-left:280px;
+    }
+    ul{padding-left:15px;}
+  </style>
 </head>
 
-<h1>pjax</h1>
+<pre>
 
-<h3>It's <%= Time.now.strftime '%I:%M:%S %p' %></h3>
+               ／￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣
+               |　It's <%= Time.now.strftime '%I:%M:%S %p' %>
+               ＼＿　 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+        .--.     (  )
+       /    \   ( )
+      ## a  a  .
+      (   '._)
+       |'-- |
+     _.\___/_   ___<label><input type="checkbox" name="pjax" />pjax</label>___
+   ."\> \Y/|<'.  '._.-'
+  /  \ \_\/ /  '-' /
+  | --'\_/|/ |   _/
+  |___.-' |  |`'`
+    |     |  |
+    |    / './
+   /__./` | |
+      \   | |
+       \  | |
+       ;  | |
+       /  | |
+ jgs  |___\_.\_
+      `-"--'---'</pre>
+
 
 <div id="main">
   <%= yield %>
