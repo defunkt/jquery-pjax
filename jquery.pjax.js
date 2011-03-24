@@ -102,6 +102,9 @@ jQuery.pjax = function( options ) {
 
       var state = { pjax: options.container }
 
+      if ( options.data )
+        state.url = options.url + '?' + $.param(options.data)
+
       if ( options.replace ) {
         window.history.replaceState(state, document.title, options.url)
       } else if ( options.push ) {
