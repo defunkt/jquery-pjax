@@ -79,9 +79,11 @@ jQuery.pjax = function( options ) {
   var defaults = {
     push: true,
     replace: false,
-    data: { pjax: true },
     type: 'GET',
     dataType: 'html',
+    beforeSend: function(xhr){
+      xhr.setRequestHeader('X-PJAX', 'true')
+    },
     error: function(){ window.location = options.url },
     success: function( data ) {
       // If we got no data or an entire web page, go directly
