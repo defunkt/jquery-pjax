@@ -143,6 +143,10 @@ if ( jQuery.browser.webkit && parseInt(jQuery.browser.version) < 534 )
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
 jQuery(window).bind('popstate', function(event){
+  // Do nothing if we're not pjaxing
+  if ( jQuery.pjax == jQuery.noop )
+    return
+
   if ( jQuery.pjax.firstLoad )
     return jQuery.pjax.firstLoad = false
 
