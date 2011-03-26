@@ -124,7 +124,7 @@ In Rails, check for `request.headers['X-PJAX']`:
     def my_page
       if request.headers['X-PJAX']
         render :layout => false
-     end
+      end
     end
 
 
