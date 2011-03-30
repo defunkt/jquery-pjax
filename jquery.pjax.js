@@ -152,14 +152,17 @@ jQuery(window).bind('popstate', function(event){
 
   var state = event.state
 
-  if ( state && $(state.pjax).length )
-    jQuery.pjax({
-      url: state.url || location.href,
-      container: state.pjax,
-      push: false
-    })
-  else
-    window.location = location.href
+  if ( state && state.pjax ) {
+    var container = $(state.pjax)
+    if ( container.length )
+      jQuery.pjax({
+        url: state.url || location.href,
+        container: container,
+        push: false
+      })
+    else
+      window.location = location.href
+  }
 })
 
 
