@@ -173,5 +173,5 @@ jQuery.event.props.push('state')
 
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
-  jQuery.pjax = jQuery.fn.pjax = $.noop
+  jQuery.pjax = jQuery.fn.pjax = jQuery.noop
 };
