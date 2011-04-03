@@ -90,6 +90,13 @@ jQuery.pjax = function( options ) {
       // Make it happen.
       $container.html(data)
 
+      if ( !$.pjax.active ) {
+        $.pjax.active = true
+        window.history.replaceState({ pjax: true },
+                                    document.title,
+                                    location.pathname)
+      }
+
       // If there's a <title> tag in the response, use it as
       // the page's title.
       var title = $.trim( $container.find('title').remove().text() )
@@ -125,6 +132,8 @@ jQuery.pjax = function( options ) {
   return xhr
 }
 
+// Has the pjaxing begun? We must know.
+jQuery.pjax.active = false
 
 // onpopstate fires at some point after the first page load, by design.
 // pjax only cares about the back button, so we ignore the first onpopstate.
@@ -152,14 +161,17 @@ jQuery(window).bind('popstate', function(event){
 
   var state = event.state
 
-  if ( state && $(state.pjax).length )
-    jQuery.pjax({
-      url: state.url || location.href,
-      container: state.pjax,
-      push: false
-    })
-  else
-    window.location = location.href
+  if ( jQuery.pjax.active || state && state.pjax ) {
+    var container = $(state.pjax+'')
+    if ( container.length )
+      jQuery.pjax({
+        url: state.url || location.href,
+        container: container,
+        push: false
+      })
+    else
+      window.location = location.href
+  }
 })
 
 
@@ -170,5 +182,6 @@ jQuery.event.props.push('state')
 
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
-  jQuery.pjax = jQuery.fn.pjax = $.noop
+  jQuery.pjax = jQuery.noop
+  jQuery.fn.pjax = function() { return this }
 };
