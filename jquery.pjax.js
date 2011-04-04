@@ -12,7 +12,7 @@
 // Accepts a jQuery ajax options object that may include these
 // pjax specific options:
 //
-// container - Where to stick the response body. Usually a String selector.
+// container - Stick the response body in this String selector
 //             $(container).html(xhr.responseBody)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
