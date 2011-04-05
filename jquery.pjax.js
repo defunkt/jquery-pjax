@@ -75,6 +75,7 @@ jQuery.pjax = function( options ) {
     timeout: 650,
     push: true,
     replace: false,
+    cache: false,
     type: 'GET',
     dataType: 'html',
     beforeSend: function(xhr){
