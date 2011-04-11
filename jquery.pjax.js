@@ -84,6 +84,7 @@ jQuery.pjax = function( options ) {
     },
     error: function(){ window.location = options.url },
     success: function( data ) {
+      var state = { pjax: true };
       try {
         if ( dataType === 'html' ) {
           //Convert normal mode HTML to extended mode
@@ -100,6 +101,8 @@ jQuery.pjax = function( options ) {
           // the page's title.
           // The html string needs to be wrapped in a tag to be "searchable"
           data.title = $.trim( $('<p>' + html + '</p>').find('title').text() );
+
+          state.container = options.container;
         } else {
           if ( !data.containers ) throw 'Missing param';
         }
@@ -123,8 +126,6 @@ jQuery.pjax = function( options ) {
                                     document.title,
                                     location.pathname)
       }
-
-      var state = { pjax: options.container }
 
       if ( options.data )
         state.url = options.url + '?' + $.param(options.data)
@@ -183,16 +184,18 @@ jQuery(window).bind('popstate', function(event){
 
   var state = event.state
 
-  if ( jQuery.pjax.active || state && state.pjax ) {
-    var container = $(state.pjax+'')
-    if ( container.length )
-      jQuery.pjax({
-        url: state.url || location.href,
-        container: container,
-        push: false
-      })
-    else
-      window.location = location.href
+  if ( jQuery.pjax.active && state && state.pjax ) {
+    var req = { url: state.url || location.href, push: false };
+
+    if ( state.container ) {
+      //Only normal mode specifies a container
+      req.container = $(state.container + '');
+      if ( req.container.length === 0 ) {
+        return window.location = location.href;
+      }
+    }
+
+    jQuery.pjax(req);
   }
 })
 
