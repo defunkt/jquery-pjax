@@ -65,6 +65,28 @@ You can find a demo at http://pjax.heroku.com/
    })
 
 
+4. Using extended mode - allows a pjax request to do more
+
+This is useful if you want to update more than one container on the page,
+which is often the case.
+
+What you can do in extended mode that you can't do in normal mode:
+    - update mulitple containers on the page
+    - specify a page title without using a <title> tag in the HTML
+    - execute javascript code without putting it in a <script> tag
+
+To go into extended mode, you just omit the container selector value
+(don't use data-pjax attributes and don't pass it to functions).
+
+You can set it up like this:
+
+    $('a').pjax();
+
+as opposed to the normal-mode version's:
+
+    $('a').pjax('#some-container');
+
+
 ## $(link).pjax( container, options )
 
 The $(link).pjax() function accepts a container, an options object,
@@ -127,10 +149,28 @@ In Rails, check for `request.headers['X-PJAX']`:
       end
     end
 
+If you're using extended mode you should return a JSON object instead of HTML.
+A complete JSON response would look something like this,
+but only the `containers` field is required:
+
+    {
+        "containers": {
+            "#main": "HTML to put inside #main container",
+            ".something-else": "Another container's HTML",
+            "#and-another-one": "Even more stuff."
+        },
+        "title": "The page title",
+        "js": "alert('Some javascript to be executed!');"
+    }
+
 
 ## page titles
 
-Your HTML should also include a <title> tag if you want page titles to work.
+If you're returning an HTML response (normal mode),
+your HTML should also include a <title> tag if you want page titles to work.
+
+If you're using extended mode, you can add a `title` field
+to the JSON response object (see above).
 
 
 ## install it

@@ -69,7 +69,8 @@ jQuery.fn.pjax = function( container, options ) {
 // Returns whatever $.ajax returns.
 jQuery.pjax = function( options ) {
   // Helper
-  var $ = jQuery, $container = $(options.container)
+  var $ = jQuery, $container = $(options.container),
+    dataType = options.container ? 'html' : 'json';
 
   var defaults = {
     timeout: 650,
@@ -77,19 +78,40 @@ jQuery.pjax = function( options ) {
     replace: false,
     cache: false,
     type: 'GET',
-    dataType: 'html',
+    dataType: dataType,
     beforeSend: function(xhr){
       xhr.setRequestHeader('X-PJAX', 'true')
     },
     error: function(){ window.location = options.url },
     success: function( data ) {
-      // If we got no data or an entire web page, go directly
-      // to the page and let normal error handling happen.
-      if ( !$.trim(data) || /<html/i.test(data) )
-        return window.location = options.url
+      try {
+        if ( dataType === 'html' ) {
+          //Convert normal mode HTML to extended mode
 
-      // Make it happen.
-      $container.html(data)
+          var html = data;
+          // If we got no data or an entire web page, go directly
+          // to the page and let normal error handling happen.
+          if ( !$.trim(html) || /<html/i.test(html) )
+            throw 'Bad html response';
+
+          data = {'containers': {}};
+          data['containers'][options.container] = html;
+          // If there's a <title> tag in the response, use it as
+          // the page's title.
+          // The html string needs to be wrapped in a tag to be "searchable"
+          data.title = $.trim( $('<p>' + html + '</p>').find('title').text() );
+        } else {
+          if ( !data.containers ) throw 'Missing param';
+        }
+      } catch (e) {
+        return window.location = options.url;
+      }
+
+      if ( data.title ) document.title = data.title;
+      $.each(data.containers, function (selector, html) {
+        $(selector).html(html);
+      });
+      if ( data.js ) eval(data.js);
 
       if ( !$.pjax.active ) {
         $.pjax.active = true
@@ -97,11 +119,6 @@ jQuery.pjax = function( options ) {
                                     document.title,
                                     location.pathname)
       }
-
-      // If there's a <title> tag in the response, use it as
-      // the page's title.
-      var title = $.trim( $container.find('title').remove().text() )
-      if ( title ) document.title = title
 
       var state = { pjax: options.container }
 
