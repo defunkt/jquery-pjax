@@ -113,6 +113,10 @@ jQuery.pjax = function( options ) {
       });
       if ( data.js ) eval(data.js);
 
+      // Since we've used it now, we can remove that firstLoad mark
+      // This fixes a FF4 back button bug
+      jQuery.pjax.firstLoad = false;
+
       if ( !$.pjax.active ) {
         $.pjax.active = true
         window.history.replaceState({ pjax: true },
