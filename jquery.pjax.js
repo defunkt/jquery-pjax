@@ -189,7 +189,7 @@ jQuery(window).bind('popstate', function(event){
 
     if ( state.container ) {
       //Only normal mode specifies a container
-      req.container = $(state.container + '');
+      req.container = jQuery(state.container + '');
       if ( req.container.length === 0 ) {
         return window.location = location.href;
       }
