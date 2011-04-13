@@ -22,29 +22,29 @@
 //
 // Returns the jQuery object
 jQuery.fn.pjax = function( container, options ) {
-  var $ = jQuery
+  var $ = jQuery;
 
   if ( options )
-    options.container = container
+    options.container = container;
   else
-    options = $.isPlainObject(container) ? container : {container:container}
+    options = $.isPlainObject(container) ? container : {container:container};
 
   return this.live('click', function(event){
     // Middle click, cmd click, and ctrl click should open
     // links in a new tab as normal.
     if ( event.which == 2 || event.metaKey )
-      return true
+      return true;
 
     var defaults = {
       url: this.href,
       container: $(this).attr('data-pjax')
-    }
+    };
 
-    $.pjax($.extend({}, defaults, options))
+    $.pjax($.extend({}, defaults, options));
 
-    event.preventDefault()
-  })
-}
+    event.preventDefault();
+  });
+};
 
 
 // Loads a URL with ajax, puts the response body inside a container,
@@ -126,52 +126,52 @@ jQuery.pjax = function( options ) {
       jQuery.pjax.firstLoad = false;
 
       if ( !$.pjax.active ) {
-        $.pjax.active = true
+        $.pjax.active = true;
         window.history.replaceState({ pjax: true },
                                     document.title,
-                                    location.pathname)
+                                    location.pathname);
       }
 
       if ( options.data )
-        state.url = options.url + '?' + $.param(options.data)
+        state.url = options.url + '?' + $.param(options.data);
 
       if ( options.replace ) {
-        window.history.replaceState(state, document.title, options.url)
+        window.history.replaceState(state, document.title, options.url);
       } else if ( options.push ) {
-        window.history.pushState(state, document.title, options.url)
+        window.history.pushState(state, document.title, options.url);
       }
 
       if ( (options.replace || options.push) && window._gaq )
-        _gaq.push(['_trackPageview'])
+        _gaq.push(['_trackPageview']);
 
       // Invoke their success handler if they gave us one.
-      success.apply(this, arguments)
+      success.apply(this, arguments);
     }
-  }
+  };
 
   // We don't want to let anyone override our success handler.
-  var success = options.success || $.noop
-  delete options.success
+  var success = options.success || $.noop;
+  delete options.success;
 
-  options = $.extend(true, {}, defaults, options)
-  var xhr = $.ajax(options)
+  options = $.extend(true, {}, defaults, options);
+  var xhr = $.ajax(options);
 
-  $(document).trigger('pjax', xhr, options)
-  return xhr
-}
+  $(document).trigger('pjax', xhr, options);
+  return xhr;
+};
 
 // Has the pjaxing begun? We must know.
-jQuery.pjax.active = false
+jQuery.pjax.active = false;
 
 // onpopstate fires at some point after the first page load, by design.
 // pjax only cares about the back button, so we ignore the first onpopstate.
 //
 // Of course, older webkit doesn't fire the onopopstate event on load.
 // So we have to special case. The joys.
-jQuery.pjax.firstLoad = true
+jQuery.pjax.firstLoad = true;
 
 if ( jQuery.browser.webkit && parseInt(jQuery.browser.version) < 534 )
-  jQuery.pjax.firstLoad = false
+  jQuery.pjax.firstLoad = false;
 
 
 // Bind our popstate handler which takes care of the back and
@@ -182,12 +182,12 @@ if ( jQuery.browser.webkit && parseInt(jQuery.browser.version) < 534 )
 jQuery(window).bind('popstate', function(event){
   // Do nothing if we're not pjaxing
   if ( jQuery.pjax == jQuery.noop )
-    return
+    return;
 
   if ( jQuery.pjax.firstLoad )
-    return jQuery.pjax.firstLoad = false
+    return jQuery.pjax.firstLoad = false;
 
-  var state = event.state
+  var state = event.state;
 
   if ( jQuery.pjax.active && state && state.pjax ) {
     var req = { url: state.url || location.href, push: false };
@@ -202,14 +202,14 @@ jQuery(window).bind('popstate', function(event){
 
     jQuery.pjax(req);
   }
-})
+});
 
 
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
-jQuery.event.props.push('state')
+jQuery.event.props.push('state');
 
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
-  jQuery.fn.pjax = function() { return this }
+  jQuery.fn.pjax = function() { return this };
 };
