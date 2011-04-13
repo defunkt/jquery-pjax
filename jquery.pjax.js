@@ -68,6 +68,11 @@ jQuery.fn.pjax = function( container, options ) {
 //
 // Returns whatever $.ajax returns.
 jQuery.pjax = function( options ) {
+  if ( !window.history || !window.history.pushState ) {
+    //Older browsers get full page reloads instead
+    return window.location = options.url;
+  }
+
   // Helper
   var $ = jQuery, $container = $(options.container),
     dataType = options.container ? 'html' : 'json';
@@ -204,9 +209,7 @@ jQuery(window).bind('popstate', function(event){
 // $(window).bind('popstate')
 jQuery.event.props.push('state')
 
-
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
-  jQuery.pjax = jQuery.noop
   jQuery.fn.pjax = function() { return this }
 };
