@@ -143,8 +143,8 @@ body into:
 
 This allows you to, say, display a loading indicator upon pjaxing:
 
-  $('a.pjax')
-    .pjax('#main')
+  $('a.pjax').pjax('#main')
+  $('#main')
     .bind('start.pjax', function() { $('#loading').show() })
     .bind('end.pjax', function() { $('#loading').hide() })
 
