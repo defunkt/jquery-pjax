@@ -67,8 +67,11 @@ $.fn.pjax = function( container, options ) {
 //
 // Returns whatever $.ajax returns.
 $.pjax = function( options ) {
-  // Helper
-  var $container = $(options.container)
+  var $container = $(options.container),
+      success = options.success || $.noop
+
+  // We don't want to let anyone override our success handler.
+  delete options.success
 
   var defaults = {
     timeout: 650,
@@ -99,20 +102,21 @@ $.pjax = function( options ) {
       // Make it happen.
       $container.html(data)
 
-      if ( !$.pjax.active ) {
-        $.pjax.active = true
-        window.history.replaceState({ pjax: true },
-                                    document.title,
-                                    location.pathname)
-      }
-
       // If there's a <title> tag in the response, use it as
       // the page's title.
-      var title = $.trim( $container.find('title').remove().text() )
+      var oldTitle = document.title,
+          title = $.trim( $container.find('title').remove().text() )
       if ( title ) document.title = title
 
-      var state = { pjax: options.container }
+      var state = {
+        pjax: options.container,
+        timeout: options.timeout
+      }
 
+      // We can't persist $objects using the history API so we need to store
+      // the string selector.
+      if ( $.isPlainObject(state.pjax) )
+        state.pjax = state.pjax.selector
 
       // If there are extra params, save the complete URL in the state object
       var query = $.param(options.data)
@@ -122,9 +126,17 @@ $.pjax = function( options ) {
       if ( options.replace ) {
         window.history.replaceState(state, document.title, options.url)
       } else if ( options.push ) {
+        // this extra replaceState before first push ensures good back
+        // button behavior
+        if ( !$.pjax.active ) {
+          window.history.replaceState($.extend({}, state, {url:null}), oldTitle)
+          $.pjax.active = true
+        }
+
         window.history.pushState(state, document.title, options.url)
       }
 
+      // Google Analytics support
       if ( (options.replace || options.push) && window._gaq )
         _gaq.push(['_trackPageview'])
 
@@ -132,10 +144,6 @@ $.pjax = function( options ) {
       success.apply(this, arguments)
     }
   }
-
-  // We don't want to let anyone override our success handler.
-  var success = options.success || $.noop
-  delete options.success
 
   options = $.extend(true, {}, defaults, options)
 
@@ -156,42 +164,32 @@ $.pjax = function( options ) {
   return $.pjax.xhr
 }
 
-// Has the pjaxing begun? We must know.
-$.pjax.active = false
 
-// onpopstate fires at some point after the first page load, by design.
-// pjax only cares about the back button, so we ignore the first onpopstate.
-//
-// Of course, older webkit doesn't fire the onopopstate event on load.
-// So we have to special case. The joys.
-$.pjax.firstLoad = true
-
-if ( $.browser.webkit && parseInt($.browser.version) < 534 )
-  $.pjax.firstLoad = false
+// Used to detect initial (useless) popstate.
+// If history.state exists, assume browser isn't going to fire initial popstate.
+var popped = ('state' in window.history), initialURL = location.href
 
 
-// Bind our popstate handler which takes care of the back and
-// forward buttons, but only once we've called pjax().
+// popstate handler takes care of the back and forward buttons
 //
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
-$(window).bind('popstate', function(event){
-  // Do nothing if we're not pjaxing
-  if ( $.pjax == $.noop )
-    return
-
-  if ( $.pjax.firstLoad )
-    return $.pjax.firstLoad = false
+$(window).bind('popstate', function(event) {
+  // Ignore inital popstate that some browsers fire on page load
+  var initialPop = !popped && location.href == initialURL
+  popped = true
+  if ( initialPop ) return
 
   var state = event.state
 
-  if ( $.pjax.active || state && state.pjax ) {
-    var container = $(state.pjax+'')
-    if ( container.length )
+  if ( state && state.pjax ) {
+    var $container = $(state.pjax+'')
+    if ( $container.length )
       $.pjax({
         url: state.url || location.href,
-        container: container,
-        push: false
+        container: $container,
+        push: false,
+        timeout: state.timeout
       })
     else
       window.location = location.href
@@ -210,5 +208,6 @@ if ( !window.history || !window.history.pushState ) {
   $.pjax = $.noop
   $.fn.pjax = function() { return this }
 }
+
 
 })(jQuery);
