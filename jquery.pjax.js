@@ -85,9 +85,13 @@ $.pjax = function( options ) {
       $container.trigger('start.pjax')
       xhr.setRequestHeader('X-PJAX', 'true')
     },
-    error: function(){ window.location = options.url },
-    complete: function(){ $container.trigger('end.pjax') },
-    success: function( data ) {
+    error: function(){
+      window.location = options.url
+    },
+    complete: function(){
+      $container.trigger('end.pjax')
+    },
+    success: function(data){
       // If we got no data or an entire web page, go directly
       // to the page and let normal error handling happen.
       if ( !$.trim(data) || /<html/i.test(data) )
