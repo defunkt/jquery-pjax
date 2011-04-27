@@ -48,8 +48,7 @@ $.fn.pjax = function( container, options ) {
 
 
 // Loads a URL with ajax, puts the response body inside a container,
-// then pushState()'s the loaded URL. Also ensures the back button
-// works the way you'd expect.
+// then pushState()'s the loaded URL.
 //
 // Works just like $.ajax in that it accepts a jQuery ajax
 // settings object (with keys like url, type, data, etc).
