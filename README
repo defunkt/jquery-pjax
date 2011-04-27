@@ -133,6 +133,22 @@ In Rails, check for `request.headers['X-PJAX']`:
 Your HTML should also include a <title> tag if you want page titles to work.
 
 
+## events
+
+pjax will fire two events on the container you've asked it to load your reponse
+body into:
+
+* start.pjax - Fired when a pjax ajax request begins.
+* end.pjax   - Fired when a pjax ajax request ends.
+
+This allows you to, say, display a loading indicator upon pjaxing:
+
+  $('a.pjax')
+    .pjax('#main')
+    .bind('start.pjax', function() { $('#loading').show() })
+    .bind('end.pjax', function() { $('#loading').hide() })
+
+
 ## install it
 
   $ cd path/to/js
