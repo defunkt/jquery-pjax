@@ -121,11 +121,11 @@ header to 'true' when it makes an ajax request to make detecting it easy.
 
 In Rails, check for `request.headers['X-PJAX']`:
 
-    def my_page
-      if request.headers['X-PJAX']
-        render :layout => false
-      end
+  def my_page
+    if request.headers['X-PJAX']
+      render :layout => false
     end
+  end
 
 
 ## page titles
