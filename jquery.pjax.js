@@ -75,7 +75,10 @@ $.pjax = function( options ) {
     timeout: 650,
     push: true,
     replace: false,
-    cache: false,
+    // We want the browser to maintain two separate internal caches: one for
+    // pjax'd partial page loads and one for normal page loads. Without
+    // adding this secret parameter, some browsers will often confuse the two.
+    data: { _pjax: true },
     type: 'GET',
     dataType: 'html',
     beforeSend: function(xhr){
@@ -107,8 +110,11 @@ $.pjax = function( options ) {
 
       var state = { pjax: options.container }
 
-      if ( options.data )
-        state.url = options.url + '?' + $.param(options.data)
+
+      // If there are extra params, save the complete URL in the state object
+      var query = $.param(options.data)
+      if ( query != "_pjax=true" )
+        state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
 
       if ( options.replace ) {
         window.history.replaceState(state, document.title, options.url)
