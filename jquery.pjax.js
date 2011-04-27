@@ -139,13 +139,22 @@ $.pjax = function( options ) {
   delete options.success
 
   options = $.extend(true, {}, defaults, options)
+
   if ( $.isFunction(options.url) ) {
     options.url = options.url()
   }
-  var xhr = $.ajax(options)
 
-  $(document).trigger('pjax', xhr, options)
-  return xhr
+  // Cancel the current request if we're already pjaxing
+  var xhr = $.pjax.xhr
+  if ( xhr && xhr.readyState < 4) {
+    xhr.onreadystatechange = $.noop
+    xhr.abort()
+  }
+
+  $.pjax.xhr = $.ajax(options)
+  $(document).trigger('pjax', $.pjax.xhr, options)
+
+  return $.pjax.xhr
 }
 
 // Has the pjaxing begun? We must know.
