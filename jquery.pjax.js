@@ -139,6 +139,9 @@ $.pjax = function( options ) {
   delete options.success
 
   options = $.extend(true, {}, defaults, options)
+  if ( $.isFunction(options.url) ) {
+    options.url = options.url()
+  }
   var xhr = $.ajax(options)
 
   $(document).trigger('pjax', xhr, options)
