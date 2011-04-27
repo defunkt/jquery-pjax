@@ -2,6 +2,8 @@
 // copyright chris wanstrath
 // https://github.com/defunkt/pjax
 
+(function($){
+
 // When called on a link, fetches the href with ajax into the
 // container specified as the first parameter or with the data-pjax
 // attribute on the link itself.
@@ -21,9 +23,7 @@
 // the options object.
 //
 // Returns the jQuery object
-jQuery.fn.pjax = function( container, options ) {
-  var $ = jQuery
-
+$.fn.pjax = function( container, options ) {
   if ( options )
     options.container = container
   else
@@ -67,9 +67,9 @@ jQuery.fn.pjax = function( container, options ) {
 //   console.log( xhr.readyState )
 //
 // Returns whatever $.ajax returns.
-jQuery.pjax = function( options ) {
+$.pjax = function( options ) {
   // Helper
-  var $ = jQuery, $container = $(options.container)
+  var $container = $(options.container)
 
   var defaults = {
     timeout: 650,
@@ -134,17 +134,17 @@ jQuery.pjax = function( options ) {
 }
 
 // Has the pjaxing begun? We must know.
-jQuery.pjax.active = false
+$.pjax.active = false
 
 // onpopstate fires at some point after the first page load, by design.
 // pjax only cares about the back button, so we ignore the first onpopstate.
 //
 // Of course, older webkit doesn't fire the onopopstate event on load.
 // So we have to special case. The joys.
-jQuery.pjax.firstLoad = true
+$.pjax.firstLoad = true
 
-if ( jQuery.browser.webkit && parseInt(jQuery.browser.version) < 534 )
-  jQuery.pjax.firstLoad = false
+if ( $.browser.webkit && parseInt($.browser.version) < 534 )
+  $.pjax.firstLoad = false
 
 
 // Bind our popstate handler which takes care of the back and
@@ -152,20 +152,20 @@ if ( jQuery.browser.webkit && parseInt(jQuery.browser.version) < 534 )
 //
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
-jQuery(window).bind('popstate', function(event){
+$(window).bind('popstate', function(event){
   // Do nothing if we're not pjaxing
-  if ( jQuery.pjax == jQuery.noop )
+  if ( $.pjax == $.noop )
     return
 
-  if ( jQuery.pjax.firstLoad )
-    return jQuery.pjax.firstLoad = false
+  if ( $.pjax.firstLoad )
+    return $.pjax.firstLoad = false
 
   var state = event.state
 
-  if ( jQuery.pjax.active || state && state.pjax ) {
-    var container = jQuery(state.pjax+'')
+  if ( $.pjax.active || state && state.pjax ) {
+    var container = $(state.pjax+'')
     if ( container.length )
-      jQuery.pjax({
+      $.pjax({
         url: state.url || location.href,
         container: container,
         push: false
@@ -178,11 +178,13 @@ jQuery(window).bind('popstate', function(event){
 
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
-jQuery.event.props.push('state')
+$.event.props.push('state')
 
 
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
-  jQuery.pjax = jQuery.noop
-  jQuery.fn.pjax = function() { return this }
+  $.pjax = $.noop
+  $.fn.pjax = function() { return this }
 };
+
+})(jQuery);
