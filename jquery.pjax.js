@@ -32,7 +32,7 @@ jQuery.fn.pjax = function( container, options ) {
   return this.live('click', function(event){
     // Middle click, cmd click, and ctrl click should open
     // links in a new tab as normal.
-    if ( event.which == 2 || event.metaKey )
+    if ( event.which > 1 || event.metaKey )
       return true
 
     var defaults = {
