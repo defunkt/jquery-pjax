@@ -180,13 +180,14 @@ $(window).bind('popstate', function(event){
 
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
-$.event.props.push('state')
+if ( $.event.props.indexOf('state') < 0 )
+  $.event.props.push('state')
 
 
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
   $.pjax = $.noop
   $.fn.pjax = function() { return this }
-};
+}
 
 })(jQuery);
