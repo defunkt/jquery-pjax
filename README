@@ -153,6 +153,13 @@ This allows you to, say, display a loading indicator upon pjaxing:
     .bind('end.pjax', function() { $('#loading').hide() })
 
 
+## browser support
+
+pjax only works with browsers that support the history.pushState API.
+
+For a table of supported browsers see: http://caniuse.com/#search=pushstate
+
+
 ## install it
 
   $ cd path/to/js
