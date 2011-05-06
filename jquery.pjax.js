@@ -37,7 +37,8 @@ $.fn.pjax = function( container, options ) {
 
     var defaults = {
       url: this.href,
-      container: $(this).attr('data-pjax')
+      container: $(this).attr('data-pjax'),
+      clickedElement: $(this)
     }
 
     $.pjax($.extend({}, defaults, options))
