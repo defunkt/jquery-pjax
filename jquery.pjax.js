@@ -78,6 +78,7 @@ $.pjax = function( options ) {
     timeout: 650,
     push: true,
     replace: false,
+    noHeaders: false,
     // We want the browser to maintain two separate internal caches: one for
     // pjax'd partial page loads and one for normal page loads. Without
     // adding this secret parameter, some browsers will often confuse the two.
@@ -95,18 +96,32 @@ $.pjax = function( options ) {
       $container.trigger('end.pjax')
     },
     success: function(data){
+      var isFullPage = /<html/i.test(data)
+
+      if (options.noHeaders && isFullPage) {
+        // Search data for the container we are looking to load
+        // by making a dummy div and stripping any script tags.
+        var parsedData = $("<div>").append(data.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/g, ""))
+        var foundContainer = parsedData.find(options.container)
+      }
+
       // If we got no data or an entire web page, go directly
       // to the page and let normal error handling happen.
-      if ( !$.trim(data) || /<html/i.test(data) )
+      if ( (!$.trim(data) || isFullPage) && !foundContainer )
         return window.location = options.url
 
-      // Make it happen.
-      $container.html(data)
+      // If we found the container in the data insert just
+      // the new container.
+      if ( foundContainer )
+        $container.replaceWith(foundContainer)
+      else
+        $container.html(data)
 
       // If there's a <title> tag in the response, use it as
       // the page's title.
+      var loadedData = isFullPage ? parsedData : $container
       var oldTitle = document.title,
-          title = $.trim( $container.find('title').remove().text() )
+          title = $.trim( loadedData.find('title').remove().text() )
       if ( title ) document.title = title
 
       var state = {
