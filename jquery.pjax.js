@@ -18,6 +18,8 @@
 //             $(container).html(xhr.responseBody)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
+//  fallback - Set to 'ajax' if you want to proceed with ajax loading in
+//             browsers that don't support window.history.pushState
 //
 // For convenience the first parameter can be either the container or
 // the options object.
@@ -38,12 +40,20 @@ $.fn.pjax = function( container, options ) {
     var defaults = {
       url: this.href,
       container: $(this).attr('data-pjax'),
-      clickedElement: $(this)
+      clickedElement: $(this),
+      fallback: $.pjax.fallback
     }
 
-    $.pjax($.extend({}, defaults, options))
+    options = $.extend({}, defaults, options)
 
-    event.preventDefault()
+    if ( $.pjax.browserIsSupported() || options.fallback == 'ajax' ) {
+      $.pjax(options)
+
+      event.preventDefault()
+    }
+    else {
+      return this
+    }
   })
 }
 
@@ -60,6 +70,12 @@ $.fn.pjax = function( container, options ) {
 //             $(container).html(xhr.responseBody)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
+//  fallback - What to do on browsers that don't support history.pushState:
+//               'ajax': perform ajax loading
+//               'location': redirect to given url
+//               null (default): give up, do nothing
+//             Can be set globally like:
+//               $.pjax.fallback = 'ajax'
 //
 // Use it just like $.ajax:
 //
@@ -84,6 +100,7 @@ $.pjax = function( options ) {
     data: { _pjax: true },
     type: 'GET',
     dataType: 'html',
+    fallback: $.pjax.fallback,
     beforeSend: function(xhr){
       $container.trigger('start.pjax')
       xhr.setRequestHeader('X-PJAX', 'true')
@@ -124,22 +141,25 @@ $.pjax = function( options ) {
       if ( query != "_pjax=true" )
         state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
 
-      if ( options.replace ) {
-        window.history.replaceState(state, document.title, options.url)
-      } else if ( options.push ) {
-        // this extra replaceState before first push ensures good back
-        // button behavior
-        if ( !$.pjax.active ) {
-          window.history.replaceState($.extend({}, state, {url:null}), oldTitle)
-          $.pjax.active = true
-        }
+      if ( $.pjax.browserIsSupported() ) {
+        if ( options.replace ) {
+          window.history.replaceState(state, document.title, options.url)
+        } else if ( options.push ) {
+          // this extra replaceState before first push ensures good back
+          // button behavior
+          if ( !$.pjax.active ) {
+            window.history.replaceState($.extend({}, state, {url:null}),
+                                        oldTitle)
+            $.pjax.active = true
+          }
 
-        window.history.pushState(state, document.title, options.url)
+          window.history.pushState(state, document.title, options.url)
+        }
       }
 
       // Google Analytics support
       if ( (options.replace || options.push) && window._gaq )
-        _gaq.push(['_trackPageview'])
+        _gaq.push(['_trackPageview', options.url])
 
       // Invoke their success handler if they gave us one.
       success.apply(this, arguments)
@@ -150,6 +170,15 @@ $.pjax = function( options ) {
 
   if ( $.isFunction(options.url) ) {
     options.url = options.url()
+  }
+
+  if ( !$.pjax.browserIsSupported() && options.fallback != 'ajax' ) {
+    if ( options.fallback == 'location' ) {
+      window.location = options.url
+    }
+    else {
+      return
+    }
   }
 
   // Cancel the current request if we're already pjaxing
@@ -164,6 +193,12 @@ $.pjax = function( options ) {
 
   return $.pjax.xhr
 }
+
+$.pjax.browserIsSupported = function() {
+  return window.history && window.history.pushState
+}
+
+$.pjax.fallback = null;
 
 
 // Used to detect initial (useless) popstate.
@@ -202,13 +237,5 @@ $(window).bind('popstate', function(event) {
 // $(window).bind('popstate')
 if ( $.inArray('state', $.event.props) < 0 )
   $.event.props.push('state')
-
-
-// Fall back to normalcy for older browsers.
-if ( !window.history || !window.history.pushState ) {
-  $.pjax = $.noop
-  $.fn.pjax = function() { return this }
-}
-
 
 })(jQuery);
