@@ -116,7 +116,7 @@ $.pjax = function( options ) {
 
       // We can't persist $objects using the history API so we need to store
       // the string selector.
-      if ( $.isPlainObject(state.pjax) )
+      if ( !$.isPlainObject(state.pjax) )
         state.pjax = state.pjax.selector
 
       // If there are extra params, save the complete URL in the state object
