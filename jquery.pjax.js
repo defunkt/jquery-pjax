@@ -111,7 +111,8 @@ $.pjax = function( options ) {
 
       var state = {
         pjax: options.container,
-        timeout: options.timeout
+        timeout: options.timeout,
+        success: success
       }
 
       // We can't persist $objects using the history API so we need to store
@@ -190,7 +191,8 @@ $(window).bind('popstate', function(event) {
         url: state.url || location.href,
         container: $container,
         push: false,
-        timeout: state.timeout
+        timeout: state.timeout,
+        success: state.success
       })
     else
       window.location = location.href
