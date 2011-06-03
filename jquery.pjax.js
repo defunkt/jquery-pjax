@@ -206,7 +206,7 @@ if ( $.inArray('state', $.event.props) < 0 )
 
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
-  $.pjax = $.noop
+  $.pjax = function ( options ) { window.location = options.url }
   $.fn.pjax = function() { return this }
 }
 
