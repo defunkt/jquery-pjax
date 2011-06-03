@@ -80,6 +80,9 @@ following additions:
                     error handler. It's in ms, so something like `timeout: 2000`
             error - By default this callback reloads the target page once `timeout`
                     ms elapses.
+    beforeSuccess - Callback to execute before the new content is put on the page.
+                    If it returns true, pjax will apply the content, otherwise
+                    it will ignore it.
 
 
 ## $.pjax( options )
