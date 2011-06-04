@@ -91,6 +91,7 @@ $.pjax = function( options ) {
     error: function(){
       window.location = options.url
     },
+    beforeSuccess: function () { },
     complete: function(){
       $container.trigger('end.pjax')
     },
@@ -99,6 +100,9 @@ $.pjax = function( options ) {
       // to the page and let normal error handling happen.
       if ( !$.trim(data) || /<html/i.test(data) )
         return window.location = options.url
+
+      if ( this.beforeSuccess() === false )
+        return;
 
       // Make it happen.
       $container.html(data)
