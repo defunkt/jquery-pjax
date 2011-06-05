@@ -71,15 +71,15 @@ The $(link).pjax() function accepts a container, an options object,
 or both. The options are the same as jQuery's $.ajax options with the
 following additions:
 
-        container - The selector of the container to load the reponse body into, or
-                    the container itself.
-   clickedElement - The element that was clicked to start the pjax call.
-             push - Whether to pushState the URL. Defaults to true (of course).
-          replace - Whether to replaceState the URL. Defaults to false.
-          timeout - pjax sets this low, <1s. Set this higher if using a custom
-                    error handler. It's in ms, so something like `timeout: 2000`
-            error - By default this callback reloads the target page once `timeout`
-                    ms elapses.
+     container - The selector of the container to load the reponse body
+                 into, or the container itself.
+clickedElement - The element that was clicked to start the pjax call.
+          push - Whether to pushState the URL. Defaults to true (of course).
+       replace - Whether to replaceState the URL. Defaults to false.
+       timeout - pjax sets this low, <1s. Set this higher if using a custom
+                 error handler. It's ms, so something like `timeout: 2000`
+         error - By default this callback reloads the target page once
+                 `timeout` ms elapses.
 
 
 ## $.pjax( options )
@@ -140,8 +140,8 @@ Your HTML should also include a <title> tag if you want page titles to work.
 
 ## events
 
-pjax will fire two events on the container you've asked it to load your reponse
-body into:
+pjax will fire two events on the container you've asked it to load your
+reponse body into:
 
 * start.pjax - Fired when a pjax ajax request begins.
 * end.pjax   - Fired when a pjax ajax request ends.
@@ -150,6 +150,13 @@ This allows you to, say, display a loading indicator upon pjaxing:
 
   $('a.pjax').pjax('#main')
   $('#main')
+    .bind('start.pjax', function() { $('#loading').show() })
+    .bind('end.pjax', function() { $('#loading').hide() })
+
+Because these events bubble, you can also set them on the body:
+
+  $('a.pjax').pjax()
+  $('body')
     .bind('start.pjax', function() { $('#loading').show() })
     .bind('end.pjax', function() { $('#loading').hide() })
 
@@ -164,7 +171,7 @@ For a table of supported browsers see: http://caniuse.com/#search=pushstate
 ## install it
 
   $ cd path/to/js
-  $ curl -O https://github.com/defunkt/jquery-pjax/raw/master/jquery.pjax.js
+  $ wget https://github.com/defunkt/jquery-pjax/raw/master/jquery.pjax.js
 
 Then, in your HTML:
 
