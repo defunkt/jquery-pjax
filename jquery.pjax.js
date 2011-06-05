@@ -1,6 +1,6 @@
 // jquery.pjax.js
 // copyright chris wanstrath
-// https://github.com/defunkt/pjax
+// https://github.com/defunkt/jquery-pjax
 
 (function($){
 
@@ -29,6 +29,13 @@ $.fn.pjax = function( container, options ) {
   else
     options = $.isPlainObject(container) ? container : {container:container}
 
+  // We can't persist $objects using the history API so we must use
+  // a String selector. Bail if we got anything else.
+  if ( typeof options.container !== 'string' ) {
+    throw "pjax container must be a string selector!"
+    return false
+  }
+
   return this.live('click', function(event){
     // Middle click, cmd click, and ctrl click should open
     // links in a new tab as normal.
@@ -37,7 +44,8 @@ $.fn.pjax = function( container, options ) {
 
     var defaults = {
       url: this.href,
-      container: $(this).attr('data-pjax')
+      container: $(this).attr('data-pjax'),
+      clickedElement: $(this)
     }
 
     $.pjax($.extend({}, defaults, options))
@@ -55,7 +63,7 @@ $.fn.pjax = function( container, options ) {
 //
 // Accepts these extra keys:
 //
-// container - Where to stick the response body.
+// container - Where to stick the response body. Must be a String.
 //             $(container).html(xhr.responseBody)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
@@ -72,6 +80,11 @@ $.pjax = function( options ) {
 
   // We don't want to let anyone override our success handler.
   delete options.success
+
+  // We can't persist $objects using the history API so we must use
+  // a String selector. Bail if we got anything else.
+  if ( typeof options.container !== 'string' )
+    throw "pjax container must be a string selector!"
 
   var defaults = {
     timeout: 650,
@@ -112,11 +125,6 @@ $.pjax = function( options ) {
         pjax: options.container,
         timeout: options.timeout
       }
-
-      // We can't persist $objects using the history API so we need to store
-      // the string selector.
-      if ( $.isPlainObject(state.pjax) )
-        state.pjax = state.pjax.selector
 
       // If there are extra params, save the complete URL in the state object
       var query = $.param(options.data)
@@ -174,7 +182,7 @@ var popped = ('state' in window.history), initialURL = location.href
 //
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
-$(window).bind('popstate', function(event) {
+$(window).bind('popstate', function(event){
   // Ignore inital popstate that some browsers fire on page load
   var initialPop = !popped && location.href == initialURL
   popped = true
@@ -183,11 +191,11 @@ $(window).bind('popstate', function(event) {
   var state = event.state
 
   if ( state && state.pjax ) {
-    var $container = $(state.pjax+'')
-    if ( $container.length )
+    var container = state.pjax
+    if ( $(container+'').length )
       $.pjax({
         url: state.url || location.href,
-        container: $container,
+        container: container,
         push: false,
         timeout: state.timeout
       })
@@ -199,15 +207,20 @@ $(window).bind('popstate', function(event) {
 
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
-if ( $.event.props.indexOf('state') < 0 )
+if ( $.inArray('state', $.event.props) < 0 )
   $.event.props.push('state')
 
 
+// Is pjax supported by this browser?
+$.support.pjax = window.history && window.history.pushState
+
+
 // Fall back to normalcy for older browsers.
-if ( !window.history || !window.history.pushState ) {
-  $.pjax = $.noop
+if ( !$.support.pjax ) {
+  $.pjax = function( options ) {
+    window.location = $.isFunction(options.url) ? options.url() : options.url
+  }
   $.fn.pjax = function() { return this }
 }
-
 
 })(jQuery);
