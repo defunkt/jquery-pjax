@@ -148,6 +148,14 @@ $.pjax = function( options ) {
       if ( (options.replace || options.push) && window._gaq )
         _gaq.push(['_trackPageview'])
 
+      // If the URL has a hash in it, make sure the browser
+      // knows to navigate to the hash.
+      var hash = window.location.hash.toString()
+      if ( hash !== '' ) {
+        window.location.hash = ''
+        window.location.hash = hash
+      }
+
       // Invoke their success handler if they gave us one.
       success.apply(this, arguments)
     }
