@@ -216,10 +216,11 @@ $.support.pjax = window.history && window.history.pushState
 
 
 // Fall back to normalcy for older browsers.
-if ( !window.history || !window.history.pushState ) {
-  $.pjax = $.noop
+if ( $.support.pjax ) {
+  $.pjax = function( options ) {
+    window.location = $.isFunction(options.url) ? options.url() : options.url
+  }
   $.fn.pjax = function() { return this }
 }
-
 
 })(jQuery);
