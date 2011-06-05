@@ -216,7 +216,7 @@ $.support.pjax = window.history && window.history.pushState
 
 
 // Fall back to normalcy for older browsers.
-if ( $.support.pjax ) {
+if ( !$.support.pjax ) {
   $.pjax = function( options ) {
     window.location = $.isFunction(options.url) ? options.url() : options.url
   }
