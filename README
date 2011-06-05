@@ -68,11 +68,14 @@ You can find a demo at http://pjax.heroku.com/
 ## $(link).pjax( container, options )
 
 The $(link).pjax() function accepts a container, an options object,
-or both. The options are the same as jQuery's $.ajax options with the
+or both. The container MUST be a string selector - this is because we
+cannot persist jQuery objects using the History API between page loads.
+
+The options are the same as jQuery's $.ajax options with the
 following additions:
 
-     container - The selector of the container to load the reponse body
-                 into, or the container itself.
+     container - The String selector of the container to load the reponse
+                 body. Must be a String.
 clickedElement - The element that was clicked to start the pjax call.
           push - Whether to pushState the URL. Defaults to true (of course).
        replace - Whether to replaceState the URL. Defaults to false.

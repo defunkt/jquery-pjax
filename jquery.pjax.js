@@ -29,6 +29,13 @@ $.fn.pjax = function( container, options ) {
   else
     options = $.isPlainObject(container) ? container : {container:container}
 
+  // We can't persist $objects using the history API so we must use
+  // a String selector. Bail if we got anything else.
+  if ( typeof options.container !== 'string' ) {
+    throw "pjax container must be a string selector!"
+    return false
+  }
+
   return this.live('click', function(event){
     // Middle click, cmd click, and ctrl click should open
     // links in a new tab as normal.
@@ -56,7 +63,7 @@ $.fn.pjax = function( container, options ) {
 //
 // Accepts these extra keys:
 //
-// container - Where to stick the response body.
+// container - Where to stick the response body. Must be a String.
 //             $(container).html(xhr.responseBody)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
@@ -73,6 +80,11 @@ $.pjax = function( options ) {
 
   // We don't want to let anyone override our success handler.
   delete options.success
+
+  // We can't persist $objects using the history API so we must use
+  // a String selector. Bail if we got anything else.
+  if ( typeof options.container !== 'string' )
+    throw "pjax container must be a string selector!"
 
   var defaults = {
     timeout: 650,
@@ -113,11 +125,6 @@ $.pjax = function( options ) {
         pjax: options.container,
         timeout: options.timeout
       }
-
-      // We can't persist $objects using the history API so we need to store
-      // the string selector.
-      if ( $.isPlainObject(state.pjax) )
-        state.pjax = state.pjax.selector
 
       // If there are extra params, save the complete URL in the state object
       var query = $.param(options.data)
