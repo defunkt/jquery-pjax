@@ -211,6 +211,10 @@ if ( $.inArray('state', $.event.props) < 0 )
   $.event.props.push('state')
 
 
+// Is pjax supported by this browser?
+$.support.pjax = window.history && window.history.pushState
+
+
 // Fall back to normalcy for older browsers.
 if ( !window.history || !window.history.pushState ) {
   $.pjax = $.noop

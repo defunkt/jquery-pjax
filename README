@@ -170,6 +170,8 @@ pjax only works with browsers that support the history.pushState API.
 
 For a table of supported browsers see: http://caniuse.com/#search=pushstate
 
+To check if pjax is supported, use the `$.support.pjax` boolean.
+
 
 ## install it
 
