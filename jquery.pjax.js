@@ -191,11 +191,11 @@ $(window).bind('popstate', function(event){
   var state = event.state
 
   if ( state && state.pjax ) {
-    var $container = $(state.pjax+'')
-    if ( $container.length )
+    var container = state.pjax
+    if ( $(container+'').length )
       $.pjax({
         url: state.url || location.href,
-        container: $container,
+        container: container,
         push: false,
         timeout: state.timeout
       })
