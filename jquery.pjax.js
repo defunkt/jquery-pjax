@@ -182,7 +182,7 @@ var popped = ('state' in window.history), initialURL = location.href
 //
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
-$(window).bind('popstate', function(event) {
+$(window).bind('popstate', function(event){
   // Ignore inital popstate that some browsers fire on page load
   var initialPop = !popped && location.href == initialURL
   popped = true
