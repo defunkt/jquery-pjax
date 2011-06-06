@@ -217,7 +217,7 @@ var pushStateEnabled = Boolean(
 );
 
 // Fall back to normalcy for older browsers.
-if ( !window.history || !pushStateEnabled ) {
+if ( !pushStateEnabled ) {
   $.pjax = $.noop
   $.fn.pjax = function() { return this }
 }
