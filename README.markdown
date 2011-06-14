@@ -36,33 +36,33 @@ You can find a demo on <http://pjax.heroku.com/>
 
 1. Functionally obtrusive, loading the href with ajax into data-pjax:
 
-    <a href='/explore' data-pjax='#main'>Explore</a>
+        <a href='/explore' data-pjax='#main'>Explore</a>
     
-    $('a[data-pjax]').pjax()
+        $('a[data-pjax]').pjax()
 
 
 2. Slightly obtrusive, passing a container and jQuery ajax options:
 
-    <a href='/explore' class='js-pjax'>Explore</a>
-        
-    $('a.js-pjax').pjax('#main', { timeout: null, error: function(xhr, err){
-      $('.error').text('Something went wrong: ' + err)
-    })
+        <a href='/explore' class='js-pjax'>Explore</a>
+    
+        $('a.js-pjax').pjax('#main', { timeout: null, error: function(xhr, err){
+          $('.error').text('Something went wrong: ' + err)
+        })
 
 
 3. Unobtrusive, showing a 'loading' spinner:
 
-    <div id='main'>
-      <div class='loader' style='display:none'><img src='spin.gif'></div>
-      <div class='tabs'>
-        <a href='/explore'>Explore</a>
-        <a href='/help'>Help</a>
-      </div>
-    </div>
-     
-    $('a').pjax('#main').live('click', function(){
-      $(this).showLoader()
-    })
+        <div id='main'>
+          <div class='loader' style='display:none'><img src='spin.gif'></div>
+          <div class='tabs'>
+            <a href='/explore'>Explore</a>
+            <a href='/help'>Help</a>
+          </div>
+        </div>
+    
+        $('a').pjax('#main').live('click', function(){
+          $(this).showLoader()
+        })
 
 
 ## $(link).pjax( container, options )
@@ -75,19 +75,14 @@ The options are the same as jQuery's $.ajax options with the
 following additions:
 
          container - The String selector of the container to load the reponse
-                 body. Must be a String.
-
+                     body. Must be a String.
     clickedElement - The element that was clicked to start the pjax call.
-
               push - Whether to pushState the URL. Defaults to true (of course).
-
            replace - Whether to replaceState the URL. Defaults to false.
-
            timeout - pjax sets this low, <1s. Set this higher if using a custom
-                 error handler. It's ms, so something like `timeout: 2000`
-
+                     error handler. It's ms, so something like `timeout: 2000`
              error - By default this callback reloads the target page once
-                 `timeout` ms elapses.
+                     `timeout` ms elapses.
 
 
 ## $.pjax( options )
