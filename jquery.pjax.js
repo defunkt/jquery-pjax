@@ -220,7 +220,17 @@ if ( $.inArray('state', $.event.props) < 0 )
 
 
 // Is pjax supported by this browser?
-$.support.pjax = window.history && window.history.pushState
+// http://stackoverflow.com/questions/6161701/is-history-api-broken-on-ios-location-bar-doesnt-update-on-pushstate
+// pushState enabling determination stolen from https://github.com/balupton/history.js
+$.support.pjax = Boolean(
+	window.history && window.history.pushState && window.history.replaceState
+	&& !(
+		/* disable for versions of iOS before version 4.3 (8F190) */
+		(/ Mobile\/([1-7][a-z]|(8([abcde]|f(1[0-8]))))/i).test(navigator.userAgent)
+		/* disable for the mercury iOS browser, or at least older versions of the webkit engine */
+		|| (/AppleWebKit\/5([0-2]|3[0-2])/i).test(navigator.userAgent)
+	)
+);
 
 
 // Fall back to normalcy for older browsers.
