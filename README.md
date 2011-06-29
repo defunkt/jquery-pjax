@@ -53,8 +53,8 @@ Two. Slightly obtrusive, passing a container and jQuery ajax options:
 
 ```js
 $('.js-pjax').pjax('#main', { timeout: null, error: function(xhr, err){
-  $('.error').text('Something went wrong: ' + err)
-})
+  $('.error').text('Something went wrong: ' + err);
+}})
 ```
 
 
