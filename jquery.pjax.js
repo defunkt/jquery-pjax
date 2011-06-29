@@ -31,7 +31,7 @@ $.fn.pjax = function( container, options ) {
 
   // We can't persist $objects using the history API so we must use
   // a String selector. Bail if we got anything else.
-  if ( typeof options.container !== 'string' ) {
+  if ( options.container && typeof options.container !== 'string' ) {
     throw "pjax container must be a string selector!"
     return false
   }
