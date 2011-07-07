@@ -45,7 +45,8 @@ $.fn.pjax = function( container, options ) {
     var defaults = {
       url: this.href,
       container: $(this).attr('data-pjax'),
-      clickedElement: $(this)
+      clickedElement: $(this),
+      fragment: null
     }
 
     $.pjax($.extend({}, defaults, options))
@@ -107,10 +108,20 @@ $.pjax = function( options ) {
       $container.trigger('end.pjax')
     },
     success: function(data){
-      // If we got no data or an entire web page, go directly
-      // to the page and let normal error handling happen.
-      if ( !$.trim(data) || /<html/i.test(data) )
-        return window.location = options.url
+      if ( options.fragment ) {
+        // If they specified a fragment, look for it in the response
+        // and pull it out.
+        var $fragment = $(data).find(options.fragment)
+        if ( $fragment.length )
+          data = $fragment.children()
+        else
+          return window.location = options.url
+      } else {
+          // If we got no data or an entire web page, go directly
+          // to the page and let normal error handling happen.
+          if ( !$.trim(data) || /<html/i.test(data) )
+            return window.location = options.url
+      }
 
       // Make it happen.
       $container.html(data)
@@ -123,6 +134,7 @@ $.pjax = function( options ) {
 
       var state = {
         pjax: options.container,
+        fragment: options.fragment,
         timeout: options.timeout
       }
 
@@ -202,6 +214,7 @@ $(window).bind('popstate', function(event){
     if ( $(container+'').length )
       $.pjax({
         url: state.url || location.href,
+        fragment: state.fragment,
         container: container,
         push: false,
         timeout: state.timeout

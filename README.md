@@ -96,6 +96,10 @@ following additions:
 * `timeout`        - pjax sets this low, <1s. Set this higher if using a
                      custom error handler. It's ms, so something like
                      `timeout: 2000`
+* `fragment`       - A String selector that specifies a sub-element to
+                     be pulled out of the response HTML and inserted
+                     into the `container`. Useful if the server always returns
+                     full HTML pages.
 
 
 ## $.pjax( options )
