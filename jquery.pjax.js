@@ -152,8 +152,7 @@ $.pjax = function( options ) {
       // knows to navigate to the hash.
       var hash = window.location.hash.toString()
       if ( hash !== '' ) {
-        window.location.hash = ''
-        window.location.hash = hash
+        window.location.href = hash
       }
 
       // Invoke their success handler if they gave us one.
