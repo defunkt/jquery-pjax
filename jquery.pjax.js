@@ -45,7 +45,8 @@ $.fn.pjax = function( container, options ) {
     var defaults = {
       url: this.href,
       container: $(this).attr('data-pjax'),
-      clickedElement: $(this)
+      clickedElement: $(this),
+      fragment: null
     }
 
     $.pjax($.extend({}, defaults, options))
@@ -107,10 +108,17 @@ $.pjax = function( options ) {
       $container.trigger('end.pjax')
     },
     success: function(data){
-      // If we got no data or an entire web page, go directly
-      // to the page and let normal error handling happen.
-      if ( !$.trim(data) || /<html/i.test(data) )
-        return window.location = options.url
+      if (options.fragment) {
+        var $fragment = $(data).find(options.fragment)
+        if ($fragment.length)
+          data = $fragment.children()
+        else return window.location = options.url
+      } else {
+          // If we got no data or an entire web page, go directly
+          // to the page and let normal error handling happen.
+          if ( !$.trim(data) || /<html/i.test(data) )
+            return window.location = options.url          
+      }
 
       // Make it happen.
       $container.html(data)
@@ -123,6 +131,7 @@ $.pjax = function( options ) {
 
       var state = {
         pjax: options.container,
+        fragment: options.fragment,
         timeout: options.timeout
       }
 
@@ -152,8 +161,7 @@ $.pjax = function( options ) {
       // knows to navigate to the hash.
       var hash = window.location.hash.toString()
       if ( hash !== '' ) {
-        window.location.hash = ''
-        window.location.hash = hash
+        window.location.href = hash
       }
 
       // Invoke their success handler if they gave us one.
@@ -203,6 +211,7 @@ $(window).bind('popstate', function(event){
     if ( $(container+'').length )
       $.pjax({
         url: state.url || location.href,
+        fragment: state.fragment,
         container: container,
         push: false,
         timeout: state.timeout

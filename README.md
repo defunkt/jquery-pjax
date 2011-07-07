@@ -88,6 +88,10 @@ following additions:
 
 * `container`      - The String selector of the container to load the
                      reponse body. Must be a String.
+* `fragment`      -  A jQuery String selector that selects a sub-element to
+                     be pulled out of the response HTML and inserted 
+                     into the `container`. Useful if the server always returns
+                     full HTML pages.
 * `clickedElement` - The element that was clicked to start the pjax call.
 * `push`           - Whether to pushState the URL. Default: true (of course)
 * `replace`        - Whether to replaceState the URL. Default: false
