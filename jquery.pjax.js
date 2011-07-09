@@ -124,7 +124,7 @@ $.pjax = function( options ) {
       }
 
       // Make it happen.
-      $container.html(data)
+      $container.html(this.dataType === 'json' ? data.html : data)
 
       // If there's a <title> tag in the response, use it as
       // the page's title.
