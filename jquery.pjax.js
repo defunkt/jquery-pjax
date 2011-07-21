@@ -88,15 +88,6 @@ $.pjax = function( options ) {
     throw "pjax container must be a string selector!"
 
   var defaults = {
-    timeout: 650,
-    push: true,
-    replace: false,
-    // We want the browser to maintain two separate internal caches: one for
-    // pjax'd partial page loads and one for normal page loads. Without
-    // adding this secret parameter, some browsers will often confuse the two.
-    data: { _pjax: true },
-    type: 'GET',
-    dataType: 'html',
     beforeSend: function(xhr){
       $container.trigger('start.pjax')
       xhr.setRequestHeader('X-PJAX', 'true')
@@ -172,7 +163,7 @@ $.pjax = function( options ) {
     }
   }
 
-  options = $.extend(true, {}, defaults, options)
+  options = $.extend(true, {}, defaults, $.pjax.defaults, options)
 
   if ( $.isFunction(options.url) ) {
     options.url = options.url()
@@ -191,6 +182,17 @@ $.pjax = function( options ) {
   return $.pjax.xhr
 }
 
+$.pjax.defaults = {
+  timeout: 650,
+  push: true,
+  replace: false,
+  // We want the browser to maintain two separate internal caches: one for
+  // pjax'd partial page loads and one for normal page loads. Without
+  // adding this secret parameter, some browsers will often confuse the two.
+  data: { _pjax: true },
+  type: 'GET',
+  dataType: 'html'
+};
 
 // Used to detect initial (useless) popstate.
 // If history.state exists, assume browser isn't going to fire initial popstate.
