@@ -75,7 +75,7 @@ $.fn.pjax = function( container, options ) {
 //   console.log( xhr.readyState )
 //
 // Returns whatever $.ajax returns.
-$.pjax = function( options ) {
+var pjax = $.pjax = function( options ) {
   var $container = $(options.container),
       success = options.success || $.noop
 
@@ -87,110 +87,112 @@ $.pjax = function( options ) {
   if ( typeof options.container !== 'string' )
     throw "pjax container must be a string selector!"
 
-  var defaults = {
-    timeout: 650,
-    push: true,
-    replace: false,
-    // We want the browser to maintain two separate internal caches: one for
-    // pjax'd partial page loads and one for normal page loads. Without
-    // adding this secret parameter, some browsers will often confuse the two.
-    data: { _pjax: true },
-    type: 'GET',
-    dataType: 'html',
-    beforeSend: function(xhr){
-      $container.trigger('start.pjax')
-      xhr.setRequestHeader('X-PJAX', 'true')
-    },
-    error: function(){
-      window.location = options.url
-    },
-    complete: function(){
-      $container.trigger('end.pjax')
-    },
-    success: function(data){
-      if ( options.fragment ) {
-        // If they specified a fragment, look for it in the response
-        // and pull it out.
-        var $fragment = $(data).find(options.fragment)
-        if ( $fragment.length )
-          data = $fragment.children()
-        else
-          return window.location = options.url
-      } else {
-          // If we got no data or an entire web page, go directly
-          // to the page and let normal error handling happen.
-          if ( !$.trim(data) || /<html/i.test(data) )
-            return window.location = options.url
-      }
-
-      // Make it happen.
-      $container.html(data)
-
-      // If there's a <title> tag in the response, use it as
-      // the page's title.
-      var oldTitle = document.title,
-          title = $.trim( $container.find('title').remove().text() )
-      if ( title ) document.title = title
-
-      var state = {
-        pjax: options.container,
-        fragment: options.fragment,
-        timeout: options.timeout
-      }
-
-      // If there are extra params, save the complete URL in the state object
-      var query = $.param(options.data)
-      if ( query != "_pjax=true" )
-        state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
-
-      if ( options.replace ) {
-        window.history.replaceState(state, document.title, options.url)
-      } else if ( options.push ) {
-        // this extra replaceState before first push ensures good back
-        // button behavior
-        if ( !$.pjax.active ) {
-          window.history.replaceState($.extend({}, state, {url:null}), oldTitle)
-          $.pjax.active = true
-        }
-
-        window.history.pushState(state, document.title, options.url)
-      }
-
-      // Google Analytics support
-      if ( (options.replace || options.push) && window._gaq )
-        _gaq.push(['_trackPageview'])
-
-      // If the URL has a hash in it, make sure the browser
-      // knows to navigate to the hash.
-      var hash = window.location.hash.toString()
-      if ( hash !== '' ) {
-        window.location.href = hash
-      }
-
-      // Invoke their success handler if they gave us one.
-      success.apply(this, arguments)
-    }
-  }
-
-  options = $.extend(true, {}, defaults, options)
+  options = $.extend(true, {}, pjax.defaults, options)
 
   if ( $.isFunction(options.url) ) {
     options.url = options.url()
   }
 
+  options.context = $container
+
+  options.success = function(data){
+    if ( options.fragment ) {
+      // If they specified a fragment, look for it in the response
+      // and pull it out.
+      var $fragment = $(data).find(options.fragment)
+      if ( $fragment.length )
+        data = $fragment.children()
+      else
+        return window.location = options.url
+    } else {
+        // If we got no data or an entire web page, go directly
+        // to the page and let normal error handling happen.
+        if ( !$.trim(data) || /<html/i.test(data) )
+          return window.location = options.url
+    }
+
+    // Make it happen.
+    this.html(data)
+
+    // If there's a <title> tag in the response, use it as
+    // the page's title.
+    var oldTitle = document.title,
+        title = $.trim( this.find('title').remove().text() )
+    if ( title ) document.title = title
+
+    var state = {
+      pjax: options.container,
+      fragment: options.fragment,
+      timeout: options.timeout
+    }
+
+    // If there are extra params, save the complete URL in the state object
+    var query = $.param(options.data)
+    if ( query != "_pjax=true" )
+      state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
+
+    if ( options.replace ) {
+      window.history.replaceState(state, document.title, options.url)
+    } else if ( options.push ) {
+      // this extra replaceState before first push ensures good back
+      // button behavior
+      if ( !pjax.active ) {
+        window.history.replaceState($.extend({}, state, {url:null}), oldTitle)
+        pjax.active = true
+      }
+
+      window.history.pushState(state, document.title, options.url)
+    }
+
+    // Google Analytics support
+    if ( (options.replace || options.push) && window._gaq )
+      _gaq.push(['_trackPageview'])
+
+    // If the URL has a hash in it, make sure the browser
+    // knows to navigate to the hash.
+    var hash = window.location.hash.toString()
+    if ( hash !== '' ) {
+      window.location.href = hash
+    }
+
+    // Invoke their success handler if they gave us one.
+    success.apply(this, arguments)
+  }
+
   // Cancel the current request if we're already pjaxing
-  var xhr = $.pjax.xhr
+  var xhr = pjax.xhr
   if ( xhr && xhr.readyState < 4) {
     xhr.onreadystatechange = $.noop
     xhr.abort()
   }
 
-  $.pjax.xhr = $.ajax(options)
-  $(document).trigger('pjax', $.pjax.xhr, options)
+  pjax.xhr = $.ajax(options)
+  $(document).trigger('pjax', pjax.xhr, options)
 
-  return $.pjax.xhr
+  return pjax.xhr
 }
 
+pjax.defaults = {
+  timeout: 650,
+  push: true,
+  replace: false,
+  // We want the browser to maintain two separate internal caches: one for
+  // pjax'd partial page loads and one for normal page loads. Without
+  // adding this secret parameter, some browsers will often confuse the two.
+  data: { _pjax: true },
+  type: 'GET',
+  dataType: 'html',
+  beforeSend: function(xhr){
+    this.trigger('start.pjax')
+    xhr.setRequestHeader('X-PJAX', 'true')
+  },
+  error: function(){
+    window.location = options.url
+  },
+  complete: function(){
+    this.trigger('end.pjax')
+  }
+}
 
 // Used to detect initial (useless) popstate.
 // If history.state exists, assume browser isn't going to fire initial popstate.
