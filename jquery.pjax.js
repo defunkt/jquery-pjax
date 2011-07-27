@@ -98,14 +98,14 @@ $.pjax = function( options ) {
     type: 'GET',
     dataType: 'html',
     beforeSend: function(xhr){
-      $container.trigger('start.pjax')
+      $container.trigger('start.pjax', [xhr, options])
       xhr.setRequestHeader('X-PJAX', 'true')
     },
     error: function(){
       window.location = options.url
     },
-    complete: function(){
-      $container.trigger('end.pjax')
+    complete: function(xhr){
+      $container.trigger('end.pjax', [xhr, options])
     },
     success: function(data){
       if ( options.fragment ) {
@@ -186,7 +186,7 @@ $.pjax = function( options ) {
   }
 
   $.pjax.xhr = $.ajax(options)
-  $(document).trigger('pjax', $.pjax.xhr, options)
+  $(document).trigger('pjax', [$.pjax.xhr, options])
 
   return $.pjax.xhr
 }
