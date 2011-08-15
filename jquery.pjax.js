@@ -127,9 +127,14 @@ $.pjax = function( options ) {
       $container.html(data)
 
       // If there's a <title> tag in the response, use it as
-      // the page's title.
+      // the page's title. Also check the title and data-title attributes on
+      // the fragment element.
       var oldTitle = document.title,
           title = $.trim( $container.find('title').remove().text() )
+      if ( options.fragment ) {
+        if ( !title ) title = $fragment.attr('title')
+        if ( !title ) title = $fragment.data('title')
+      }
       if ( title ) document.title = title
 
       var state = {
