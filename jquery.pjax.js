@@ -36,7 +36,21 @@ $.fn.pjax = function( container, options ) {
     return false
   }
 
-  return this.live('click', function(event){
+  return this.live('click', function(event) {
+    // Check if the url is not suited for pjax/ajax request
+    // - href is not in valid format
+    // - rails-generated links for resources
+    // - class "no-pjax" present
+    // - attribute "nopjax" present
+    
+    if (
+      /^javascript/i.test($(this).attr('href')) ||
+      $(this).attr('href') == '#'              ||
+      $(this).attr('data-method')              ||
+      $(this).attr('data-confirm')             ||
+      $(this).hasClass('no-pjax')              ||
+      $(this).attr('nopjax')) { return true; }
+    
     // Middle click, cmd click, and ctrl click should open
     // links in a new tab as normal.
     if ( event.which > 1 || event.metaKey )
