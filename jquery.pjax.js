@@ -181,7 +181,7 @@ $.pjax = function( options ) {
   // Cancel the current request if we're already pjaxing
   var xhr = $.pjax.xhr
   if ( xhr && xhr.readyState < 4) {
-    xhr.onreadystatechange = $.noop
+    xhr.error = xhr.onreadystatechange = $.noop
     xhr.abort()
   }
 
