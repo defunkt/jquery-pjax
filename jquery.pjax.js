@@ -101,8 +101,9 @@ $.pjax = function( options ) {
       $container.trigger('start.pjax')
       xhr.setRequestHeader('X-PJAX', 'true')
     },
-    error: function(){
-      window.location = options.url
+    error: function(xhr, textStatus, errorThrown){
+      if ( textStatus !== 'abort' )
+        window.location = options.url
     },
     complete: function(){
       $container.trigger('end.pjax')
@@ -181,7 +182,7 @@ $.pjax = function( options ) {
   // Cancel the current request if we're already pjaxing
   var xhr = $.pjax.xhr
   if ( xhr && xhr.readyState < 4) {
-    xhr.error = xhr.onreadystatechange = $.noop
+    xhr.onreadystatechange = $.noop
     xhr.abort()
   }
 
