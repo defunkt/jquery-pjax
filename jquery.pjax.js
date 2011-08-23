@@ -101,8 +101,9 @@ $.pjax = function( options ) {
       $container.trigger('start.pjax')
       xhr.setRequestHeader('X-PJAX', 'true')
     },
-    error: function(){
-      window.location = options.url
+    error: function(xhr, textStatus, errorThrown){
+      if ( textStatus !== 'abort' )
+        window.location = options.url
     },
     complete: function(){
       $container.trigger('end.pjax')
