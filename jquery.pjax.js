@@ -188,7 +188,8 @@ pjax.defaults = {
     xhr.setRequestHeader('X-PJAX', 'true')
   },
   error: function(){
-    window.location = options.url
+    if ( textStatus !== 'abort' )
+      window.location = options.url
   },
   complete: function(){
     this.trigger('end.pjax', [xhr, options])
