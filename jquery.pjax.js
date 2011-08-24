@@ -167,7 +167,7 @@ var pjax = $.pjax = function( options ) {
   }
 
   pjax.xhr = $.ajax(options)
-  $(document).trigger('pjax', pjax.xhr, options)
+  $(document).trigger('pjax', [pjax.xhr, options])
 
   return pjax.xhr
 }
