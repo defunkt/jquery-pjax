@@ -183,14 +183,14 @@ pjax.defaults = {
   type: 'GET',
   dataType: 'html',
   beforeSend: function(xhr){
-    this.trigger('start.pjax')
+    this.trigger('start.pjax', [xhr, options])
     xhr.setRequestHeader('X-PJAX', 'true')
   },
   error: function(){
     window.location = options.url
   },
   complete: function(){
-    this.trigger('end.pjax')
+    this.trigger('end.pjax', [xhr, options])
   }
 }
 
