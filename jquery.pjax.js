@@ -172,6 +172,7 @@ var pjax = $.pjax = function( options ) {
   return pjax.xhr
 }
 
+
 pjax.defaults = {
   timeout: 650,
   push: true,
@@ -193,6 +194,7 @@ pjax.defaults = {
     this.trigger('end.pjax', [xhr, options])
   }
 }
+
 
 // Used to detect initial (useless) popstate.
 // If history.state exists, assume browser isn't going to fire initial popstate.
