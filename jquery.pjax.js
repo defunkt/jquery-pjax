@@ -166,6 +166,7 @@ var pjax = $.pjax = function( options ) {
     xhr.abort()
   }
 
+  pjax.options = options
   pjax.xhr = $.ajax(options)
   $(document).trigger('pjax', [pjax.xhr, options])
 
@@ -184,15 +185,15 @@ pjax.defaults = {
   type: 'GET',
   dataType: 'html',
   beforeSend: function(xhr){
-    this.trigger('start.pjax', [xhr, options])
+    this.trigger('start.pjax', [xhr, pjax.options])
     xhr.setRequestHeader('X-PJAX', 'true')
   },
   error: function(xhr, textStatus, errorThrown){
     if ( textStatus !== 'abort' )
-      window.location = options.url
+      window.location = pjax.options.url
   },
-  complete: function(){
-    this.trigger('end.pjax', [xhr, options])
+  complete: function(xhr){
+    this.trigger('end.pjax', [xhr, pjax.options])
   }
 }
 
