@@ -41,6 +41,11 @@ $.fn.pjax = function( container, options ) {
     // links in a new tab as normal.
     if ( event.which > 1 || event.metaKey )
       return true
+    
+    // Elements with no href or an anchor href should be ignored.
+    var href = $(event.target).attr('href')
+    if ( !href || href.indexOf('#') == 0 )
+      return true
 
     var defaults = {
       url: this.href,
