@@ -4,8 +4,6 @@
 
 (function($){
 
-var idCount = 0
-
 // When called on a link, fetches the href with ajax into the
 // container specified as the first parameter or with the data-pjax
 // attribute on the link itself.
@@ -39,7 +37,7 @@ $.fn.pjax = function( container, options ) {
 
     var defaults = {
       url: this.href,
-      container: $(this).attr('data-pjax') || $(this).closest('*[data-pjax-container]'),
+      container: $(this).attr('data-pjax') || $(this).closest('*[data-pjax-container]')[0],
       clickedElement: $(this),
       fragment: null
     }
@@ -72,17 +70,24 @@ $.fn.pjax = function( container, options ) {
 // Returns whatever $.ajax returns.
 var pjax = $.pjax = function( options ) {
   var $container = $(options.container),
-      selector = $container.selector,
       success = options.success || $.noop
 
   // We don't want to let anyone override our success handler.
   delete options.success
 
-  if ( typeof selector !== 'string' || selector === '' ) {
-    if ( ! $container.attr('id') ) {
-      $container.attr('id', 'pjax-container-' + idCount++)
-    }
+  function validSelector( selector ) {
+    return typeof selector === 'string' && selector !== ''
+  }
+
+  var selector
+  if ( validSelector($container.selector) ) {
+    selector = $container.selector
+  } else if ( validSelector($container.data('pjax-container')) ) {
+    selector = $container.data('pjax-container')
+  } else if ( $container.attr('id') ) {
     selector = '#' + $container.attr('id')
+  } else if ( !selector ) {
+    throw "no selector for container"
   }
 
   options = $.extend(true, {}, pjax.defaults, options)
