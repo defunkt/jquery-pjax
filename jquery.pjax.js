@@ -37,7 +37,8 @@ $.fn.pjax = function( container, options ) {
 
     var defaults = {
       url: this.href,
-      container: $(this).attr('data-pjax') || $(this).closest('*[data-pjax-container]')[0],
+      data: $(this).data('pjax-params'),
+      container: $(this).data('pjax') || $(this).closest('*[data-pjax-container]')[0],
       clickedElement: $(this),
       fragment: null
     }
@@ -130,7 +131,7 @@ var pjax = $.pjax = function( options ) {
     }
 
     // If there are extra params, save the complete URL in the state object
-    var query = $.param(options.data)
+    var query = (typeof options.data === 'string') ? options.data : $.param(options.data)
     if ( query != "_pjax=true" )
       state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
 
