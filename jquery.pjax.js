@@ -256,6 +256,4 @@ if ( !$.support.pjax ) {
   $.fn.pjax = function() { return this }
 }
 
-$('a[data-pjax]').pjax()
-
 })(jQuery);
