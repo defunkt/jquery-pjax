@@ -37,8 +37,8 @@ $.fn.pjax = function( container, options ) {
 
     var defaults = {
       url: this.href,
-      data: $(this).data('pjax-params'),
-      container: $(this).data('pjax') || $(this).closest('*[data-pjax-container]')[0],
+      data: $(this).attr('data-pjax-params'),
+      container: $(this).attr('data-pjax') || $(this).closest('*[data-pjax-container]')[0],
       clickedElement: $(this),
       fragment: null
     }
@@ -83,8 +83,8 @@ var pjax = $.pjax = function( options ) {
   var selector
   if ( validSelector($container.selector) ) {
     selector = $container.selector
-  } else if ( validSelector($container.data('pjax-container')) ) {
-    selector = $container.data('pjax-container')
+  } else if ( validSelector($container.attr('data-pjax-container')) ) {
+    selector = $container.attr('data-pjax-container')
   } else if ( $container.attr('id') ) {
     selector = '#' + $container.attr('id')
   } else if ( !selector ) {
