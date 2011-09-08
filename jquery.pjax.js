@@ -29,13 +29,6 @@ $.fn.pjax = function( container, options ) {
   else
     options = $.isPlainObject(container) ? container : {container:container}
 
-  // We can't persist $objects using the history API so we must use
-  // a String selector. Bail if we got anything else.
-  if ( options.container && typeof options.container !== 'string' ) {
-    throw "pjax container must be a string selector!"
-    return false
-  }
-
   return this.live('click', function(event){
     // Middle click, cmd click, and ctrl click should open
     // links in a new tab as normal.
@@ -44,7 +37,8 @@ $.fn.pjax = function( container, options ) {
 
     var defaults = {
       url: this.href,
-      container: $(this).attr('data-pjax'),
+      data: $(this).attr('data-pjax-params'),
+      container: $(this).attr('data-pjax') || $(this).closest('*[data-pjax-container]')[0],
       clickedElement: $(this),
       fragment: null
     }
@@ -64,7 +58,7 @@ $.fn.pjax = function( container, options ) {
 //
 // Accepts these extra keys:
 //
-// container - Where to stick the response body. Must be a String.
+// container - Where to stick the response body.
 //             $(container).html(xhr.responseBody)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
@@ -82,10 +76,20 @@ var pjax = $.pjax = function( options ) {
   // We don't want to let anyone override our success handler.
   delete options.success
 
-  // We can't persist $objects using the history API so we must use
-  // a String selector. Bail if we got anything else.
-  if ( typeof options.container !== 'string' )
-    throw "pjax container must be a string selector!"
+  function validSelector( selector ) {
+    return typeof selector === 'string' && selector !== ''
+  }
+
+  var selector
+  if ( validSelector($container.selector) ) {
+    selector = $container.selector
+  } else if ( validSelector($container.attr('data-pjax-container')) ) {
+    selector = $container.attr('data-pjax-container')
+  } else if ( $container.attr('id') ) {
+    selector = '#' + $container.attr('id')
+  } else if ( !selector ) {
+    throw "no selector for container"
+  }
 
   options = $.extend(true, {}, pjax.defaults, options)
 
@@ -121,13 +125,13 @@ var pjax = $.pjax = function( options ) {
     if ( title ) document.title = title
 
     var state = {
-      pjax: options.container,
+      pjax: selector,
       fragment: options.fragment,
       timeout: options.timeout
     }
 
     // If there are extra params, save the complete URL in the state object
-    var query = $.param(options.data)
+    var query = (typeof options.data === 'string') ? options.data : $.param(options.data)
     if ( query != "_pjax=true" )
       state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
 
