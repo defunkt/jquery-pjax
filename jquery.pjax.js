@@ -39,7 +39,9 @@ $.fn.pjax = function( container, options ) {
   return this.live('click', function(event){
     // Middle click, cmd click, and ctrl click should open
     // links in a new tab as normal.
-    if ( event.which > 1 || event.metaKey )
+    if ( event.which > 1 || event.metaKey ||
+         // the link was a local hash, e.g. <a href="#main">
+         this.href.replace(this.hash || '', '') == window.location)
       return true
 
     var defaults = {
