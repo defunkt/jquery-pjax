@@ -169,16 +169,16 @@ Your HTML should also include a `<title>` tag if you want page titles to work.
 pjax will fire two events on the container you've asked it to load your
 reponse body into:
 
-* `start.pjax` - Fired when a pjax ajax request begins.
-* `end.pjax`   - Fired when a pjax ajax request ends.
+* `pjax:start` - Fired when a pjax ajax request begins.
+* `pjax:end`   - Fired when a pjax ajax request ends.
 
 This allows you to, say, display a loading indicator upon pjaxing:
 
 ```js
 $('a.pjax').pjax('#main')
 $('#main')
-  .bind('start.pjax', function() { $('#loading').show() })
-  .bind('end.pjax',   function() { $('#loading').hide() })
+  .bind('pjax:start', function() { $('#loading').show() })
+  .bind('pjax:end',   function() { $('#loading').hide() })
 ```
 
 Because these events bubble, you can also set them on the body:
@@ -186,8 +186,8 @@ Because these events bubble, you can also set them on the body:
 ```js
 $('a.pjax').pjax()
 $('body')
-  .bind('start.pjax', function() { $('#loading').show() })
-  .bind('end.pjax',   function() { $('#loading').hide() })
+  .bind('pjax:start', function() { $('#loading').show() })
+  .bind('pjax:end',   function() { $('#loading').hide() })
 ```
 
 ## browser support

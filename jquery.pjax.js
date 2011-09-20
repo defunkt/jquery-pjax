@@ -185,6 +185,8 @@ pjax.defaults = {
   type: 'GET',
   dataType: 'html',
   beforeSend: function(xhr){
+    this.trigger('pjax:start', [xhr, pjax.options])
+    // start.pjax is deprecated
     this.trigger('start.pjax', [xhr, pjax.options])
     xhr.setRequestHeader('X-PJAX', 'true')
   },
@@ -193,6 +195,8 @@ pjax.defaults = {
       window.location = pjax.options.url
   },
   complete: function(xhr){
+    this.trigger('pjax:end', [xhr, pjax.options])
+    // end.pjax is deprecated
     this.trigger('end.pjax', [xhr, pjax.options])
   }
 }
