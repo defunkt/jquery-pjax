@@ -112,7 +112,10 @@ var pjax = $.pjax = function( options ) {
     }
 
     // Make it happen.
-    this.html(data)
+    if($.isFunction(pjax.renderResponse))
+        pjax.renderResponse($container,data);
+    else
+        this.html(data)
 
     // If there's a <title> tag in the response, use it as
     // the page's title.
@@ -123,7 +126,8 @@ var pjax = $.pjax = function( options ) {
     var state = {
       pjax: options.container,
       fragment: options.fragment,
-      timeout: options.timeout
+      timeout: options.timeout,
+      dataType: options.dataType
     }
 
     // If there are extra params, save the complete URL in the state object
@@ -227,7 +231,8 @@ $(window).bind('popstate', function(event){
         fragment: state.fragment,
         container: container,
         push: false,
-        timeout: state.timeout
+        timeout: state.timeout,
+        dataType: state.dataType
       })
     else
       window.location = location.href
