@@ -163,6 +163,9 @@ Asp.Net MVC3: <http://biasecurities.com/blog/2011/using-pjax-with-asp-net-mvc3/>
 
 Your HTML should also include a `<title>` tag if you want page titles to work.
 
+When using a page fragment, pjax will check the fragment DOM element
+for a `title` or `data-title` attribute and use any value it finds.
+
 
 ## events
 

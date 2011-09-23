@@ -120,6 +120,11 @@ var pjax = $.pjax = function( options ) {
         title = $.trim( this.find('title').remove().text() )
     if ( title ) document.title = title
 
+    // No <title>? Fragment? Look for data-title and title attributes.
+    if ( !title && options.fragment ) {
+      title = $fragment.attr('title') || $fragment.data('title')
+    }
+
     var state = {
       pjax: options.container,
       fragment: options.fragment,
