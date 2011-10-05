@@ -160,6 +160,9 @@ var pjax = $.pjax = function( options ) {
       window.location.href = hash
     }
 
+    // If the clicked element is still present, un-focus it
+    options.clickedElement.blur();
+
     // Invoke their success handler if they gave us one.
     success.apply(this, arguments)
   }
