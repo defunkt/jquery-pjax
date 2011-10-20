@@ -110,21 +110,7 @@ var pjax = $.pjax = function( options ) {
         if ( !$.trim(data) || /<html/i.test(data) )
           return window.location = options.url
     }
-
-    // Make it happen.
-    this.html(data)
-
-    // If there's a <title> tag in the response, use it as
-    // the page's title.
-    var oldTitle = document.title,
-        title = $.trim( this.find('title').remove().text() )
-    if ( title ) document.title = title
-
-    // No <title>? Fragment? Look for data-title and title attributes.
-    if ( !title && options.fragment ) {
-      title = $fragment.attr('title') || $fragment.data('title')
-    }
-
+    
     var state = {
       pjax: options.container,
       fragment: options.fragment,
@@ -147,6 +133,20 @@ var pjax = $.pjax = function( options ) {
       }
 
       window.history.pushState(state, document.title, options.url)
+    }
+
+    // Make it happen.
+    this.html(data)
+
+    // If there's a <title> tag in the response, use it as
+    // the page's title.
+    var oldTitle = document.title,
+        title = $.trim( this.find('title').remove().text() )
+    if ( title ) document.title = title
+
+    // No <title>? Fragment? Look for data-title and title attributes.
+    if ( !title && options.fragment ) {
+      title = $fragment.attr('title') || $fragment.data('title')
     }
 
     // Google Analytics support
