@@ -96,6 +96,7 @@ var pjax = $.pjax = function( options ) {
   options.context = $container
 
   options.success = function(data){
+    var _data = $(data);
     if ( options.fragment ) {
       // If they specified a fragment, look for it in the response
       // and pull it out.
@@ -118,12 +119,14 @@ var pjax = $.pjax = function( options ) {
     // the page's title.
     var oldTitle = document.title,
         title = $.trim( this.find('title').remove().text() )
-    if ( title ) document.title = title
-
+    
     // No <title>? Fragment? Look for data-title and title attributes.
+    // Failing that, check the <title> of the original data response (e.g., full page.)
     if ( !title && options.fragment ) {
-      title = $fragment.attr('title') || $fragment.data('title')
+      title = $fragment.attr('title') || $fragment.data('title') || _data.filter('title').text();
     }
+    
+    if ( title ) document.title = title
 
     var state = {
       pjax: options.container,
