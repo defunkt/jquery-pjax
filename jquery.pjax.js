@@ -125,16 +125,16 @@ var pjax = $.pjax = function( options ) {
       title = $fragment.attr('title') || $fragment.data('title')
     }
 
-    var state = {
+    var state = jQuery.extend(true, window.history.state, {
       pjax: options.container,
       fragment: options.fragment,
       timeout: options.timeout
-    }
+    })
 
     // If there are extra params, save the complete URL in the state object
-    var query = $.param(options.data)
+    var url = options.url, query = $.param(options.data)
     if ( query != "_pjax=true" )
-      state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
+      state.url = url = url + (/\?/.test(url) ? "&" : "?") + query
 
     if ( options.replace ) {
       window.history.replaceState(state, document.title, options.url)
@@ -148,6 +148,8 @@ var pjax = $.pjax = function( options ) {
 
       window.history.pushState(state, document.title, options.url)
     }
+
+    this.data('pjax-url', url)
 
     // Google Analytics support
     if ( (options.replace || options.push) && window._gaq )
@@ -194,6 +196,13 @@ pjax.defaults = {
     // start.pjax is deprecated
     this.trigger('start.pjax', [xhr, pjax.options])
     xhr.setRequestHeader('X-PJAX', 'true')
+
+    var url = pjax.options.url, query = $.param(pjax.options.data)
+    if ( query != "_pjax=true" )
+      url = url + (/\?/.test(url) ? "&" : "?") + query
+
+    if ( pjax.options.preventRedundantLoad && $(pjax.options.container).data('pjax-url') == url )
+      return false
   },
   error: function(xhr, textStatus, errorThrown){
     if ( textStatus !== 'abort' )
