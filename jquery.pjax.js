@@ -35,23 +35,52 @@ $.fn.pjax = function( container, options ) {
     throw "pjax container must be a string selector!"
     return false
   }
+  
+  return this.live({
+    // for links
+    click: function(event){
+      if ($(this).is('form')) { return }
+    
+      // Middle click, cmd click, and ctrl click should open
+      // links in a new tab as normal.
+      if ( event.which > 1 || event.metaKey )
+        return true
 
-  return this.live('click', function(event){
-    // Middle click, cmd click, and ctrl click should open
-    // links in a new tab as normal.
-    if ( event.which > 1 || event.metaKey )
-      return true
+      var defaults = {
+        url: this.href,
+        container: $(this).attr('data-pjax'),
+        clickedElement: $(this),
+        fragment: null
+      }
 
-    var defaults = {
-      url: this.href,
-      container: $(this).attr('data-pjax'),
-      clickedElement: $(this),
-      fragment: null
+      $.pjax($.extend({}, defaults, options))
+
+      event.preventDefault()
+    }, 
+    // for forms
+    submit: function(event) {
+      var $form = $(this);
+      if (!$form.is('form')) { return true }
+      
+      // if there is a filled out file field in the form, we can't submit it via ajax.
+      // we'll just let it submit in the normal fashion
+      if ($form.find('input:file').filter(function() { return this.val() }).length) {
+        return true
+      }
+      
+      var defaults = {
+        url: $form.attr('action'),
+        type: $form.attr('method'),
+        data: $form.serializeArray(),
+        container: $form.attr('data-pjax'),
+        clickedElement: $form,
+        fragment: null
+      }
+      
+      $.pjax($.extend({}, defaults, options))
+      
+      event.preventDefault()
     }
-
-    $.pjax($.extend({}, defaults, options))
-
-    event.preventDefault()
   })
 }
 
@@ -96,70 +125,10 @@ var pjax = $.pjax = function( options ) {
   options.context = $container
 
   options.success = function(data){
-    if ( options.fragment ) {
-      // If they specified a fragment, look for it in the response
-      // and pull it out.
-      var $fragment = $(data).find(options.fragment)
-      if ( $fragment.length )
-        data = $fragment.children()
-      else
-        return window.location = options.url
-    } else {
-        // If we got no data or an entire web page, go directly
-        // to the page and let normal error handling happen.
-        if ( !$.trim(data) || /<html/i.test(data) )
-          return window.location = options.url
-    }
-
-    // Make it happen.
-    this.html(data)
-
-    // If there's a <title> tag in the response, use it as
-    // the page's title.
-    var oldTitle = document.title,
-        title = $.trim( this.find('title').remove().text() )
-    if ( title ) document.title = title
-
-    // No <title>? Fragment? Look for data-title and title attributes.
-    if ( !title && options.fragment ) {
-      title = $fragment.attr('title') || $fragment.data('title')
-    }
-
-    var state = {
-      pjax: options.container,
-      fragment: options.fragment,
-      timeout: options.timeout
-    }
-
-    // If there are extra params, save the complete URL in the state object
-    var query = $.param(options.data)
-    if ( query != "_pjax=true" )
-      state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
-
-    if ( options.replace ) {
-      window.history.replaceState(state, document.title, options.url)
-    } else if ( options.push ) {
-      // this extra replaceState before first push ensures good back
-      // button behavior
-      if ( !pjax.active ) {
-        window.history.replaceState($.extend({}, state, {url:null}), oldTitle)
-        pjax.active = true
-      }
-
-      window.history.pushState(state, document.title, options.url)
-    }
-
-    // Google Analytics support
-    if ( (options.replace || options.push) && window._gaq )
-      _gaq.push(['_trackPageview'])
-
-    // If the URL has a hash in it, make sure the browser
-    // knows to navigate to the hash.
-    var hash = window.location.hash.toString()
-    if ( hash !== '' ) {
-      window.location.href = hash
-    }
-
+    pjax.updateContainer.call(this, data, options)
+    pjax.pushState(options)
+    
+    
     // Invoke their success handler if they gave us one.
     success.apply(this, arguments)
   }
@@ -176,6 +145,74 @@ var pjax = $.pjax = function( options ) {
   $(document).trigger('pjax', [pjax.xhr, options])
 
   return pjax.xhr
+}
+
+pjax.updateContainer = function(data, options) {
+  if ( options.fragment ) {
+    // If they specified a fragment, look for it in the response
+    // and pull it out.
+    var $fragment = $('<div>' + data + '</div>').find(options.fragment)
+    if ( $fragment.length )
+      data = $fragment.children()
+    else
+      return window.location = options.url
+  } else {
+      // If we got no data or an entire web page, go directly
+      // to the page and let normal error handling happen.
+      if ( !$.trim(data) || /<html/i.test(data) )
+        return window.location = options.url
+  }
+
+  // Make it happen.
+  this.html(data)
+
+  // If there's a <title> tag in the response, use it as
+  // the page's title.
+  options.oldTitle = document.title
+  var title = $.trim( this.find('title').remove().text() )
+
+  // No <title>? Fragment? Look for data-title and title attributes.
+  if ( !title && options.fragment ) {
+    title = $fragment.attr('title') || $fragment.data('title')
+  }
+  if ( title ) document.title = title
+}
+
+pjax.pushState = function(options) {
+  var state = {
+    pjax: options.container,
+    fragment: options.fragment,
+    timeout: options.timeout
+  }
+
+  // If there are extra params, save the complete URL in the state object
+  var query = $.param(options.data)
+  if ( query != "_pjax=true" )
+    state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
+
+  if ( options.replace ) {
+    window.history.replaceState(state, document.title, options.url)
+  } else if ( options.push ) {
+    // this extra replaceState before first push ensures good back
+    // button behavior
+    if ( !pjax.active ) {
+      window.history.replaceState($.extend({}, state, {url:null}), options.oldTitle)
+      pjax.active = true
+    }
+
+    window.history.pushState(state, document.title, options.url)
+  }
+
+  // Google Analytics support
+  if ( (options.replace || options.push) && window._gaq )
+    _gaq.push(['_trackPageview'])
+
+  // If the URL has a hash in it, make sure the browser
+  // knows to navigate to the hash.
+  var hash = window.location.hash.toString()
+  if ( hash !== '' ) {
+    window.location.href = hash
+  }  
 }
 
 
@@ -196,7 +233,11 @@ pjax.defaults = {
     xhr.setRequestHeader('X-PJAX', 'true')
   },
   error: function(xhr, textStatus, errorThrown){
-    if ( textStatus !== 'abort' )
+    // if it's a standard form error, we are just re-setting some form fields, no
+    // need to throw an error or pushState
+    if (xhr.status == 422)
+      pjax.updateContainer.call(this, xhr.responseText, pjax.options)
+    else if ( textStatus !== 'abort' )
       window.location = pjax.options.url
   },
   complete: function(xhr){
