@@ -42,6 +42,11 @@ $.fn.pjax = function( container, options ) {
     if ( event.which > 1 || event.metaKey )
       return true
 
+    // Ignore anchors on the same page
+    if ( this.hash && this.href.replace(this.hash, '') ===
+         location.href.replace(location.hash, '') )
+      return true
+
     var defaults = {
       url: this.href,
       container: $(this).attr('data-pjax'),
