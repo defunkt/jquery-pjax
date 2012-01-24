@@ -183,6 +183,8 @@ function findContainerFor(container) {
     throw "no pjax container for " + container.selector
   } else if ( container.selector !== '' && container.context === document ) {
     return container
+  } else if ( container.attr('id') ) {
+    return $('#' + container.attr('id'))
   } else {
     throw "cant get selector for pjax container!"
   }
