@@ -175,6 +175,8 @@ reponse body into:
 * `pjax:start` - Fired when a pjax ajax request begins.
 * `pjax:end`   - Fired when a pjax ajax request ends.
 
+Note: In the previous versions, it used to fire `start.pjax` and `end.pjax` events.
+
 This allows you to, say, display a loading indicator upon pjaxing:
 
 ```js
