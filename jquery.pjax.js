@@ -24,39 +24,61 @@
 //
 // Returns the jQuery object
 $.fn.pjax = function( container, options ) {
-  if ( options )
-    options.container = container
-  else
-    options = $.isPlainObject(container) ? container : {container:container}
-
-  options.container = findContainerFor(options.container)
-
+  options = optionsFor(container, options)
   return this.live('click', function(event){
-    // Middle click, cmd click, and ctrl click should open
-    // links in a new tab as normal.
-    if ( event.which > 1 || event.metaKey )
-      return true
-
-    // Ignore cross origin links
-    if ( location.protocol !== this.protocol || location.host !== this.host )
-      return true
-
-    // Ignore anchors on the same page
-    if ( this.hash && this.href.replace(this.hash, '') ===
-         location.href.replace(location.hash, '') )
-      return true
-
-    var defaults = {
-      url: this.href,
-      container: $(this).attr('data-pjax'),
-      clickedElement: $(this),
-      fragment: null
-    }
-
-    $.pjax($.extend({}, defaults, options))
-
-    event.preventDefault()
+    return handleClick(event, options)
   })
+}
+
+// Public: pjax on click handler
+//
+// Exported as $.pjax.click.
+//
+// event   - "click" jQuery.Event
+// options - pjax options
+//
+// Examples
+//
+//   $('a').live('click', $.pjax.click)
+//   // is the same as
+//   $('a').pjax()
+//
+//  $(document).on('click', 'a', function(event) {
+//    var container = $(this).closest('[data-pjax-container]')
+//    return $.pjax.click(event, container)
+//  })
+//
+// Returns false if pjax runs, otherwise nothing.
+function handleClick(event, container, options) {
+  options = optionsFor(container, options)
+
+  var link = event.currentTarget
+
+  // Middle click, cmd click, and ctrl click should open
+  // links in a new tab as normal.
+  if ( event.which > 1 || event.metaKey )
+    return
+
+  // Ignore cross origin links
+  if ( location.protocol !== link.protocol || location.host !== link.host )
+    return
+
+  // Ignore anchors on the same page
+  if ( link.hash && link.href.replace(link.hash, '') ===
+       location.href.replace(location.hash, '') )
+    return
+
+  var defaults = {
+    url: link.href,
+    container: $(link).attr('data-pjax'),
+    clickedElement: $(link),
+    fragment: null
+  }
+
+  $.pjax($.extend({}, defaults, options))
+
+  event.preventDefault()
+  return false
 }
 
 
@@ -178,6 +200,44 @@ var pjax = $.pjax = function( options ) {
   return pjax.xhr
 }
 
+
+// Internal: Build options Object for arguments.
+//
+// For convenience the first parameter can be either the container or
+// the options object.
+//
+// Examples
+//
+//   optionsFor('#container')
+//   // => {container: '#container'}
+//
+//   optionsFor('#container', {push: true})
+//   // => {container: '#container', push: true}
+//
+//   optionsFor({container: '#container', push: true})
+//   // => {container: '#container', push: true}
+//
+// Returns options Object.
+function optionsFor(container, options) {
+  // Both container and options
+  if ( container && options )
+    options.container = container
+
+  // First argument is options Object
+  else if ( $.isPlainObject(container) )
+    options = container
+
+  // Only container
+  else
+    options = {container: container}
+
+  // Find and validate container
+  if (options.container)
+    options.container = findContainerFor(options.container)
+
+  return options
+}
+
 // Internal: Find container element for a variety of inputs.
 //
 // Because we can't persist elements using the history API, we must be
@@ -227,6 +287,9 @@ pjax.defaults = {
     this.trigger('end.pjax', [xhr, pjax.options])
   }
 }
+
+// Export $.pjax.click
+pjax.click = handleClick
 
 
 // Used to detect initial (useless) popstate.
@@ -280,6 +343,7 @@ if ( !$.support.pjax ) {
   $.pjax = function( options ) {
     window.location = $.isFunction(options.url) ? options.url() : options.url
   }
+  $.pjax.click = $.noop
   $.fn.pjax = function() { return this }
 }
 
