@@ -261,6 +261,8 @@ function findContainerFor(container) {
 }
 
 
+var timeoutTimer = null
+
 pjax.defaults = {
   timeout: 650,
   push: true,
@@ -271,7 +273,21 @@ pjax.defaults = {
   data: { _pjax: true },
   type: 'GET',
   dataType: 'html',
-  beforeSend: function(xhr){
+  beforeSend: function(xhr, settings){
+    var context = this
+
+    if (settings.async && settings.timeout > 0) {
+      timeoutTimer = setTimeout(function() {
+        var event = $.Event('pjax:timeout')
+        context.trigger(event, [xhr, pjax.options])
+        if (event.result !== false)
+          xhr.abort('timeout')
+      }, settings.timeout)
+
+      // Clear timeout setting so jquerys internal timeout isn't invoked
+      settings.timeout = 0
+    }
+
     this.trigger('pjax:start', [xhr, pjax.options])
     // start.pjax is deprecated
     this.trigger('start.pjax', [xhr, pjax.options])
@@ -282,6 +298,9 @@ pjax.defaults = {
       window.location = pjax.options.url
   },
   complete: function(xhr){
+    if (timeoutTimer)
+      clearTimeout(timeoutTimer)
+
     this.trigger('pjax:end', [xhr, pjax.options])
     // end.pjax is deprecated
     this.trigger('end.pjax', [xhr, pjax.options])
