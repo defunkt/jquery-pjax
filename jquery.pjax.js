@@ -159,6 +159,7 @@ var pjax = $.pjax = function( options ) {
       state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
 
     if ( options.replace ) {
+      pjax.active = true
       window.history.replaceState(state, document.title, options.url)
     } else if ( options.push ) {
       // this extra replaceState before first push ensures good back
