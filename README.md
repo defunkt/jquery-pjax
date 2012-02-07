@@ -154,6 +154,21 @@ def my_page
 end
 ```
 
+Or as a before filter in application controller:
+
+```ruby
+layout :set_layout
+
+private
+  def set_layout
+    if request.headers['X-PJAX']
+      false
+    else
+      "application"
+    end
+  end
+```
+
 Django: <https://github.com/jacobian/django-pjax>
 
 Asp.Net MVC3: <http://biasecurities.com/blog/2011/using-pjax-with-asp-net-mvc3/>
