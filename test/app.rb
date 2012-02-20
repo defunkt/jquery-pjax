@@ -11,6 +11,10 @@ get '/' do
   send_file "#{ROOT}/test/index.html"
 end
 
+get '/iframe' do
+  send_file "#{ROOT}/test/iframe.html"
+end
+
 get '/hello' do
   "<title>Hello</title><p>Hello!</p>"
 end
