@@ -1,20 +1,12 @@
 require 'sinatra'
 
-ROOT = File.expand_path("../..", __FILE__)
-
-set :root, ROOT
-set :public_folder, ROOT
-
+set :public_folder, settings.root
 enable :static
 
 get '/' do
-  send_file "#{ROOT}/test/index.html"
+  redirect "/index.html"
 end
 
-get '/iframe' do
-  send_file "#{ROOT}/test/iframe.html"
-end
-
-get '/hello' do
-  "<title>Hello</title><p>Hello!</p>"
+get '/jquery.pjax.js' do
+  send_file "#{settings.root}/../jquery.pjax.js"
 end

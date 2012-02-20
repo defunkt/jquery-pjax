@@ -6,7 +6,7 @@ module("$.pjax", {
       self.frame = frame
       start()
     }
-    $("#qunit-fixture").append("<iframe src='/iframe'>")
+    $("#qunit-fixture").append("<iframe src='iframe.html'>")
   },
   teardown: function() {
     delete window.iframeReady
@@ -18,10 +18,10 @@ asyncTest("pushes new url", function() {
   var frame = this.frame
 
   frame.$.pjax({
-    url: "/hello",
+    url: "hello.html",
     container: "#main",
     success: function() {
-      equal(frame.location.pathname, "/hello")
+      equal(frame.location.pathname, "/hello.html")
       start()
     }
   })
@@ -31,10 +31,10 @@ asyncTest("replaces container html from response data", function() {
   var frame = this.frame
 
   frame.$.pjax({
-    url: "/hello",
+    url: "hello.html",
     container: "#main",
     success: function() {
-      equal(frame.$("#main").html(), "<p>Hello!</p>")
+      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
       start()
     }
   })
@@ -44,11 +44,10 @@ asyncTest("sets title to response <title>", function() {
   var frame = this.frame
 
   frame.$.pjax({
-    url: "/hello",
+    url: "hello.html",
     container: "#main",
     success: function() {
       equal(frame.document.title, "Hello")
-      equal(frame.location.pathname, "/hello")
       start()
     }
   })
@@ -65,7 +64,7 @@ asyncTest("triggers pjax:start event from container", function() {
   })
 
   frame.$.pjax({
-    url: "/hello",
+    url: "hello.html",
     container: "#main",
     success: function() {
       equal(startCalled, frame.$("#main")[0])
@@ -85,7 +84,7 @@ asyncTest("triggers pjax:end event from container", function() {
   })
 
   frame.$.pjax({
-    url: "/hello",
+    url: "hello.html",
     container: "#main"
   })
 })
@@ -95,10 +94,10 @@ asyncTest("container option accepts String selector", function() {
   var frame = this.frame
 
   frame.$.pjax({
-    url: "/hello",
+    url: "hello.html",
     container: "#main",
     success: function() {
-      equal(frame.$("#main").html(), "<p>Hello!</p>")
+      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
       start()
     }
   })
@@ -108,10 +107,10 @@ asyncTest("container option accepts jQuery object", function() {
   var frame = this.frame
 
   frame.$.pjax({
-    url: "/hello",
+    url: "hello.html",
     container: frame.$("#main"),
     success: function() {
-      equal(frame.$("#main").html(), "<p>Hello!</p>")
+      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
       start()
     }
   })
@@ -121,10 +120,10 @@ asyncTest("container option accepts Element with ID", function() {
   var frame = this.frame
 
   frame.$.pjax({
-    url: "/hello",
+    url: "hello.html",
     container: frame.document.getElementById("main"),
     success: function() {
-      equal(frame.$("#main").html(), "<p>Hello!</p>")
+      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
       start()
     }
   })
@@ -134,10 +133,10 @@ asyncTest("url option accepts function", function() {
   var frame = this.frame
 
   frame.$.pjax({
-    url: function() { return "/hello" },
+    url: function() { return "hello.html" },
     container: "#main",
     success: function() {
-      equal(frame.$("#main").html(), "<p>Hello!</p>")
+      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
       start()
     }
   })
