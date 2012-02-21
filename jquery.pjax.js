@@ -380,8 +380,14 @@ if ( !$.support.pjax ) {
     }
 
     var data = options.data
-    for (key in data) {
-      form.append($('<input>', {type: 'hidden', name: key, value: data[key]}))
+    if (typeof data === 'string') {
+      $.each(data.split('&'), function(index, value) {
+        var pair = value.split('=')
+        form.append($('<input>', {type: 'hidden', name: pair[0], value: pair[1]}))
+      })
+    } else if (typeof data === 'object') {
+      for (key in data)
+        form.append($('<input>', {type: 'hidden', name: key, value: data[key]}))
     }
 
     $(document.body).append(form)
