@@ -26,6 +26,20 @@ get '/jquery.pjax.js' do
   send_file "#{settings.root}/../jquery.pjax.js"
 end
 
+get '/timeout.html' do
+  if pjax?
+    sleep 1
+    erb :timeout, :layout => false
+  else
+    erb :timeout
+  end
+end
+
+get '/boom.html' do
+  status 500
+  erb :boom, :layout => !pjax?
+end
+
 get '/:page.html' do
   erb :"#{params[:page]}", :layout => !pjax?
 end

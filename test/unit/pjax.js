@@ -58,42 +58,6 @@ if ($.support.pjax) {
   })
 
 
-  asyncTest("triggers pjax:start event from container", function() {
-    var frame = this.frame
-
-    var startCalled
-
-    frame.$("#main").on("pjax:start", function() {
-      startCalled = this
-    })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main",
-      success: function() {
-        equal(startCalled, frame.$("#main")[0])
-        start()
-      }
-    })
-  })
-
-  asyncTest("triggers pjax:end event from container", function() {
-    var frame = this.frame
-
-    var endCalled
-
-    frame.$("#main").on("pjax:end", function() {
-      equal(this, frame.$("#main")[0])
-      start()
-    })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
-    })
-  })
-
-
   asyncTest("container option accepts String selector", function() {
     var frame = this.frame
 
@@ -275,4 +239,101 @@ if ($.support.pjax) {
       }
     })
   })
+
+  asyncTest("triggers pjax:start event from container", function() {
+    var frame = this.frame
+
+    var startCalled
+
+    frame.$("#main").on("pjax:start", function(event, xhr, options) {
+      startCalled = this
+
+      ok(event)
+      ok(xhr)
+      equal(options.url, "hello.html")
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      success: function() {
+        equal(startCalled, frame.$("#main")[0])
+        start()
+      }
+    })
+  })
+
+  asyncTest("triggers pjax:end event from container", function() {
+    var frame = this.frame
+
+    var endCalled
+
+    frame.$("#main").on("pjax:end", function(event, xhr, options) {
+      ok(event)
+      equal(xhr.status, 200)
+      equal(options.url, "hello.html")
+
+      equal(this, frame.$("#main")[0])
+
+      start()
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
+  asyncTest("loads fallback if timeout event isn't handled", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "timeout.html",
+      container: "#main"
+    })
+
+    this.iframe.onload = function() {
+      equal(frame.$("#main p").html(), "SLOW DOWN!")
+      equal(frame.location.pathname, "/timeout.html")
+      start()
+    }
+  })
+
+  asyncTest("stopping pjax:timeout disables default behavior", function() {
+    var frame = this.frame
+
+    frame.$("#main").on("pjax:timeout", function(event, xhr) {
+      ok(true)
+
+      setTimeout(function() {
+        xhr.abort()
+        start()
+      }, 0)
+
+      return false
+    })
+
+    this.iframe.onload = function() { ok(false) }
+
+    frame.$.pjax({
+      url: "timeout.html",
+      container: "#main"
+    })
+  })
+
+  asyncTest("500 loads fallback", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "boom.html",
+      container: "#main"
+    })
+
+    this.iframe.onload = function() {
+      equal(frame.$("#main p").html(), "500")
+      equal(frame.location.pathname, "/boom.html")
+      start()
+    }
+  })
+
 }
