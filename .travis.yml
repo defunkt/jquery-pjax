@@ -2,10 +2,6 @@ language: ruby
 rvm:
   - 1.9.3
 
-branches:
-  only:
-    - travis
-
 install: gem install sinatra
 
 before_script:
