@@ -12,7 +12,7 @@ module("$.pjax fallback", {
     window.iframeLoad = function(frame) {
       setTimeout(function() { self.loaded(frame) }, 0)
     }
-    $("#qunit-fixture").append("<iframe src='iframe.html'>")
+    $("#qunit-fixture").append("<iframe src='home.html'>")
   },
   teardown: function() {
     delete window.iframeLoad
@@ -30,6 +30,20 @@ asyncTest("sets new url", function() {
 
   frame.$.pjax({
     url: "hello.html",
+    container: "#main"
+  })
+})
+
+asyncTest("sets new url for function", function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/hello.html")
+    start()
+  }
+
+  frame.$.pjax({
+    url: function() { return "hello.html" },
     container: "#main"
   })
 })

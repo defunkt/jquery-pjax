@@ -5,7 +5,7 @@ enable :static
 
 helpers do
   def pjax?
-    env['HTTP_X_PJAX']
+    env['HTTP_X_PJAX'] && !params[:layout]
   end
 
   def title(str)
@@ -26,11 +26,6 @@ get '/jquery.pjax.js' do
   send_file "#{settings.root}/../jquery.pjax.js"
 end
 
-
-get '/iframe.html' do
-  erb :index, :layout => !pjax?
-end
-
-get '/hello.html' do
-  erb :hello, :layout => !pjax?
+get '/:page.html' do
+  erb :"#{params[:page]}", :layout => !pjax?
 end

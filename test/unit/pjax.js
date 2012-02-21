@@ -5,9 +5,11 @@ if ($.support.pjax) {
       stop()
       window.iframeLoad = function(frame) {
         self.frame = frame
+        window.iframeLoad = $.noop
         start()
       }
-      $("#qunit-fixture").append("<iframe src='iframe.html'>")
+      $("#qunit-fixture").append("<iframe src='home.html'>")
+      this.iframe = $("iframe")[0]
     },
     teardown: function() {
       delete window.iframeLoad
@@ -49,6 +51,7 @@ if ($.support.pjax) {
       container: "#main",
       success: function() {
         equal(frame.document.title, "Hello")
+        ok(!frame.$("#main title").length)
         start()
       }
     })
@@ -138,6 +141,136 @@ if ($.support.pjax) {
       container: "#main",
       success: function() {
         equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+        start()
+      }
+    })
+  })
+
+
+  asyncTest("only fragment is inserted", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "hello.html?layout=true",
+      fragment: "#main",
+      container: "#main",
+      success: function(data) {
+        equal(typeof data, 'string')
+        equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+        start()
+      }
+    })
+  })
+
+  asyncTest("fragment sets title to response <title>", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "hello.html?layout=true",
+      fragment: "#main",
+      container: "#main",
+      success: function(data) {
+        equal(frame.document.title, "Hello")
+        start()
+      }
+    })
+  })
+
+  asyncTest("fragment sets title to response title attr", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "fragment.html",
+      fragment: "#foo",
+      container: "#main",
+      success: function(data) {
+        equal(frame.document.title, "Foo")
+        equal(frame.$("#main p").html(), "Foo")
+        start()
+      }
+    })
+  })
+
+  asyncTest("fragment sets title to response data-title attr", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "fragment.html",
+      fragment: "#bar",
+      container: "#main",
+      success: function(data) {
+        equal(frame.document.title, "Bar")
+        equal(frame.$("#main p").html(), "Bar")
+        start()
+      }
+    })
+  })
+
+  asyncTest("missing fragment falls back to full load", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "hello.html?layout=true",
+      fragment: "#missing",
+      container: "#main"
+    })
+
+    this.iframe.onload = function() {
+      equal(frame.$("#main p").html(), "Hello!")
+      equal(frame.location.pathname, "/hello.html")
+      start()
+    }
+  })
+
+  asyncTest("missing data falls back to full load", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "empty.html",
+      container: "#main"
+    })
+
+    this.iframe.onload = function() {
+      equal(frame.$("#main").html().trim(), "")
+      equal(frame.location.pathname, "/empty.html")
+      start()
+    }
+  })
+
+  asyncTest("full html page falls back to full load", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "hello.html?layout=true",
+      container: "#main"
+    })
+
+    this.iframe.onload = function() {
+      equal(frame.$("#main p").html(), "Hello!")
+      equal(frame.location.pathname, "/hello.html")
+      start()
+    }
+  })
+
+
+  asyncTest("custom success handler is always invoked", function() {
+    var frame = this.frame
+
+    stop()
+    frame.$("#main").on("pjax:end", function(event, xhr, options) {
+      ok(event)
+      equal(xhr.status, 200)
+      equal(options.url, "hello.html")
+      start()
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      success: function(data, status, xhr) {
+        ok(data)
+        equal(status, 'success')
+        equal(xhr.status, 200)
         start()
       }
     })
