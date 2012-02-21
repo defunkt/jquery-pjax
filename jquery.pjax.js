@@ -117,35 +117,36 @@ var pjax = $.pjax = function( options ) {
   options.context = $container
 
   options.success = function(data){
+    var title, oldTitle = document.title
+
     if ( options.fragment ) {
       // If they specified a fragment, look for it in the response
       // and pull it out.
-      var $fragment = $(data).find(options.fragment)
-      if ( $fragment.length )
-        data = $fragment.children()
-      else
+      var html = $('<html>').html(data)
+      var $fragment = html.find(options.fragment)
+      if ( $fragment.length ) {
+        this.html($fragment.contents())
+
+        // If there's a <title> tag in the response, use it as
+        // the page's title. Otherwise, look for data-title and title attributes.
+        title = html.find('title').text() || $fragment.attr('title') || $fragment.data('title')
+      } else {
         return window.location = options.url
+      }
     } else {
         // If we got no data or an entire web page, go directly
         // to the page and let normal error handling happen.
         if ( !$.trim(data) || /<html/i.test(data) )
           return window.location = options.url
+
+      this.html(data)
+
+      // If there's a <title> tag in the response, use it as
+      // the page's title.
+      title = this.find('title').remove().text()
     }
 
-    // Make it happen.
-    this.html(data)
-
-    // If there's a <title> tag in the response, use it as
-    // the page's title.
-    var oldTitle = document.title,
-        title = $.trim( this.find('title').remove().text() )
-
-    // No <title>? Fragment? Look for data-title and title attributes.
-    if ( !title && options.fragment ) {
-      title = $fragment.attr('title') || $fragment.data('title')
-    }
-
-    if ( title ) document.title = title
+    if ( title ) document.title = $.trim(title)
 
     var state = {
       pjax: $container.selector,
