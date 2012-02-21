@@ -75,3 +75,27 @@ asyncTest("sets title to response <title>", function() {
     container: "#main"
   })
 })
+
+asyncTest("adds entry to browser history", function() {
+  var frame = this.frame
+  var count = 0
+
+  this.loaded = function() {
+    count++
+
+    if (count == 1) {
+      equal(frame.location.pathname, "/hello.html")
+      ok(frame.history.length > 1)
+      frame.history.back()
+    } else if (count == 2) {
+      equal(frame.location.pathname, "/home.html")
+      frame.history.forward()
+      start()
+    }
+  }
+
+  frame.$.pjax({
+    url: "hello.html",
+    container: "#main"
+  })
+})
