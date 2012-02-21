@@ -2,19 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <title><%= @title %></title>
   <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js"></script>
   <script type="text/javascript" src="jquery.pjax.js"></script>
-  <script type="text/javascript">
-    $(function() { window.parent.iframeReady(window) });
-  </script>
 </head>
 <body>
   <div id="main">
-    <ul>
-      <li><a href="/home">home</a></li>
-      <li><a href="/dinosaurs.html">dinosaurs</a></li>
-      <li><a href="/aliens.html">aliens</a></li>
-    </ul>
+    <%= yield %>
   </div>
 </body>
 </html>
