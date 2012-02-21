@@ -167,6 +167,23 @@ if ($.support.pjax) {
     start()
   })
 
+
+  asyncTest("ignores exactly same uri", function() {
+    var frame = this.frame
+
+    frame.$("a").pjax({ container: "#main" })
+
+    var event = frame.$.Event('click')
+    frame.$('#main').on('pjax:end', function() {
+      ok(false)
+    })
+
+    frame.$("a[href='/home.html']").trigger(event)
+    equal(event.result, false)
+
+    start()
+  })
+
   asyncTest("ignores same page anchors", function() {
     var frame = this.frame
 
