@@ -99,3 +99,112 @@ asyncTest("adds entry to browser history", function() {
     container: "#main"
   })
 })
+
+
+asyncTest("sets GET method", function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "GET")
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'GET',
+    url: "env.html",
+    container: "#main"
+  })
+})
+
+
+asyncTest("sets POST method", function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "POST")
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'POST',
+    url: "env.html",
+    container: "#main"
+  })
+})
+
+asyncTest("sets PUT method", function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "PUT")
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'PUT',
+    url: "env.html",
+    container: "#main"
+  })
+})
+
+asyncTest("sets DELETE method", function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "DELETE")
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'DELETE',
+    url: "env.html",
+    container: "#main"
+  })
+})
+
+
+asyncTest("GET with data object", function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "GET")
+    equal(env['rack.request.query_hash']['foo'], 'bar')
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'GET',
+    url: "env.html",
+    data: {foo: 'bar'},
+    container: "#main"
+  })
+})
+
+asyncTest("POST with data object", function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "POST")
+    equal(env['rack.request.form_hash']['foo'], 'bar')
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'POST',
+    url: "env.html",
+    data: {foo: 'bar'},
+    container: "#main"
+  })
+})

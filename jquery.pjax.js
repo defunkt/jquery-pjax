@@ -362,7 +362,30 @@ $.support.pjax =
 // Fall back to normalcy for older browsers.
 if ( !$.support.pjax ) {
   $.pjax = function( options ) {
-    window.location = $.isFunction(options.url) ? options.url() : options.url
+    var url = $.isFunction(options.url) ? options.url() : options.url,
+        method = options.type ? options.type.toUpperCase() : 'GET'
+
+    var form = $('<form>', {
+      method: method === 'GET' ? 'GET' : 'POST',
+      action: url,
+      style: 'display:none'
+    })
+
+    if (method !== 'GET' && method !== 'POST') {
+      form.append($('<input>', {
+        type: 'hidden',
+        name: '_method',
+        value: method.toLowerCase()
+      }))
+    }
+
+    var data = options.data
+    for (key in data) {
+      form.append($('<input>', {type: 'hidden', name: key, value: data[key]}))
+    }
+
+    $(document.body).append(form)
+    form.submit()
   }
   $.pjax.click = $.noop
   $.fn.pjax = function() { return this }
