@@ -232,29 +232,6 @@ if ($.support.pjax) {
   })
 
 
-  asyncTest("custom success handler is always invoked", function() {
-    var frame = this.frame
-
-    stop()
-    frame.$("#main").on("pjax:end", function(event, xhr, options) {
-      ok(event)
-      equal(xhr.status, 200)
-      equal(options.url, "hello.html")
-      start()
-    })
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main",
-      success: function(data, status, xhr) {
-        ok(data)
-        equal(status, 'success')
-        equal(xhr.status, 200)
-        start()
-      }
-    })
-  })
-
   asyncTest("triggers pjax:start event from container", function() {
     var frame = this.frame
 
@@ -295,6 +272,144 @@ if ($.support.pjax) {
 
     frame.$.pjax({
       url: "hello.html",
+      container: "#main"
+    })
+  })
+
+  asyncTest("triggers pjax:beforeSend event from container", function() {
+    var frame = this.frame
+
+    frame.$("#main").on("pjax:beforeSend", function(event, xhr, settings, options) {
+      ok(event)
+      ok(xhr)
+      equal(settings.url, "hello.html?_pjax=true")
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      beforeSend: function(xhr, settings) {
+        ok(xhr)
+        equal(settings.url, "hello.html?_pjax=true")
+      },
+      success: function(data, status, xhr) {
+        start()
+      }
+    })
+  })
+
+  asyncTest("stopping pjax:beforeSend prevents the request", function() {
+    var frame = this.frame
+
+    frame.$("#main").on("pjax:beforeSend", function(event, xhr) {
+      ok(true)
+      setTimeout(start, 0)
+      return false
+    })
+
+    this.iframe.onload = function() { ok(false) }
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      success: function() {
+        ok(false)
+      }
+    })
+  })
+
+
+  asyncTest("triggers pjax:success event from container", function() {
+    var frame = this.frame
+
+    stop()
+    frame.$("#main").on("pjax:success", function(event, data, status, xhr, options) {
+      ok(event)
+      ok(data)
+      equal(status, 'success')
+      equal(xhr.status, 200)
+      equal(options.url, "hello.html")
+      start()
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      success: function(data, status, xhr) {
+        ok(data)
+        equal(status, 'success')
+        equal(xhr.status, 200)
+        start()
+      }
+    })
+  })
+
+  asyncTest("triggers pjax:complete event from container", function() {
+    var frame = this.frame
+
+    stop()
+    frame.$("#main").on("pjax:complete", function(event, xhr, status, options) {
+      ok(event)
+      equal(xhr.status, 200)
+      equal(status, 'success')
+      equal(options.url, "hello.html")
+      start()
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      complete: function(xhr, status) {
+        equal(xhr.status, 200)
+        equal(status, 'success')
+        start()
+      }
+    })
+  })
+
+  asyncTest("triggers pjax:error event from container", function() {
+    var frame = this.frame
+
+    stop()
+    frame.$("#main").on("pjax:error", function(event, xhr, status, error, options) {
+      ok(event)
+      equal(xhr.status, 500)
+      equal(status, 'error')
+      equal(error, 'Internal Server Error')
+      equal(options.url, "boom.html")
+      start()
+    })
+
+    frame.$.pjax({
+      url: "boom.html",
+      container: "#main",
+      error: function(xhr, status, error) {
+        equal(xhr.status, 500)
+        equal(status, 'error')
+        equal(error, 'Internal Server Error')
+        start()
+      }
+    })
+  })
+
+  asyncTest("stopping pjax:error disables default behavior", function() {
+    var frame = this.frame
+
+    frame.$("#main").on("pjax:error", function(event, xhr) {
+      ok(true)
+
+      setTimeout(function() {
+        xhr.abort()
+        start()
+      }, 0)
+
+      return false
+    })
+
+    this.iframe.onload = function() { ok(false) }
+
+    frame.$.pjax({
+      url: "boom.html",
       container: "#main"
     })
   })
