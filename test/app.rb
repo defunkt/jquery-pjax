@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'json'
 
 set :public_folder, settings.root
 enable :static
@@ -24,6 +25,22 @@ end
 
 get '/jquery.pjax.js' do
   send_file "#{settings.root}/../jquery.pjax.js"
+end
+
+get '/env.html' do
+  erb :env, :layout => !pjax?
+end
+
+post '/env.html' do
+  erb :env, :layout => !pjax?
+end
+
+put '/env.html' do
+  erb :env, :layout => !pjax?
+end
+
+delete '/env.html' do
+  erb :env, :layout => !pjax?
 end
 
 get '/timeout.html' do
