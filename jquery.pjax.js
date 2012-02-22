@@ -169,16 +169,20 @@ var pjax = $.pjax = function( options ) {
   }
 
   options.error = function(xhr, textStatus, errorThrown) {
+    var url = xhr.getResponseHeader('X-PJAX-URL') || options.url
+
     // DEPRECATED: Invoke original `error` handler
     if (oldError) oldError.apply(this, arguments)
 
     var event = $.Event('pjax:error')
     this.trigger(event, [xhr, textStatus, errorThrown, options])
     if (textStatus !== 'abort' && event.result !== false)
-      window.location = options.url
+      window.location = url
   }
 
   options.success = function(data, status, xhr) {
+    var url = xhr.getResponseHeader('X-PJAX-URL') || options.url
+
     var title, oldTitle = document.title
 
     if ( options.fragment ) {
@@ -193,13 +197,13 @@ var pjax = $.pjax = function( options ) {
         // the page's title. Otherwise, look for data-title and title attributes.
         title = html.find('title').text() || $fragment.attr('title') || $fragment.data('title')
       } else {
-        return window.location = options.url
+        return window.location = url
       }
     } else {
       // If we got no data or an entire web page, go directly
       // to the page and let normal error handling happen.
       if ( !$.trim(data) || /<html/i.test(data) )
-        return window.location = options.url
+        return window.location = url
 
       this.html(data)
 
@@ -219,11 +223,11 @@ var pjax = $.pjax = function( options ) {
     // If there are extra params, save the complete URL in the state object
     var query = $.param(options.data)
     if ( query != "_pjax=true" )
-      state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
+      state.url = url + (/\?/.test(url) ? "&" : "?") + query
 
     if ( options.replace ) {
       pjax.active = true
-      window.history.replaceState(state, document.title, options.url)
+      window.history.replaceState(state, document.title, url)
     } else if ( options.push ) {
       // this extra replaceState before first push ensures good back
       // button behavior
@@ -232,7 +236,7 @@ var pjax = $.pjax = function( options ) {
         pjax.active = true
       }
 
-      window.history.pushState(state, document.title, options.url)
+      window.history.pushState(state, document.title, url)
     }
 
     // Google Analytics support

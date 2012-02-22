@@ -19,6 +19,13 @@ helpers do
   end
 end
 
+after do
+  if pjax?
+    response.headers['X-PJAX-URL'] = request.url
+  end
+end
+
+
 get '/' do
   erb :qunit
 end
@@ -41,6 +48,10 @@ end
 
 delete '/env.html' do
   erb :env, :layout => !pjax?
+end
+
+get '/redirect.html' do
+  redirect "/hello.html"
 end
 
 get '/timeout.html' do
