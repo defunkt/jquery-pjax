@@ -7,8 +7,8 @@ install: gem install sinatra
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-  - ruby ./test/app.rb &
-  - sleep 3
+  - ruby ./test/app.rb 2>/dev/null &
+  - sleep 2
 
 script: phantomjs ./test/run-qunit.js "http://localhost:4567/"
 

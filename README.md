@@ -45,16 +45,18 @@ $('a[data-pjax]').pjax()
 ```
 
 
-Two. Slightly obtrusive, passing a container and jQuery ajax options:
+Two. Slightly obtrusive, passing a container and binding an error handler:
 
 ```html
 <a href='/explore' class='js-pjax'>Explore</a>
 ```
 
 ```js
-$('.js-pjax').pjax('#main', { timeout: null, error: function(xhr, err){
+$('.js-pjax').pjax('#main')
+
+$('#main').live('pjax:error', function(e, xhr, err) {
   $('.error').text('Something went wrong: ' + err)
-}})
+})
 ```
 
 
@@ -91,8 +93,6 @@ following additions:
 * `clickedElement` - The element that was clicked to start the pjax call.
 * `push`           - Whether to pushState the URL. Default: true (of course)
 * `replace`        - Whether to replaceState the URL. Default: false
-* `error`          - By default this callback reloads the target page once
-                    `timeout` ms elapses.
 * `timeout`        - pjax sets this low, <1s. Set this higher if using a
                      custom error handler. It's ms, so something like
                      `timeout: 2000`
@@ -195,18 +195,34 @@ This allows you to, say, display a loading indicator upon pjaxing:
 ```js
 $('a.pjax').pjax('#main')
 $('#main')
-  .bind('pjax:start', function() { $('#loading').show() })
-  .bind('pjax:end',   function() { $('#loading').hide() })
+  .on('pjax:start', function() { $('#loading').show() })
+  .on('pjax:end',   function() { $('#loading').hide() })
 ```
 
-Because these events bubble, you can also set them on the body:
+Because these events bubble, you can also set them on the document:
 
 ```js
 $('a.pjax').pjax()
-$('body')
-  .bind('pjax:start', function() { $('#loading').show() })
-  .bind('pjax:end',   function() { $('#loading').hide() })
+$(document)
+  .on('pjax:start', function() { $('#loading').show() })
+  .on('pjax:end',   function() { $('#loading').hide() })
 ```
+
+In addition, custom events are added to complement `$.ajax`'s
+callbacks.
+
+* `pjax:beforeSend` - Fired before the pjax request begins. Returning
+                      false will abort the request.
+* `pjax:complete`   - Fired after the pjax request finishes.
+* `pjax:success`    - Fired after the pjax request succeeds.
+* `pjax:error`      - Fired after the pjax request fails. Returning
+                      false will prevent the the fallback redirect.
+* `pjax:timeout`    - Fired if after timeout is reached. Returning
+                      false will disable the fallback and will wait
+                      indefinitely until the response returns.
+
+**CAUTION** Callback handlers passed to `$.pjax` **cannot** be persisted
+across full page reloads. Its recommended you use custom events instead.
 
 ## browser support
 

@@ -102,21 +102,83 @@ function handleClick(event, container, options) {
 //
 // Returns whatever $.ajax returns.
 var pjax = $.pjax = function( options ) {
-  var $container = findContainerFor(options.container),
-      success = options.success || $.noop
-
-  // We don't want to let anyone override our success handler.
-  delete options.success
-
-  options = $.extend(true, {}, pjax.defaults, options)
+  options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
   if ( $.isFunction(options.url) ) {
     options.url = options.url()
   }
 
-  options.context = $container
+  // DEPRECATED: Save references to original event callbacks. However,
+  // listening for custom pjax:* events is prefered.
+  var oldBeforeSend = options.beforeSend,
+      oldComplete   = options.complete,
+      oldSuccess    = options.success,
+      oldError      = options.error
 
-  options.success = function(data){
+  options.context = findContainerFor(options.container)
+
+  var timeoutTimer
+
+  options.beforeSend = function(xhr, settings) {
+    var context = this
+
+    if (settings.timeout > 0) {
+      timeoutTimer = setTimeout(function() {
+        var event = $.Event('pjax:timeout')
+        context.trigger(event, [xhr, options])
+        if (event.result !== false)
+          xhr.abort('timeout')
+      }, settings.timeout)
+
+      // Clear timeout setting so jquerys internal timeout isn't invoked
+      settings.timeout = 0
+    }
+
+    xhr.setRequestHeader('X-PJAX', 'true')
+
+    var result
+
+    // DEPRECATED: Invoke original `beforeSend` handler
+    if (oldBeforeSend) {
+      result = oldBeforeSend.apply(this, arguments)
+      if (result === false) return false
+    }
+
+    var event = $.Event('pjax:beforeSend')
+    this.trigger(event, [xhr, settings])
+    result = event.result
+    if (result === false) return false
+
+    this.trigger('pjax:start', [xhr, options])
+    // start.pjax is deprecated
+    this.trigger('start.pjax', [xhr, options])
+  }
+
+  options.complete = function(xhr, textStatus) {
+    if (timeoutTimer)
+      clearTimeout(timeoutTimer)
+
+    // DEPRECATED: Invoke original `complete` handler
+    if (oldComplete) oldComplete.apply(this, arguments)
+
+    this.trigger('pjax:complete', [xhr, textStatus, options])
+
+    this.trigger('pjax:end', [xhr, options])
+    // end.pjax is deprecated
+    this.trigger('end.pjax', [xhr, options])
+  }
+
+  options.error = function(xhr, textStatus, errorThrown) {
+    // DEPRECATED: Invoke original `error` handler
+    if (oldError) oldError.apply(this, arguments)
+
+    var event = $.Event('pjax:error')
+    this.trigger(event, [xhr, textStatus, errorThrown, options])
+    if (textStatus !== 'abort' && event.result !== false)
+      window.location = options.url
+  }
+
+  options.success = function(data, status, xhr) {
     var title, oldTitle = document.title
 
     if ( options.fragment ) {
@@ -134,10 +196,10 @@ var pjax = $.pjax = function( options ) {
         return window.location = options.url
       }
     } else {
-        // If we got no data or an entire web page, go directly
-        // to the page and let normal error handling happen.
-        if ( !$.trim(data) || /<html/i.test(data) )
-          return window.location = options.url
+      // If we got no data or an entire web page, go directly
+      // to the page and let normal error handling happen.
+      if ( !$.trim(data) || /<html/i.test(data) )
+        return window.location = options.url
 
       this.html(data)
 
@@ -149,7 +211,7 @@ var pjax = $.pjax = function( options ) {
     if ( title ) document.title = $.trim(title)
 
     var state = {
-      pjax: $container.selector,
+      pjax: this.selector,
       fragment: options.fragment,
       timeout: options.timeout
     }
@@ -184,9 +246,12 @@ var pjax = $.pjax = function( options ) {
       window.location.href = hash
     }
 
-    // Invoke their success handler if they gave us one.
-    success.apply(this, arguments)
+    // DEPRECATED: Invoke original `success` handler
+    if (oldSuccess) oldSuccess.apply(this, arguments)
+
+    this.trigger('pjax:success', [data, status, xhr, options])
   }
+
 
   // Cancel the current request if we're already pjaxing
   var xhr = pjax.xhr
@@ -263,8 +328,6 @@ function findContainerFor(container) {
 }
 
 
-var timeoutTimer = null
-
 pjax.defaults = {
   timeout: 650,
   push: true,
@@ -274,39 +337,7 @@ pjax.defaults = {
   // adding this secret parameter, some browsers will often confuse the two.
   data: { _pjax: true },
   type: 'GET',
-  dataType: 'html',
-  beforeSend: function(xhr, settings){
-    var context = this
-
-    if (settings.async && settings.timeout > 0) {
-      timeoutTimer = setTimeout(function() {
-        var event = $.Event('pjax:timeout')
-        context.trigger(event, [xhr, pjax.options])
-        if (event.result !== false)
-          xhr.abort('timeout')
-      }, settings.timeout)
-
-      // Clear timeout setting so jquerys internal timeout isn't invoked
-      settings.timeout = 0
-    }
-
-    this.trigger('pjax:start', [xhr, pjax.options])
-    // start.pjax is deprecated
-    this.trigger('start.pjax', [xhr, pjax.options])
-    xhr.setRequestHeader('X-PJAX', 'true')
-  },
-  error: function(xhr, textStatus, errorThrown){
-    if ( textStatus !== 'abort' )
-      window.location = pjax.options.url
-  },
-  complete: function(xhr){
-    if (timeoutTimer)
-      clearTimeout(timeoutTimer)
-
-    this.trigger('pjax:end', [xhr, pjax.options])
-    // end.pjax is deprecated
-    this.trigger('end.pjax', [xhr, pjax.options])
-  }
+  dataType: 'html'
 }
 
 // Export $.pjax.click
