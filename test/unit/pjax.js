@@ -574,4 +574,18 @@ if ($.support.pjax) {
       }
     })
   })
+
+  asyncTest("follows redirect with X-PJAX-URL header", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "redirect.html",
+      container: "#main",
+      success: function() {
+        equal(frame.location.pathname, "/hello.html")
+        equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+        start()
+      }
+    })
+  })
 }

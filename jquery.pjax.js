@@ -197,6 +197,9 @@ var pjax = $.pjax = function( options ) {
   }
 
   options.error = function(xhr, textStatus, errorThrown) {
+    var respUrl = xhr.getResponseHeader('X-PJAX-URL')
+    if (respUrl) url = stripPjaxParam(respUrl)
+
     // DEPRECATED: Invoke original `error` handler
     if (oldError) oldError.apply(this, arguments)
 
@@ -207,6 +210,9 @@ var pjax = $.pjax = function( options ) {
   }
 
   options.success = function(data, status, xhr) {
+    var respUrl = xhr.getResponseHeader('X-PJAX-URL')
+    if (respUrl) url = stripPjaxParam(respUrl)
+
     var title, oldTitle = document.title
 
     if ( options.fragment ) {
