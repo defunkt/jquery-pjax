@@ -29,8 +29,14 @@ page.open(phantom.args[0], function(status) {
     })
   }, function() {
     var failures = page.evaluate(function() {
-      var el = document.getElementById('qunit-testresult')
+      var el    = document.getElementById('qunit-testresult'),
+          fails = document.getElementsByClassName('fail')
+
+      for (var i = 0; i < fails.length; i++)
+        console.log(fails[i].innerText)
+
       console.log(el.innerText)
+
       return parseInt(el.getElementsByClassName('failed')[0].innerHTML)
     })
     phantom.exit(failures > 0 ? 1 : 0)
