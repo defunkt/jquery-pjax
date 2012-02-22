@@ -81,6 +81,29 @@ function handleClick(event, container, options) {
   return false
 }
 
+// Internal: Strips _pjax=true param from url
+//
+// url - String
+//
+// Returns String.
+function stripPjaxParam(url) {
+  return url
+    .replace(/\?_pjax=true&?/, '?')
+    .replace(/_pjax=true&?/, '')
+    .replace(/\?$/, '')
+}
+
+// Internal: Parse URL components and returns a Locationish object.
+//
+// url - String URL
+//
+// Returns HTMLAnchorElement that acts like Location.
+function parseURL(url) {
+  var a = document.createElement('a')
+  a.href = url
+  return a
+}
+
 
 // Loads a URL with ajax, puts the response body inside a container,
 // then pushState()'s the loaded URL.
@@ -104,9 +127,12 @@ function handleClick(event, container, options) {
 var pjax = $.pjax = function( options ) {
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
-  if ( $.isFunction(options.url) ) {
+  if ($.isFunction(options.url)) {
     options.url = options.url()
   }
+
+  var url  = options.url
+  var hash = parseURL(url).hash
 
   // DEPRECATED: Save references to original event callbacks. However,
   // listening for custom pjax:* events is prefered.
@@ -121,6 +147,8 @@ var pjax = $.pjax = function( options ) {
 
   options.beforeSend = function(xhr, settings) {
     var context = this
+
+    url = stripPjaxParam(settings.url)
 
     if (settings.timeout > 0) {
       timeoutTimer = setTimeout(function() {
@@ -169,7 +197,8 @@ var pjax = $.pjax = function( options ) {
   }
 
   options.error = function(xhr, textStatus, errorThrown) {
-    var url = xhr.getResponseHeader('X-PJAX-URL') || options.url
+    var respUrl = xhr.getResponseHeader('X-PJAX-URL')
+    if (respUrl) url = stripPjaxParam(respUrl)
 
     // DEPRECATED: Invoke original `error` handler
     if (oldError) oldError.apply(this, arguments)
@@ -181,7 +210,8 @@ var pjax = $.pjax = function( options ) {
   }
 
   options.success = function(data, status, xhr) {
-    var url = xhr.getResponseHeader('X-PJAX-URL') || options.url
+    var respUrl = xhr.getResponseHeader('X-PJAX-URL')
+    if (respUrl) url = stripPjaxParam(respUrl)
 
     var title, oldTitle = document.title
 
@@ -215,15 +245,11 @@ var pjax = $.pjax = function( options ) {
     if ( title ) document.title = $.trim(title)
 
     var state = {
+      url: url,
       pjax: this.selector,
       fragment: options.fragment,
       timeout: options.timeout
     }
-
-    // If there are extra params, save the complete URL in the state object
-    var query = $.param(options.data)
-    if ( query != "_pjax=true" )
-      state.url = url + (/\?/.test(url) ? "&" : "?") + query
 
     if ( options.replace ) {
       pjax.active = true
@@ -245,7 +271,6 @@ var pjax = $.pjax = function( options ) {
 
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
-    var hash = window.location.hash.toString()
     if ( hash !== '' ) {
       window.location.href = hash
     }
