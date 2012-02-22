@@ -375,7 +375,7 @@ if ($.support.pjax) {
       ok(event)
       equal(xhr.status, 500)
       equal(status, 'error')
-      equal(error, 'Internal Server Error')
+      equal(error.trim(), 'Internal Server Error')
       equal(options.url, "boom.html")
       start()
     })
@@ -386,7 +386,7 @@ if ($.support.pjax) {
       error: function(xhr, status, error) {
         equal(xhr.status, 500)
         equal(status, 'error')
-        equal(error, 'Internal Server Error')
+        equal(error.trim(), 'Internal Server Error')
         start()
       }
     })
