@@ -81,6 +81,28 @@ function handleClick(event, container, options) {
   return false
 }
 
+// Internal: Strips _pjax=true param from url
+//
+// url - String
+//
+// Returns String.
+function stripPjaxParam(url) {
+  return url
+    .replace(/&?_pjax=true/, '')
+    .replace(/\?$/, '')
+}
+
+// Internal: Parse URL components and returns a Locationish object.
+//
+// url - String URL
+//
+// Returns HTMLAnchorElement that acts like Location.
+function parseURL(url) {
+  var a = document.createElement('a')
+  a.href = url
+  return a
+}
+
 
 // Loads a URL with ajax, puts the response body inside a container,
 // then pushState()'s the loaded URL.
@@ -110,6 +132,8 @@ var pjax = $.pjax = function( options ) {
     options.url = options.url()
   }
 
+  var hash = parseURL(options.url).hash
+
   // url     - URL used for pushState
   // ajaxUrl - Internal URL that $.ajax uses to make the request.
   //           Contains hidden params such as _pjax=true
@@ -120,7 +144,7 @@ var pjax = $.pjax = function( options ) {
   // for pjax'd partial page loads and one for normal page loads.
   // Without adding this secret parameter, some browsers will often
   // confuse the two.
-  if (!/_pjax=true/.test(ajaxUrl))
+  if (options.type === 'GET' && !/_pjax=true/.test(ajaxUrl))
     options.data._pjax = true
 
   // DEPRECATED: Save references to original event callbacks. However,
@@ -138,6 +162,7 @@ var pjax = $.pjax = function( options ) {
     var context = this
 
     ajaxUrl = settings.url
+    url     = stripPjaxParam(settings.url)
 
     if (settings.timeout > 0) {
       timeoutTimer = setTimeout(function() {
@@ -254,7 +279,6 @@ var pjax = $.pjax = function( options ) {
 
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
-    var hash = window.location.hash.toString()
     if ( hash !== '' ) {
       window.location.href = hash
     }

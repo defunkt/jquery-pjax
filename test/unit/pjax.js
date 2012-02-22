@@ -125,6 +125,36 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("sets hidden _pjax=true param on XHR GET request", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "env.html",
+      container: "#main",
+      success: function() {
+        var env = JSON.parse(frame.$("#env").text())
+        equal(env['rack.request.query_hash']['_pjax'], 'true')
+        start()
+      }
+    })
+  })
+
+  asyncTest("doesn't sets hidden _pjax=true param on XHR POST request", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      type: 'POST',
+      url: "env.html",
+      container: "#main",
+      success: function() {
+        var env = JSON.parse(frame.$("#env").text())
+        ok(!env['rack.request.query_hash']['_pjax'])
+        ok(!env['rack.request.form_hash']['_pjax'])
+        start()
+      }
+    })
+  })
+
 
   asyncTest("only fragment is inserted", function() {
     var frame = this.frame
@@ -523,7 +553,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("popstate preserves hidden GET data", function() {
+  asyncTest("popstate preserves GET data", function() {
     var frame = this.frame
 
     frame.$.pjax({
@@ -532,7 +562,7 @@ if ($.support.pjax) {
       container: "#main",
       complete: function() {
         equal(frame.location.pathname, "/env.html")
-        equal(frame.location.search, "?foo=1")
+        equal(frame.location.search, "?foo=1&bar=2")
 
         var env = JSON.parse(frame.$("#env").text())
         equal(env['rack.request.query_hash']['foo'], '1')
@@ -547,7 +577,7 @@ if ($.support.pjax) {
             ok(frame.history.length > 2)
             goBack(frame, function() {
               equal(frame.location.pathname, "/env.html")
-              equal(frame.location.search, "?foo=1")
+              equal(frame.location.search, "?foo=1&bar=2")
 
               var env = JSON.parse(frame.$("#env").text())
               equal(env['rack.request.query_hash']['foo'], '1')
