@@ -88,7 +88,8 @@ function handleClick(event, container, options) {
 // Returns String.
 function stripPjaxParam(url) {
   return url
-    .replace(/&?_pjax=true/, '')
+    .replace(/\?_pjax=true&?/, '?')
+    .replace(/_pjax=true&?/, '')
     .replace(/\?$/, '')
 }
 
@@ -126,26 +127,12 @@ function parseURL(url) {
 var pjax = $.pjax = function( options ) {
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
-  if (!options.data) options.data = {}
-
   if ($.isFunction(options.url)) {
     options.url = options.url()
   }
 
-  var hash = parseURL(options.url).hash
-
-  // url     - URL used for pushState
-  // ajaxUrl - Internal URL that $.ajax uses to make the request.
-  //           Contains hidden params such as _pjax=true
-  var url, ajaxUrl
-  url = ajaxUrl = options.url
-
-  // We want the browser to maintain two separate internal caches: one
-  // for pjax'd partial page loads and one for normal page loads.
-  // Without adding this secret parameter, some browsers will often
-  // confuse the two.
-  if (options.type === 'GET' && !/_pjax=true/.test(ajaxUrl))
-    options.data._pjax = true
+  var url  = options.url
+  var hash = parseURL(url).hash
 
   // DEPRECATED: Save references to original event callbacks. However,
   // listening for custom pjax:* events is prefered.
@@ -161,8 +148,7 @@ var pjax = $.pjax = function( options ) {
   options.beforeSend = function(xhr, settings) {
     var context = this
 
-    ajaxUrl = settings.url
-    url     = stripPjaxParam(settings.url)
+    url = stripPjaxParam(settings.url)
 
     if (settings.timeout > 0) {
       timeoutTimer = setTimeout(function() {
@@ -253,7 +239,7 @@ var pjax = $.pjax = function( options ) {
     if ( title ) document.title = $.trim(title)
 
     var state = {
-      url: ajaxUrl,
+      url: url,
       pjax: this.selector,
       fragment: options.fragment,
       timeout: options.timeout
@@ -369,6 +355,10 @@ pjax.defaults = {
   timeout: 650,
   push: true,
   replace: false,
+  // We want the browser to maintain two separate internal caches: one for
+  // pjax'd partial page loads and one for normal page loads. Without
+  // adding this secret parameter, some browsers will often confuse the two.
+  data: { _pjax: true },
   type: 'GET',
   dataType: 'html'
 }

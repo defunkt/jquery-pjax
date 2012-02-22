@@ -139,22 +139,6 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("doesn't sets hidden _pjax=true param on XHR POST request", function() {
-    var frame = this.frame
-
-    frame.$.pjax({
-      type: 'POST',
-      url: "env.html",
-      container: "#main",
-      success: function() {
-        var env = JSON.parse(frame.$("#env").text())
-        ok(!env['rack.request.query_hash']['_pjax'])
-        ok(!env['rack.request.form_hash']['_pjax'])
-        start()
-      }
-    })
-  })
-
 
   asyncTest("only fragment is inserted", function() {
     var frame = this.frame
