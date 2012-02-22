@@ -176,9 +176,12 @@ asyncTest("GET with data object", function() {
 
   this.loaded = function() {
     equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "?foo=bar")
+
     var env = JSON.parse(frame.$("#env").text())
     equal(env['REQUEST_METHOD'], "GET")
     equal(env['rack.request.query_hash']['foo'], 'bar')
+
     start()
   }
 
@@ -195,9 +198,12 @@ asyncTest("POST with data object", function() {
 
   this.loaded = function() {
     equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "")
+
     var env = JSON.parse(frame.$("#env").text())
     equal(env['REQUEST_METHOD'], "POST")
     equal(env['rack.request.form_hash']['foo'], 'bar')
+
     start()
   }
 
@@ -214,9 +220,12 @@ asyncTest("GET with data string", function() {
 
   this.loaded = function() {
     equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "?foo=bar")
+
     var env = JSON.parse(frame.$("#env").text())
     equal(env['REQUEST_METHOD'], "GET")
     equal(env['rack.request.query_hash']['foo'], 'bar')
+
     start()
   }
 
@@ -233,9 +242,12 @@ asyncTest("POST with data string", function() {
 
   this.loaded = function() {
     equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "")
+
     var env = JSON.parse(frame.$("#env").text())
     equal(env['REQUEST_METHOD'], "POST")
     equal(env['rack.request.form_hash']['foo'], 'bar')
+
     start()
   }
 

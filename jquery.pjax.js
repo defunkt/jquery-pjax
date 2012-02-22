@@ -81,6 +81,29 @@ function handleClick(event, container, options) {
   return false
 }
 
+// Internal: Strips _pjax=true param from url
+//
+// url - String
+//
+// Returns String.
+function stripPjaxParam(url) {
+  return url
+    .replace(/\?_pjax=true&?/, '?')
+    .replace(/_pjax=true&?/, '')
+    .replace(/\?$/, '')
+}
+
+// Internal: Parse URL components and returns a Locationish object.
+//
+// url - String URL
+//
+// Returns HTMLAnchorElement that acts like Location.
+function parseURL(url) {
+  var a = document.createElement('a')
+  a.href = url
+  return a
+}
+
 
 // Loads a URL with ajax, puts the response body inside a container,
 // then pushState()'s the loaded URL.
@@ -104,9 +127,12 @@ function handleClick(event, container, options) {
 var pjax = $.pjax = function( options ) {
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
-  if ( $.isFunction(options.url) ) {
+  if ($.isFunction(options.url)) {
     options.url = options.url()
   }
+
+  var url  = options.url
+  var hash = parseURL(url).hash
 
   // DEPRECATED: Save references to original event callbacks. However,
   // listening for custom pjax:* events is prefered.
@@ -121,6 +147,8 @@ var pjax = $.pjax = function( options ) {
 
   options.beforeSend = function(xhr, settings) {
     var context = this
+
+    url = stripPjaxParam(settings.url)
 
     if (settings.timeout > 0) {
       timeoutTimer = setTimeout(function() {
@@ -175,7 +203,7 @@ var pjax = $.pjax = function( options ) {
     var event = $.Event('pjax:error')
     this.trigger(event, [xhr, textStatus, errorThrown, options])
     if (textStatus !== 'abort' && event.result !== false)
-      window.location = options.url
+      window.location = url
   }
 
   options.success = function(data, status, xhr) {
@@ -193,13 +221,13 @@ var pjax = $.pjax = function( options ) {
         // the page's title. Otherwise, look for data-title and title attributes.
         title = html.find('title').text() || $fragment.attr('title') || $fragment.data('title')
       } else {
-        return window.location = options.url
+        return window.location = url
       }
     } else {
       // If we got no data or an entire web page, go directly
       // to the page and let normal error handling happen.
       if ( !$.trim(data) || /<html/i.test(data) )
-        return window.location = options.url
+        return window.location = url
 
       this.html(data)
 
@@ -211,19 +239,15 @@ var pjax = $.pjax = function( options ) {
     if ( title ) document.title = $.trim(title)
 
     var state = {
+      url: url,
       pjax: this.selector,
       fragment: options.fragment,
       timeout: options.timeout
     }
 
-    // If there are extra params, save the complete URL in the state object
-    var query = $.param(options.data)
-    if ( query != "_pjax=true" )
-      state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
-
     if ( options.replace ) {
       pjax.active = true
-      window.history.replaceState(state, document.title, options.url)
+      window.history.replaceState(state, document.title, url)
     } else if ( options.push ) {
       // this extra replaceState before first push ensures good back
       // button behavior
@@ -232,7 +256,7 @@ var pjax = $.pjax = function( options ) {
         pjax.active = true
       }
 
-      window.history.pushState(state, document.title, options.url)
+      window.history.pushState(state, document.title, url)
     }
 
     // Google Analytics support
@@ -241,7 +265,6 @@ var pjax = $.pjax = function( options ) {
 
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
-    var hash = window.location.hash.toString()
     if ( hash !== '' ) {
       window.location.href = hash
     }

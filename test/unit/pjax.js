@@ -125,6 +125,20 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("sets hidden _pjax=true param on XHR GET request", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "env.html",
+      container: "#main",
+      success: function() {
+        var env = JSON.parse(frame.$("#env").text())
+        equal(env['rack.request.query_hash']['_pjax'], 'true')
+        start()
+      }
+    })
+  })
+
 
   asyncTest("only fragment is inserted", function() {
     var frame = this.frame
@@ -466,4 +480,98 @@ if ($.support.pjax) {
     }
   })
 
+
+  function goBack(frame, callback) {
+    setTimeout(function() {
+      frame.$("#main").one("pjax:complete", callback)
+      frame.history.back()
+    }, 0)
+  }
+
+  function goForward(frame, callback) {
+    setTimeout(function() {
+      frame.$("#main").one("pjax:complete", callback)
+      frame.history.forward()
+    }, 0)
+  }
+
+  asyncTest("popstate going back to page", function() {
+    var frame = this.frame
+
+    equal(frame.location.pathname, "/home.html")
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      complete: function() {
+        equal(frame.location.pathname, "/hello.html")
+
+        ok(frame.history.length > 1)
+        goBack(frame, function() {
+          equal(frame.location.pathname, "/home.html")
+          start()
+        })
+      }
+    })
+  })
+
+  asyncTest("popstate going forward to page", function() {
+    var frame = this.frame
+
+    equal(frame.location.pathname, "/home.html")
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      complete: function() {
+        equal(frame.location.pathname, "/hello.html")
+
+        ok(frame.history.length > 1)
+        goBack(frame, function() {
+          goForward(frame, function() {
+            equal(frame.location.pathname, "/hello.html")
+            start()
+          })
+        })
+      }
+    })
+  })
+
+  asyncTest("popstate preserves GET data", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "env.html?foo=1",
+      data: { bar: 2 },
+      container: "#main",
+      complete: function() {
+        equal(frame.location.pathname, "/env.html")
+        equal(frame.location.search, "?foo=1&bar=2")
+
+        var env = JSON.parse(frame.$("#env").text())
+        equal(env['rack.request.query_hash']['foo'], '1')
+        equal(env['rack.request.query_hash']['bar'], '2')
+
+        frame.$.pjax({
+          url: "hello.html",
+          container: "#main",
+          complete: function() {
+            equal(frame.location.pathname, "/hello.html")
+
+            ok(frame.history.length > 2)
+            goBack(frame, function() {
+              equal(frame.location.pathname, "/env.html")
+              equal(frame.location.search, "?foo=1&bar=2")
+
+              var env = JSON.parse(frame.$("#env").text())
+              equal(env['rack.request.query_hash']['foo'], '1')
+              equal(env['rack.request.query_hash']['bar'], '2')
+
+              start()
+            })
+          }
+        })
+      }
+    })
+  })
 }
