@@ -104,9 +104,24 @@ function handleClick(event, container, options) {
 var pjax = $.pjax = function( options ) {
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
-  if ( $.isFunction(options.url) ) {
+  if (!options.data) options.data = {}
+
+  if ($.isFunction(options.url)) {
     options.url = options.url()
   }
+
+  // url     - URL used for pushState
+  // ajaxUrl - Internal URL that $.ajax uses to make the request.
+  //           Contains hidden params such as _pjax=true
+  var url, ajaxUrl
+  url = ajaxUrl = options.url
+
+  // We want the browser to maintain two separate internal caches: one
+  // for pjax'd partial page loads and one for normal page loads.
+  // Without adding this secret parameter, some browsers will often
+  // confuse the two.
+  if (!/_pjax=true/.test(ajaxUrl))
+    options.data._pjax = true
 
   // DEPRECATED: Save references to original event callbacks. However,
   // listening for custom pjax:* events is prefered.
@@ -121,6 +136,8 @@ var pjax = $.pjax = function( options ) {
 
   options.beforeSend = function(xhr, settings) {
     var context = this
+
+    ajaxUrl = settings.url
 
     if (settings.timeout > 0) {
       timeoutTimer = setTimeout(function() {
@@ -175,7 +192,7 @@ var pjax = $.pjax = function( options ) {
     var event = $.Event('pjax:error')
     this.trigger(event, [xhr, textStatus, errorThrown, options])
     if (textStatus !== 'abort' && event.result !== false)
-      window.location = options.url
+      window.location = url
   }
 
   options.success = function(data, status, xhr) {
@@ -193,13 +210,13 @@ var pjax = $.pjax = function( options ) {
         // the page's title. Otherwise, look for data-title and title attributes.
         title = html.find('title').text() || $fragment.attr('title') || $fragment.data('title')
       } else {
-        return window.location = options.url
+        return window.location = url
       }
     } else {
       // If we got no data or an entire web page, go directly
       // to the page and let normal error handling happen.
       if ( !$.trim(data) || /<html/i.test(data) )
-        return window.location = options.url
+        return window.location = url
 
       this.html(data)
 
@@ -211,19 +228,15 @@ var pjax = $.pjax = function( options ) {
     if ( title ) document.title = $.trim(title)
 
     var state = {
+      url: ajaxUrl,
       pjax: this.selector,
       fragment: options.fragment,
       timeout: options.timeout
     }
 
-    // If there are extra params, save the complete URL in the state object
-    var query = $.param(options.data)
-    if ( query != "_pjax=true" )
-      state.url = options.url + (/\?/.test(options.url) ? "&" : "?") + query
-
     if ( options.replace ) {
       pjax.active = true
-      window.history.replaceState(state, document.title, options.url)
+      window.history.replaceState(state, document.title, url)
     } else if ( options.push ) {
       // this extra replaceState before first push ensures good back
       // button behavior
@@ -232,7 +245,7 @@ var pjax = $.pjax = function( options ) {
         pjax.active = true
       }
 
-      window.history.pushState(state, document.title, options.url)
+      window.history.pushState(state, document.title, url)
     }
 
     // Google Analytics support
@@ -332,10 +345,6 @@ pjax.defaults = {
   timeout: 650,
   push: true,
   replace: false,
-  // We want the browser to maintain two separate internal caches: one for
-  // pjax'd partial page loads and one for normal page loads. Without
-  // adding this secret parameter, some browsers will often confuse the two.
-  data: { _pjax: true },
   type: 'GET',
   dataType: 'html'
 }
