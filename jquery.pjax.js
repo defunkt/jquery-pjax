@@ -163,7 +163,7 @@ var pjax = $.pjax = function( options ) {
     }
 
     xhr.setRequestHeader('X-PJAX', 'true')
-
+    xhr.setRequestHeader('X-PJAX-Container', options.container)
     var result
 
     // DEPRECATED: Invoke original `beforeSend` handler

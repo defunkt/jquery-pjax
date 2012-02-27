@@ -125,6 +125,22 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("sets X-PJAX-Container header to container on XHR request", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "env.html",
+      container: "#main",
+      success: function() {
+        var env = JSON.parse(frame.$("#env").text())
+        ok(env['HTTP_X_PJAX_CONTAINER'])
+        equal(env['HTTP_X_PJAX_CONTAINER'], "#main")
+        start()
+      }
+    })
+  })
+
+
   asyncTest("sets hidden _pjax=true param on XHR GET request", function() {
     var frame = this.frame
 
