@@ -63,6 +63,10 @@ function handleClick(event, container, options) {
   if ( location.protocol !== link.protocol || location.host !== link.host )
     return
 
+  // Ignore clicks leading to the same page
+  if ( location.href == link.href)
+    return false
+
   // Ignore anchors on the same page
   if ( link.hash && link.href.replace(link.hash, '') ===
        location.href.replace(location.hash, '') )
