@@ -128,6 +128,21 @@ if ($.support.pjax) {
     frame.$(link).click()
   })
 
+  asyncTest("sets relatedTarget to clicked element", function() {
+    var frame = this.frame
+
+    frame.$("a").pjax({ container: "#main" })
+
+    var link = frame.$("a[href='/dinosaurs.html']")[0]
+
+    frame.$("#main").on("pjax:end", function(event, xhr, options) {
+      equal(link, event.relatedTarget)
+      start()
+    })
+
+    frame.$(link).click()
+  })
+
 
   asyncTest("ignores middle clicks", function() {
     var frame = this.frame

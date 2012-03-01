@@ -290,6 +290,27 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("sets relatedTarget to target", function() {
+    var frame = this.frame
+
+    var endCalled
+
+    frame.$("#main").on("pjax:end", function(event, xhr, options) {
+      ok(event)
+
+      equal(event.relatedTarget, frame.$("#main")[0])
+      equal(this, frame.$("#main")[0])
+
+      start()
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      target: frame.$("#main")[0]
+    })
+  })
+
   asyncTest("triggers pjax:beforeSend event from container", function() {
     var frame = this.frame
 

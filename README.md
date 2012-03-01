@@ -90,7 +90,7 @@ following additions:
 
 * `container`      - The String selector of the container to load the
                      reponse body. Must be a String.
-* `clickedElement` - The element that was clicked to start the pjax call.
+* `target`         - The Element that was clicked to start the pjax call.
 * `push`           - Whether to pushState the URL. Default: true (of course)
 * `replace`        - Whether to replaceState the URL. Default: false
 * `timeout`        - pjax sets this low, <1s. Set this higher if using a
