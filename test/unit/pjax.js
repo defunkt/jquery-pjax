@@ -125,7 +125,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("sets hidden _pjax=true param on XHR GET request", function() {
+  asyncTest("sets X-PJAX-Container header to container on XHR request", function() {
     var frame = this.frame
 
     frame.$.pjax({
@@ -133,12 +133,27 @@ if ($.support.pjax) {
       container: "#main",
       success: function() {
         var env = JSON.parse(frame.$("#env").text())
-        equal(env['rack.request.query_hash']['_pjax'], 'true')
+        ok(env['HTTP_X_PJAX_CONTAINER'])
+        equal(env['HTTP_X_PJAX_CONTAINER'], "#main")
         start()
       }
     })
   })
 
+
+  asyncTest("sets hidden _pjax param on XHR GET request", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "env.html",
+      container: "#main",
+      success: function() {
+        var env = JSON.parse(frame.$("#env").text())
+        equal(env['rack.request.query_hash']['_pjax'], '#main')
+        start()
+      }
+    })
+  })
 
   asyncTest("only fragment is inserted", function() {
     var frame = this.frame
@@ -296,7 +311,7 @@ if ($.support.pjax) {
     frame.$("#main").on("pjax:beforeSend", function(event, xhr, settings, options) {
       ok(event)
       ok(xhr)
-      equal(settings.url, "hello.html?_pjax=true")
+      equal(settings.url, "hello.html?_pjax=%23main")
     })
 
     frame.$.pjax({
@@ -304,7 +319,7 @@ if ($.support.pjax) {
       container: "#main",
       beforeSend: function(xhr, settings) {
         ok(xhr)
-        equal(settings.url, "hello.html?_pjax=true")
+        equal(settings.url, "hello.html?_pjax=%23main")
       },
       success: function(data, status, xhr) {
         start()

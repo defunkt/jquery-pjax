@@ -81,15 +81,15 @@ function handleClick(event, container, options) {
   return false
 }
 
-// Internal: Strips _pjax=true param from url
+// Internal: Strips _pjax parameter from url
 //
 // url - String
 //
 // Returns String.
 function stripPjaxParam(url) {
   return url
-    .replace(/\?_pjax=true&?/, '?')
-    .replace(/_pjax=true&?/, '')
+    .replace(/\?_pjax=[^\&]*&?/, '?')
+    .replace(/_pjax=[^\&]*&?/, '')
     .replace(/\?$/, '')
 }
 
@@ -125,7 +125,10 @@ function parseURL(url) {
 //
 // Returns whatever $.ajax returns.
 var pjax = $.pjax = function( options ) {
-  options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
+
+  options.context = findContainerFor(options.container)
+
+  options = $.extend(true, {}, $.ajaxSettings, pjax.defaults(options.context), options)
 
   if ($.isFunction(options.url)) {
     options.url = options.url()
@@ -141,7 +144,6 @@ var pjax = $.pjax = function( options ) {
       oldSuccess    = options.success,
       oldError      = options.error
 
-  options.context = findContainerFor(options.container)
 
   var timeoutTimer
 
@@ -163,7 +165,7 @@ var pjax = $.pjax = function( options ) {
     }
 
     xhr.setRequestHeader('X-PJAX', 'true')
-
+    xhr.setRequestHeader('X-PJAX-Container', options.container)
     var result
 
     // DEPRECATED: Invoke original `beforeSend` handler
@@ -357,16 +359,18 @@ function findContainerFor(container) {
 }
 
 
-pjax.defaults = {
-  timeout: 650,
-  push: true,
-  replace: false,
-  // We want the browser to maintain two separate internal caches: one for
-  // pjax'd partial page loads and one for normal page loads. Without
-  // adding this secret parameter, some browsers will often confuse the two.
-  data: { _pjax: true },
-  type: 'GET',
-  dataType: 'html'
+pjax.defaults = function (context) {
+  return {
+    timeout:650,
+    push:true,
+    replace:false,
+    // We want the browser to maintain two separate internal caches: one for
+    // pjax'd partial page loads and one for normal page loads. Without
+    // adding this secret parameter, some browsers will often confuse the two.
+    data:{ _pjax:context.selector },
+    type:'GET',
+    dataType:'html'
+  }
 }
 
 // Export $.pjax.click
