@@ -169,6 +169,8 @@ private
   end
 ```
 
+Rails: <https://github.com/rails/pjax_rails>
+
 Django: <https://github.com/jacobian/django-pjax>
 
 Asp.Net MVC3: <http://biasecurities.com/blog/2011/using-pjax-with-asp-net-mvc3/>
@@ -240,7 +242,7 @@ work normally) and `$.pjax({url:url})` calls will redirect to the given URL.
 
 ```
 $ cd path/to/js
-$ wget https://github.com/defunkt/jquery-pjax/raw/master/jquery.pjax.js
+$ wget https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
 ```
 
 Then, in your HTML:
