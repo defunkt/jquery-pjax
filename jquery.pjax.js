@@ -25,7 +25,7 @@
 // Returns the jQuery object
 $.fn.pjax = function( container, options ) {
   options = optionsFor(container, options)
-  return this.live('click', function(event){
+  return $(document).on('click', this.selector, function(event){
     return handleClick(event, options)
   })
 }
@@ -40,6 +40,8 @@ $.fn.pjax = function( container, options ) {
 // Examples
 //
 //   $('a').live('click', $.pjax.click)
+//   and
+//   $(document).on('click', 'a', $.pjax.click)
 //   // is the same as
 //   $('a').pjax()
 //
@@ -386,7 +388,7 @@ var popped = ('state' in window.history), initialURL = location.href
 //
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
-$(window).bind('popstate', function(event){
+$(window).on('popstate', function(event){
   // Ignore inital popstate that some browsers fire on page load
   var initialPop = !popped && location.href == initialURL
   popped = true
@@ -411,7 +413,7 @@ $(window).bind('popstate', function(event){
 
 
 // Add the state property to jQuery's event object so we can use it in
-// $(window).bind('popstate')
+// $(window).on('popstate')
 if ( $.inArray('state', $.event.props) < 0 )
   $.event.props.push('state')
 
