@@ -574,10 +574,11 @@ if ($.support.pjax) {
         equal(env['rack.request.query_hash']['bar'], '2')
 
         frame.$.pjax({
-          url: "hello.html",
+          url: "hello.html?a=1",
           container: "#main",
           complete: function() {
             equal(frame.location.pathname, "/hello.html")
+            equal(frame.location.search, "?a=1")
 
             ok(frame.history.length > 2)
             goBack(frame, function() {
