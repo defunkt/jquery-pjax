@@ -139,6 +139,51 @@ if ($.support.pjax) {
     })
   })
 
+  var search_check = function(url, data, search){
+    return function(){
+      var frame = this.frame
+      frame.$.pjax({
+        url: url,
+        data: data,
+        container: "#main",
+        success: function() {
+          equal(frame.location.search, search)
+          start()
+        }
+      })
+    }
+  }
+
+  var query_data_searches = [
+    ['',        { },            ''],
+    ['a=1',     { },            'a=1'],
+    ['',        { a: 1 },       'a=1'],
+    ['a=1&b=2', { },            'a=1&b=2'],
+    ['a=1',     { b: 2 },       'a=1&b=2'],
+    ['',        { a: 1, b: 2 }, 'a=1&b=2']
+  ]
+  for (var i = 0, len = query_data_searches.length; i < len; i++) {
+    var query, data, search
+    var url = 'hello.html'
+
+    query = query_data_searches[i][0]
+    data  = query_data_searches[i][1]
+    search = query_data_searches[i][2]
+
+    if(query.length > 0){
+      url += '?' + query
+    }
+
+    if(search.length > 0){
+      search = '?' + search
+    }
+
+    var testname = "preserves query string on GET request"
+    testname +=  " (" + (i + 1) + "/" + query_data_searches.length + ")"
+
+    asyncTest(testname, search_check(url, data, search))
+  }
+
 
   asyncTest("only fragment is inserted", function() {
     var frame = this.frame
