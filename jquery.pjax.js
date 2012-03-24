@@ -462,3 +462,21 @@ if ( !$.support.pjax ) {
 }
 
 })(jQuery);
+
+
+$(function () {
+  $("a[data-pjax]").pjax();
+	$(document).on("pjax:start", function (e) {
+		var link = $(e.relatedTarget);
+		var linkTarget = $(link).attr("data-pjax-loader");
+		if (linkTarget) {
+			$(linkTarget).show()
+		}
+	}).on("pjax:end", function (e) {
+		var link = $(e.relatedTarget);
+		var linkTarget = $(link).attr("data-pjax-loader");
+		if (linkTarget) {
+			$(linkTarget).hide()
+		}
+	});
+});
