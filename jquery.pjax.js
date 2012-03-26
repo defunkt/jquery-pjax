@@ -24,9 +24,8 @@
 //
 // Returns the jQuery object
 $.fn.pjax = function( container, options ) {
-  options = optionsFor(container, options)
   return this.live('click', function(event){
-    return handleClick(event, options)
+    return handleClick(event, container, options)
   })
 }
 
