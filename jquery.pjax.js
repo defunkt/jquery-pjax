@@ -53,6 +53,9 @@ function handleClick(event, container, options) {
 
   var link = event.currentTarget
 
+  if (link.tagName.toUpperCase() !== 'A')
+    throw "$.fn.pjax or $.pjax.click requires an anchor element"
+
   // Middle click, cmd click, and ctrl click should open
   // links in a new tab as normal.
   if ( event.which > 1 || event.metaKey )
