@@ -139,6 +139,24 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("preserves query string on GET request", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "env.html?foo=1&bar=2",
+      container: "#main",
+      complete: function() {
+        equal(frame.location.pathname, "/env.html")
+        equal(frame.location.search, "?foo=1&bar=2")
+
+        var env = JSON.parse(frame.$("#env").text())
+        equal(env['rack.request.query_hash']['foo'], '1')
+        equal(env['rack.request.query_hash']['bar'], '2')
+        start()
+      }
+    })
+  })
+
 
   asyncTest("only fragment is inserted", function() {
     var frame = this.frame
