@@ -158,7 +158,6 @@ if ($.support.pjax) {
   })
 
 
-
   asyncTest("only fragment is inserted", function() {
     var frame = this.frame
 
