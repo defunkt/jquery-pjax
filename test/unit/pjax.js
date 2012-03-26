@@ -139,50 +139,24 @@ if ($.support.pjax) {
     })
   })
 
-  var search_check = function(url, data, search){
-    return function(){
-      var frame = this.frame
-      frame.$.pjax({
-        url: url,
-        data: data,
-        container: "#main",
-        success: function() {
-          equal(frame.location.search, search)
-          start()
-        }
-      })
-    }
-  }
+  asyncTest("preserves query string on GET request", function() {
+    var frame = this.frame
 
-  var query_data_searches = [
-    ['',        { },            ''],
-    ['a=1',     { },            'a=1'],
-    ['',        { a: 1 },       'a=1'],
-    ['a=1&b=2', { },            'a=1&b=2'],
-    ['a=1',     { b: 2 },       'a=1&b=2'],
-    ['',        { a: 1, b: 2 }, 'a=1&b=2']
-  ]
-  for (var i = 0, len = query_data_searches.length; i < len; i++) {
-    var query, data, search
-    var url = 'hello.html'
+    frame.$.pjax({
+      url: "env.html?foo=1&bar=2",
+      container: "#main",
+      complete: function() {
+        equal(frame.location.pathname, "/env.html")
+        equal(frame.location.search, "?foo=1&bar=2")
 
-    query = query_data_searches[i][0]
-    data  = query_data_searches[i][1]
-    search = query_data_searches[i][2]
+        var env = JSON.parse(frame.$("#env").text())
+        equal(env['rack.request.query_hash']['foo'], '1')
+        equal(env['rack.request.query_hash']['bar'], '2')
+        start()
+      }
+    })
+  })
 
-    if(query.length > 0){
-      url += '?' + query
-    }
-
-    if(search.length > 0){
-      search = '?' + search
-    }
-
-    var testname = "preserves query string on GET request"
-    testname +=  " (" + (i + 1) + "/" + query_data_searches.length + ")"
-
-    asyncTest(testname, search_check(url, data, search))
-  }
 
 
   asyncTest("only fragment is inserted", function() {
