@@ -134,6 +134,8 @@ var pjax = $.pjax = function( options ) {
     options.url = options.url()
   }
 
+  options.url = options.urlMapper(url);
+
   var target = options.target
 
   // DEPRECATED: use options.target
@@ -371,6 +373,7 @@ pjax.defaults = {
   // pjax'd partial page loads and one for normal page loads. Without
   // adding this secret parameter, some browsers will often confuse the two.
   data: { _pjax: true },
+  urlMapper: function (url) { return url; },
   type: 'GET',
   dataType: 'html'
 }
