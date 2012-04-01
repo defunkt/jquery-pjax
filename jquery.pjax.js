@@ -93,6 +93,8 @@ function stripPjaxParam(url) {
   return url
     .replace(/\?_pjax=true&?/, '?')
     .replace(/_pjax=true&?/, '')
+    .replace(/\?_pjax_container=([^&]+)&?/, '?')
+    .replace(/_pjax_container=([^&]+)&?/, '')
     .replace(/[\?&]$/, '')
 }
 
@@ -151,6 +153,8 @@ var pjax = $.pjax = function( options ) {
 
   var context = options.context = findContainerFor(options.container)
 
+  options.data._pjax_container = context.selector
+
   function fire(type, args) {
     var event = $.Event(type, { relatedTarget: target })
     context.trigger(event, args)
@@ -173,6 +177,7 @@ var pjax = $.pjax = function( options ) {
     }
 
     xhr.setRequestHeader('X-PJAX', 'true')
+    xhr.setRequestHeader('X-PJAX-CONTAINER', this.selector)
 
     var result
 
