@@ -258,7 +258,8 @@ var pjax = $.pjax = function( options ) {
 
     if ( title ) document.title = $.trim(title)
 
-    var state = {
+    var state = pjax.state = {
+      id: options.id || (new Date).getTime(),
       url: url,
       pjax: this.selector,
       fragment: options.fragment,
@@ -272,7 +273,7 @@ var pjax = $.pjax = function( options ) {
       // this extra replaceState before first push ensures good back
       // button behavior
       if ( !pjax.active ) {
-        window.history.replaceState($.extend({}, state, {url:null}), oldTitle)
+        window.history.replaceState($.extend({}, state, initialState), oldTitle)
         pjax.active = true
       }
 
@@ -379,6 +380,12 @@ pjax.defaults = {
   dataType: 'html'
 }
 
+var initialState = pjax.state = {
+  id: (new Date).getTime(),
+  url: location.href
+}
+
+
 // Export $.pjax.click
 pjax.click = handleClick
 
@@ -404,7 +411,8 @@ $(window).bind('popstate', function(event){
     var container = state.pjax
     if ( $(container+'').length )
       $.pjax({
-        url: state.url || location.href,
+        id: state.id,
+        url: state.url,
         fragment: state.fragment,
         container: container,
         push: false,
