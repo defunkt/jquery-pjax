@@ -84,15 +84,15 @@ function handleClick(event, container, options) {
   return false
 }
 
-// Internal: Strips _pjax=true param from url
+// Internal: Strips _pjax param from url
 //
 // url - String
 //
 // Returns String.
 function stripPjaxParam(url) {
   return url
-    .replace(/\?_pjax=true&?/, '?')
-    .replace(/_pjax=true&?/, '')
+    .replace(/\?_pjax=[^&]+&?/, '?')
+    .replace(/_pjax=[^&]+&?/, '')
     .replace(/[\?&]$/, '')
 }
 
@@ -151,6 +151,13 @@ var pjax = $.pjax = function( options ) {
 
   var context = options.context = findContainerFor(options.container)
 
+  // We want the browser to maintain two separate internal caches: one
+  // for pjax'd partial page loads and one for normal page loads.
+  // Without adding this secret parameter, some browsers will often
+  // confuse the two.
+  if (!options.data) options.data = {}
+  options.data._pjax = context.selector
+
   function fire(type, args) {
     var event = $.Event(type, { relatedTarget: target })
     context.trigger(event, args)
@@ -173,6 +180,7 @@ var pjax = $.pjax = function( options ) {
     }
 
     xhr.setRequestHeader('X-PJAX', 'true')
+    xhr.setRequestHeader('X-PJAX-Container', context.selector)
 
     var result
 
@@ -367,10 +375,6 @@ pjax.defaults = {
   timeout: 650,
   push: true,
   replace: false,
-  // We want the browser to maintain two separate internal caches: one for
-  // pjax'd partial page loads and one for normal page loads. Without
-  // adding this secret parameter, some browsers will often confuse the two.
-  data: { _pjax: true },
   type: 'GET',
   dataType: 'html'
 }
