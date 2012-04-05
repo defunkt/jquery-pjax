@@ -165,6 +165,10 @@ var pjax = $.pjax = function( options ) {
     window.history.replaceState(pjax.state, document.title)
   }
 
+  // Record original scroll position and update the current state
+  // before we leave
+  scrollPositions[pjax.state.id] = $(window).scrollTop()
+
   // We want the browser to maintain two separate internal caches: one
   // for pjax'd partial page loads and one for normal page loads.
   // Without adding this secret parameter, some browsers will often
@@ -290,6 +294,13 @@ var pjax = $.pjax = function( options ) {
     if ( (options.replace || options.push) && window._gaq )
       _gaq.push(['_trackPageview'])
 
+    // Restore previous position or scroll to top
+    if (options.preserveScrollPosition) {
+      var offset = (typeof options.scrollPosition === 'number') ?
+        options.scrollPosition : 0
+      $(window).scrollTop(offset)
+    }
+
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
     if ( hash !== '' ) {
@@ -383,7 +394,8 @@ pjax.defaults = {
   push: true,
   replace: false,
   type: 'GET',
-  dataType: 'html'
+  dataType: 'html',
+  preserveScrollPosition: true
 }
 
 // Export $.pjax.click
@@ -393,6 +405,9 @@ pjax.click = handleClick
 // Used to detect initial (useless) popstate.
 // If history.state exists, assume browser isn't going to fire initial popstate.
 var popped = ('state' in window.history), initialURL = location.href
+
+// Map state ids to their scroll offset positions
+var scrollPositions = {}
 
 
 // popstate handler takes care of the back and forward buttons
@@ -416,7 +431,8 @@ $(window).bind('popstate', function(event){
         push: false,
         container: container,
         fragment: state.fragment,
-        timeout: state.timeout
+        timeout: state.timeout,
+        scrollPosition: scrollPositions[state.id]
       })
     else
       window.location = location.href
