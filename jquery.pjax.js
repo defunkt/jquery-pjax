@@ -151,6 +151,20 @@ var pjax = $.pjax = function( options ) {
 
   var context = options.context = findContainerFor(options.container)
 
+  // Initialize pjax.state for the initial page load. Assume we're
+  // using the container and options of the link we're loading for the
+  // back button to the initial page.
+  if (!pjax.state) {
+    pjax.state = {
+      id: (new Date).getTime(),
+      url: location.href,
+      pjax: context.selector,
+      fragment: options.fragment,
+      timeout: options.timeout
+    }
+    window.history.replaceState(pjax.state, document.title)
+  }
+
   // We want the browser to maintain two separate internal caches: one
   // for pjax'd partial page loads and one for normal page loads.
   // Without adding this secret parameter, some browsers will often
@@ -227,7 +241,7 @@ var pjax = $.pjax = function( options ) {
     var respUrl = xhr.getResponseHeader('X-PJAX-URL')
     if (respUrl) url = stripPjaxParam(respUrl)
 
-    var title, oldTitle = document.title
+    var title
 
     if ( options.fragment ) {
       // If they specified a fragment, look for it in the response
@@ -258,26 +272,18 @@ var pjax = $.pjax = function( options ) {
 
     if ( title ) document.title = $.trim(title)
 
-    var state = pjax.state = {
+    pjax.state = {
       id: options.id || (new Date).getTime(),
       url: url,
-      pjax: this.selector,
+      pjax: context.selector,
       fragment: options.fragment,
       timeout: options.timeout
     }
 
     if ( options.replace ) {
-      pjax.active = true
-      window.history.replaceState(state, document.title, url)
+      window.history.replaceState(pjax.state, document.title, url)
     } else if ( options.push ) {
-      // this extra replaceState before first push ensures good back
-      // button behavior
-      if ( !pjax.active ) {
-        window.history.replaceState($.extend({}, state, initialState), oldTitle)
-        pjax.active = true
-      }
-
-      window.history.pushState(state, document.title, url)
+      window.history.pushState(pjax.state, document.title, url)
     }
 
     // Google Analytics support
@@ -380,12 +386,6 @@ pjax.defaults = {
   dataType: 'html'
 }
 
-var initialState = pjax.state = {
-  id: (new Date).getTime(),
-  url: location.href
-}
-
-
 // Export $.pjax.click
 pjax.click = handleClick
 
@@ -413,9 +413,9 @@ $(window).bind('popstate', function(event){
       $.pjax({
         id: state.id,
         url: state.url,
-        fragment: state.fragment,
-        container: container,
         push: false,
+        container: container,
+        fragment: state.fragment,
         timeout: state.timeout
       })
     else
