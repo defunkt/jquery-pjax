@@ -654,7 +654,7 @@ if ($.support.pjax) {
     })
 
     ok(frame.$.pjax.state.url.match("/home.html"))
-    equal(frame.$.pjax.state.pjax, "#main")
+    equal(frame.$.pjax.state.container, "#main")
   })
 
   asyncTest("updates $.pjax.state to new page", function() {
@@ -665,7 +665,7 @@ if ($.support.pjax) {
       container: "#main",
       success: function() {
         ok(frame.$.pjax.state.url.match("/hello.html"))
-        equal(frame.$.pjax.state.pjax, "#main")
+        equal(frame.$.pjax.state.container, "#main")
         start()
       }
     })

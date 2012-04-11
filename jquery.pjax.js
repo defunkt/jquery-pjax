@@ -260,7 +260,7 @@ var pjax = $.pjax = function( options ) {
 
     pjax.state = {
       url: url,
-      pjax: context.selector,
+      container: context.selector,
       fragment: options.fragment,
       timeout: options.timeout
     }
@@ -295,7 +295,7 @@ var pjax = $.pjax = function( options ) {
   if (!pjax.state) {
     pjax.state = {
       url: window.location.href,
-      pjax: context.selector,
+      container: context.selector,
       fragment: options.fragment,
       timeout: options.timeout
     }
@@ -406,18 +406,19 @@ $(window).bind('popstate', function(event){
 
   var state = event.state
 
-  if ( state && state.pjax ) {
-    var container = state.pjax
-    if ( $(container+'').length )
+  if (state && state.container) {
+    var container = $(state.container)
+    if (container.length) {
       $.pjax({
         url: state.url,
-        fragment: state.fragment,
         container: container,
         push: false,
+        fragment: state.fragment,
         timeout: state.timeout
       })
-    else
+    } else {
       window.location = location.href
+    }
   }
 })
 
