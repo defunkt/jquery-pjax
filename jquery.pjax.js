@@ -277,6 +277,8 @@ var pjax = $.pjax = function( options ) {
       }
 
       window.history.pushState(state, document.title, url)
+      //manualy keep track of the current location, workaround for Android bug (http://code.google.com/p/android/issues/detail?id=17471)
+      $.pjax.location = parseURL(url);
     }
 
     // Google Analytics support
@@ -309,6 +311,9 @@ var pjax = $.pjax = function( options ) {
 
   return pjax.xhr
 }
+
+//manualy keep track of the current location, workaround for Android bug (http://code.google.com/p/android/issues/detail?id=17471)
+$.pjax.location = location;
 
 
 // Internal: Build options Object for arguments.
@@ -385,7 +390,7 @@ pjax.click = handleClick
 
 // Used to detect initial (useless) popstate.
 // If history.state exists, assume browser isn't going to fire initial popstate.
-var popped = ('state' in window.history), initialURL = location.href
+var popped = ('state' in window.history), initialURL = $.pjax.location.href
 
 
 // popstate handler takes care of the back and forward buttons
@@ -394,7 +399,7 @@ var popped = ('state' in window.history), initialURL = location.href
 // stuff yet.
 $(window).bind('popstate', function(event){
   // Ignore inital popstate that some browsers fire on page load
-  var initialPop = !popped && location.href == initialURL
+  var initialPop = !popped && $.pjax.location.href == initialURL
   popped = true
   if ( initialPop ) return
 
