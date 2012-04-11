@@ -641,4 +641,33 @@ if ($.support.pjax) {
       }
     })
   })
+
+  asyncTest("lazily sets initial $.pjax.state", function() {
+    var frame = this.frame
+
+    ok(!frame.$.pjax.state)
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      success: start
+    })
+
+    ok(frame.$.pjax.state.url.match("/home.html"))
+    equal(frame.$.pjax.state.pjax, "#main")
+  })
+
+  asyncTest("updates $.pjax.state to new page", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      success: function() {
+        ok(frame.$.pjax.state.url.match("/hello.html"))
+        equal(frame.$.pjax.state.pjax, "#main")
+        start()
+      }
+    })
+  })
 }
