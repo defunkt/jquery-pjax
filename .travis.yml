@@ -10,7 +10,7 @@ before_script:
   - ruby ./test/app.rb 2>/dev/null &
   - sleep 2
 
-script: phantomjs ./test/run-qunit.js "http://localhost:4567/"
+script: phantomjs ./test/run-qunit.coffee "http://localhost:4567/"
 
 notifications:
   email: false
