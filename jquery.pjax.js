@@ -84,29 +84,6 @@ function handleClick(event, container, options) {
   return false
 }
 
-// Internal: Strips _pjax param from url
-//
-// url - String
-//
-// Returns String.
-function stripPjaxParam(url) {
-  return url
-    .replace(/\?_pjax=[^&]+&?/, '?')
-    .replace(/_pjax=[^&]+&?/, '')
-    .replace(/[\?&]$/, '')
-}
-
-// Internal: Parse URL components and returns a Locationish object.
-//
-// url - String URL
-//
-// Returns HTMLAnchorElement that acts like Location.
-function parseURL(url) {
-  var a = document.createElement('a')
-  a.href = url
-  return a
-}
-
 
 // Loads a URL with ajax, puts the response body inside a container,
 // then pushState()'s the loaded URL.
@@ -259,6 +236,7 @@ var pjax = $.pjax = function( options ) {
     if ( title ) document.title = $.trim(title)
 
     pjax.state = {
+      id: options.id || uniqueId(),
       url: url,
       container: context.selector,
       fragment: options.fragment,
@@ -294,6 +272,7 @@ var pjax = $.pjax = function( options ) {
   // behavior.
   if (!pjax.state) {
     pjax.state = {
+      id: uniqueId(),
       url: window.location.href,
       container: context.selector,
       fragment: options.fragment,
@@ -316,6 +295,39 @@ var pjax = $.pjax = function( options ) {
   return pjax.xhr
 }
 
+
+// Internal: Generate unique id for state object.
+//
+// Use a timestamp instead of a counter since ids should still be
+// unique across page loads.
+//
+// Returns Number.
+function uniqueId() {
+  return (new Date).getTime()
+}
+
+// Internal: Strips _pjax param from url
+//
+// url - String
+//
+// Returns String.
+function stripPjaxParam(url) {
+  return url
+    .replace(/\?_pjax=[^&]+&?/, '?')
+    .replace(/_pjax=[^&]+&?/, '')
+    .replace(/[\?&]$/, '')
+}
+
+// Internal: Parse URL components and returns a Locationish object.
+//
+// url - String URL
+//
+// Returns HTMLAnchorElement that acts like Location.
+function parseURL(url) {
+  var a = document.createElement('a')
+  a.href = url
+  return a
+}
 
 // Internal: Build options Object for arguments.
 //
@@ -410,6 +422,7 @@ $(window).bind('popstate', function(event){
     var container = $(state.container)
     if (container.length) {
       $.pjax({
+        id: state.id,
         url: state.url,
         container: container,
         push: false,

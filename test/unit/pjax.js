@@ -653,6 +653,7 @@ if ($.support.pjax) {
       success: start
     })
 
+    ok(frame.$.pjax.state.id)
     ok(frame.$.pjax.state.url.match("/home.html"))
     equal(frame.$.pjax.state.container, "#main")
   })
@@ -664,10 +665,57 @@ if ($.support.pjax) {
       url: "hello.html",
       container: "#main",
       success: function() {
+        ok(frame.$.pjax.state.id)
         ok(frame.$.pjax.state.url.match("/hello.html"))
         equal(frame.$.pjax.state.container, "#main")
         start()
       }
     })
+  })
+
+  asyncTest("new id is generated for new pages", function() {
+    var frame = this.frame
+
+    var oldId
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      success: function() {
+        ok(frame.$.pjax.state.id)
+        notEqual(oldId, frame.$.pjax.state.id)
+        start()
+      }
+    })
+
+    ok(frame.$.pjax.state.id)
+    oldId = frame.$.pjax.state.id
+  })
+
+  asyncTest("id is the same going back", function() {
+    var frame = this.frame
+
+    var oldId
+
+    equal(frame.location.pathname, "/home.html")
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+      complete: function() {
+        ok(frame.$.pjax.state.id)
+        notEqual(oldId, frame.$.pjax.state.id)
+
+        ok(frame.history.length > 1)
+        goBack(frame, function() {
+          ok(frame.$.pjax.state.id)
+          equal(oldId, frame.$.pjax.state.id)
+          start()
+        })
+      }
+    })
+
+    ok(frame.$.pjax.state.id)
+    oldId = frame.$.pjax.state.id
   })
 }
