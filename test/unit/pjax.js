@@ -57,6 +57,34 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("sets title to response nested <title>", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "nested_title.html",
+      container: "#main",
+      success: function() {
+        equal(frame.document.title, "Hello")
+        ok(!frame.$("#main title").length)
+        start()
+      }
+    })
+  })
+
+  asyncTest("sets title to response last <title>", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "double_title.html",
+      container: "#main",
+      success: function() {
+        equal(frame.document.title, "World!")
+        ok(!frame.$("#main title").length)
+        start()
+      }
+    })
+  })
+
 
   asyncTest("container option accepts String selector", function() {
     var frame = this.frame
