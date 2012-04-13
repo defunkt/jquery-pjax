@@ -264,3 +264,11 @@ curl \
   -d code_url=https://github.com/defunkt/jquery-pjax/raw/master/jquery.pjax.js \
   http://closure-compiler.appspot.com/compile
 ```
+
+
+## troubleshooting
+If it appears that adding pjax had no effect, it could be that the timeout was reached and a normal page load was used instead. You can test this by looking in Chrome's networking panel for a canceled GET request or by changing the timeout to:
+
+```js
+$('a[data-pjax]').pjax({timeout: 30000});
+```
