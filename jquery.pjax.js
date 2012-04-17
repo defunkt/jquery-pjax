@@ -567,7 +567,7 @@ $(window).bind('popstate', function(event){
         // cache which direction the history shifted.
         containerCache[direction](pjax.state.id, container.contents())
       }
-      
+
       var options = {
         id: state.id,
         url: state.url,
