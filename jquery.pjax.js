@@ -271,6 +271,8 @@ var pjax = $.pjax = function( options ) {
 
   pjax.options = options
   pjax.xhr = $.ajax(options)
+
+  // pjax event is deprecated
   $(document).trigger('pjax', [pjax.xhr, options])
 
   return pjax.xhr
@@ -565,34 +567,32 @@ $(window).bind('popstate', function(event){
         // cache which direction the history shifted.
         containerCache[direction](pjax.state.id, container.contents())
       }
+      
+      var options = {
+        id: state.id,
+        url: state.url,
+        container: container,
+        push: false,
+        fragment: state.fragment,
+        timeout: state.timeout,
+        scrollTo: false
+      }
 
       if (contents) {
-        var event
-
-        $(document).trigger('pjax')
-
-        event = $.Event('pjax:start', { persisted: true })
-        container.trigger(event)
-        // end.pjax is deprecated
-        container.trigger('start.pjax')
+        // pjax event is deprecated
+        $(document).trigger('pjax', [null, options])
+        container.trigger('pjax:start', [null, options])
+        // end.pjax event is deprecated
+        container.trigger('start.pjax', [null, options])
 
         container.html(contents)
         pjax.state = state
 
-        event = $.Event('pjax:end', { persisted: true })
-        container.trigger(event)
-        // end.pjax is deprecated
-        container.trigger('end.pjax')
+        container.trigger('pjax:end', [null, options])
+        // end.pjax event is deprecated
+        container.trigger('end.pjax', [null, options])
       } else {
-        $.pjax({
-          id: state.id,
-          url: state.url,
-          container: container,
-          push: false,
-          fragment: state.fragment,
-          timeout: state.timeout,
-          scrollTo: false
-        })
+        $.pjax(options)
       }
 
       // Force reflow/relayout before the browser tries to restore the
