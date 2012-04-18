@@ -100,6 +100,23 @@ asyncTest("adds entry to browser history", function() {
   })
 })
 
+asyncTest("scrolls to top of the page", function() {
+  var frame = this.frame
+
+  frame.window.scrollTo(0, 100)
+  equal(frame.window.scrollY, 100)
+
+  this.loaded = function(frame) {
+    equal(frame.window.scrollY, 0)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "/long.html",
+    container: "#main"
+  })
+})
+
 
 asyncTest("sets GET method", function() {
   var frame = this.frame
