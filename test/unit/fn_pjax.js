@@ -52,9 +52,7 @@ if ($.support.pjax) {
       start()
     })
 
-    var event = frame.$.Event('click')
-    frame.$("a[href='/dinosaurs.html']").trigger(event)
-    equal(event.result, false)
+    frame.$("a[href='/dinosaurs.html']").trigger('click')
   })
 
 
