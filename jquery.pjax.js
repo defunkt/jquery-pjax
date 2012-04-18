@@ -25,7 +25,7 @@
 // Returns the jQuery object
 $.fn.pjax = function( container, options ) {
   return this.live('click.pjax', function(event){
-    return handleClick(event, container, options)
+    handleClick(event, container, options)
   })
 }
 
@@ -81,7 +81,6 @@ function handleClick(event, container, options) {
   $.pjax($.extend({}, defaults, options))
 
   event.preventDefault()
-  return false
 }
 
 
@@ -166,9 +165,19 @@ var pjax = $.pjax = function( options ) {
 
     if (!fire('pjax:beforeSend', [xhr, settings])) return false
 
+    if (options.push) {
+      // Cache current container element before replacing it
+      containerCache.push(pjax.state.id, context.clone(true, true).contents())
+
+      window.history.pushState(null, "", options.url)
+      pjax.state = null
+    }
+
     fire('pjax:start', [xhr, options])
     // start.pjax is deprecated
     fire('start.pjax', [xhr, options])
+
+    fire('pjax:send', [xhr, settings])
   }
 
   options.complete = function(xhr, textStatus) {
@@ -204,8 +213,6 @@ var pjax = $.pjax = function( options ) {
       return
     }
 
-    var oldState = pjax.state
-
     pjax.state = {
       id: options.id || uniqueId(),
       url: container.url,
@@ -214,13 +221,8 @@ var pjax = $.pjax = function( options ) {
       timeout: options.timeout
     }
 
-    if ( options.replace ) {
+    if (options.push || options.replace) {
       window.history.replaceState(pjax.state, container.title, container.url)
-    } else if ( options.push ) {
-      window.history.pushState(pjax.state, container.title, container.url)
-
-      // Cache current container element before replacing it
-      containerCache.push(oldState.id, context.contents())
     }
 
     if (container.title) document.title = container.title
@@ -565,7 +567,7 @@ $(window).bind('popstate', function(event){
 
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
-        containerCache[direction](pjax.state.id, container.contents())
+        containerCache[direction](pjax.state.id, container.clone(true, true).contents())
       }
 
       var options = {
