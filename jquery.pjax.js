@@ -53,7 +53,11 @@ function handleClick(event, container, options) {
 
   var link = event.currentTarget
 
+  // If current target isnt a link, try to find the first A descendant
   if (link.tagName.toUpperCase() !== 'A')
+    link = $(link).find('a')[0]
+
+  if (!link)
     throw "$.fn.pjax or $.pjax.click requires an anchor element"
 
   // Middle click, cmd click, and ctrl click should open
