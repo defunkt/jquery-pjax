@@ -169,7 +169,7 @@ var pjax = $.pjax = function( options ) {
 
     if (!fire('pjax:beforeSend', [xhr, settings])) return false
 
-    if (options.push) {
+    if (options.push && !options.replace) {
       // Cache current container element before replacing it
       containerCache.push(pjax.state.id, context.clone(true, true).contents())
 
