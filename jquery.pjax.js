@@ -458,6 +458,20 @@ function extractContainer(data, xhr, options) {
   return obj
 }
 
+// Public: Reload current page with pjax.
+//
+// Returns whatever $.pjax returns.
+pjax.reload = function(container, options) {
+  var defaults = {
+    url: window.location.href,
+    push: false,
+    replace: true,
+    scrollTo: false
+  }
+
+  return $.pjax($.extend(defaults, optionsFor(container, options)))
+}
+
 
 pjax.defaults = {
   timeout: 650,
@@ -659,6 +673,7 @@ if ( !$.support.pjax ) {
     form.submit()
   }
   $.pjax.click = $.noop
+  $.pjax.reload = window.location.reload
   $.fn.pjax = function() { return this }
 }
 
