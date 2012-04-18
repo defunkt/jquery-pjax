@@ -174,7 +174,6 @@ var pjax = $.pjax = function( options ) {
       containerCache.push(pjax.state.id, context.clone(true, true).contents())
 
       window.history.pushState(null, "", options.url)
-      pjax.state = null
     }
 
     fire('pjax:start', [xhr, options])
