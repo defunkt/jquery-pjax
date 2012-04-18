@@ -43,7 +43,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("sets title to response <title>", function() {
+  asyncTest("sets title to response title tag", function() {
     var frame = this.frame
 
     frame.$.pjax({
@@ -57,7 +57,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("sets title to response nested <title>", function() {
+  asyncTest("sets title to response nested title tag", function() {
     var frame = this.frame
 
     frame.$.pjax({
@@ -71,7 +71,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("sets title to response last <title>", function() {
+  asyncTest("sets title to response last title tag", function() {
     var frame = this.frame
 
     frame.$.pjax({
@@ -80,6 +80,39 @@ if ($.support.pjax) {
       success: function() {
         equal(frame.document.title, "World!")
         ok(!frame.$("#main title").length)
+        start()
+      }
+    })
+  })
+
+  asyncTest("scrolls to top of page", function() {
+    var frame = this.frame
+
+    frame.window.scrollTo(0, 100)
+    equal(frame.window.scrollY, 100)
+
+    frame.$.pjax({
+      url: "long.html",
+      container: "#main",
+      success: function() {
+        equal(frame.window.scrollY, 0)
+        start()
+      }
+    })
+  })
+
+  asyncTest("preserves current scroll position", function() {
+    var frame = this.frame
+
+    frame.window.scrollTo(0, 100)
+    equal(frame.window.scrollY, 100)
+
+    frame.$.pjax({
+      url: "long.html",
+      container: "#main",
+      scrollTo: false,
+      success: function() {
+        equal(frame.window.scrollY, 100)
         start()
       }
     })
@@ -215,7 +248,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("fragment sets title to response <title>", function() {
+  asyncTest("fragment sets title to response title tag", function() {
     var frame = this.frame
 
     frame.$.pjax({
@@ -564,14 +597,14 @@ if ($.support.pjax) {
 
   function goBack(frame, callback) {
     setTimeout(function() {
-      frame.$("#main").one("pjax:complete", callback)
+      frame.$("#main").one("pjax:end", callback)
       frame.history.back()
     }, 0)
   }
 
   function goForward(frame, callback) {
     setTimeout(function() {
-      frame.$("#main").one("pjax:complete", callback)
+      frame.$("#main").one("pjax:end", callback)
       frame.history.forward()
     }, 0)
   }
@@ -613,6 +646,35 @@ if ($.support.pjax) {
             equal(frame.location.pathname, "/hello.html")
             start()
           })
+        })
+      }
+    })
+  })
+
+  asyncTest("popstate preserves scroll position", function() {
+    var frame = this.frame
+
+    equal(frame.location.pathname, "/home.html")
+
+    frame.window.scrollTo(0, 100)
+    equal(frame.window.scrollY, 100)
+
+    frame.$.pjax({
+      url: "long.html",
+      container: "#main",
+      complete: function() {
+        equal(frame.location.pathname, "/long.html")
+        equal(frame.window.scrollY, 0)
+
+        ok(frame.history.length > 1)
+        goBack(frame, function() {
+          equal(frame.location.pathname, "/home.html")
+
+          // PENDING: Popstate scroll position restore doesn't seem to
+          // work inside an iframe.
+          // equal(frame.window.scrollY, 100)
+
+          start()
         })
       }
     })

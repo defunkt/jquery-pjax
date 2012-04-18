@@ -25,7 +25,7 @@
 // Returns the jQuery object
 $.fn.pjax = function( container, options ) {
   return this.live('click.pjax', function(event){
-    return handleClick(event, container, options)
+    handleClick(event, container, options)
   })
 }
 
@@ -53,7 +53,11 @@ function handleClick(event, container, options) {
 
   var link = event.currentTarget
 
+  // If current target isnt a link, try to find the first A descendant
   if (link.tagName.toUpperCase() !== 'A')
+    link = $(link).find('a')[0]
+
+  if (!link)
     throw "$.fn.pjax or $.pjax.click requires an anchor element"
 
   // Middle click, cmd click, and ctrl click should open
@@ -81,7 +85,6 @@ function handleClick(event, container, options) {
   $.pjax($.extend({}, defaults, options))
 
   event.preventDefault()
-  return false
 }
 
 
@@ -166,9 +169,18 @@ var pjax = $.pjax = function( options ) {
 
     if (!fire('pjax:beforeSend', [xhr, settings])) return false
 
+    if (options.push && !options.replace) {
+      // Cache current container element before replacing it
+      containerCache.push(pjax.state.id, context.clone(true, true).contents())
+
+      window.history.pushState(null, "", options.url)
+    }
+
     fire('pjax:start', [xhr, options])
     // start.pjax is deprecated
     fire('start.pjax', [xhr, options])
+
+    fire('pjax:send', [xhr, settings])
   }
 
   options.complete = function(xhr, textStatus) {
@@ -212,14 +224,16 @@ var pjax = $.pjax = function( options ) {
       timeout: options.timeout
     }
 
+    if (options.push || options.replace) {
+      window.history.replaceState(pjax.state, container.title, container.url)
+    }
+
     if (container.title) document.title = container.title
     context.html(container.contents)
 
-    if ( options.replace ) {
-      window.history.replaceState(pjax.state, container.title, container.url)
-    } else if ( options.push ) {
-      window.history.pushState(pjax.state, container.title, container.url)
-    }
+    // Scroll to top by default
+    if (typeof options.scrollTo === 'number')
+      $(window).scrollTop(options.scrollTo)
 
     // Google Analytics support
     if ( (options.replace || options.push) && window._gaq )
@@ -262,6 +276,8 @@ var pjax = $.pjax = function( options ) {
 
   pjax.options = options
   pjax.xhr = $.ajax(options)
+
+  // pjax event is deprecated
   $(document).trigger('pjax', [pjax.xhr, options])
 
   return pjax.xhr
@@ -441,14 +457,99 @@ function extractContainer(data, xhr, options) {
   return obj
 }
 
+// Public: Reload current page with pjax.
+//
+// Returns whatever $.pjax returns.
+pjax.reload = function(container, options) {
+  var defaults = {
+    url: window.location.href,
+    push: false,
+    replace: true,
+    scrollTo: false
+  }
+
+  return $.pjax($.extend(defaults, optionsFor(container, options)))
+}
+
 
 pjax.defaults = {
   timeout: 650,
   push: true,
   replace: false,
   type: 'GET',
-  dataType: 'html'
+  dataType: 'html',
+  scrollTo: 0,
+  maxCacheLength: 20
 }
+
+// Internal: History DOM caching class.
+function Cache() {
+  this.mapping      = {}
+  this.forwardStack = []
+  this.backStack    = []
+}
+// Push previous state id and container contents into the history
+// cache. Should be called in conjunction with `pushState` to save the
+// previous container contents.
+//
+// id    - State ID Number
+// value - DOM Element to cache
+//
+// Returns nothing.
+Cache.prototype.push = function(id, value) {
+  this.mapping[id] = value
+  this.backStack.push(id)
+
+  // Remove all entires in forward history stack after pushing
+  // a new page.
+  while (this.forwardStack.length)
+    delete this.mapping[this.forwardStack.shift()]
+
+  // Trim back history stack to max cache length.
+  while (this.backStack.length > pjax.defaults.maxCacheLength)
+    delete this.mapping[this.backStack.shift()]
+}
+// Retrieve cached DOM Element for state id.
+//
+// id - State ID Number
+//
+// Returns DOM Element(s) or undefined if cache miss.
+Cache.prototype.get = function(id) {
+  return this.mapping[id]
+}
+// Shifts cache from forward history cache to back stack. Should be
+// called on `popstate` with the previous state id and container
+// contents.
+//
+// id    - State ID Number
+// value - DOM Element to cache
+//
+// Returns nothing.
+Cache.prototype.forward = function(id, value) {
+  this.mapping[id] = value
+  this.backStack.push(id)
+
+  if (id = this.forwardStack.pop())
+    delete this.mapping[id]
+}
+// Shifts cache from back history cache to forward stack. Should be
+// called on `popstate` with the previous state id and container
+// contents.
+//
+// id    - State ID Number
+// value - DOM Element to cache
+//
+// Returns nothing.
+Cache.prototype.back = function(id, value) {
+  this.mapping[id] = value
+  this.forwardStack.push(id)
+
+  if (id = this.backStack.pop())
+    delete this.mapping[id]
+}
+
+var containerCache = new Cache
+
 
 // Export $.pjax.click
 pjax.click = handleClick
@@ -474,14 +575,48 @@ $(window).bind('popstate', function(event){
   if (state && state.container) {
     var container = $(state.container)
     if (container.length) {
-      $.pjax({
+      var contents = containerCache.get(state.id)
+
+      if (pjax.state) {
+        // Since state ids always increase, we can deduce the history
+        // direction from the previous state.
+        var direction = pjax.state.id < state.id ? 'forward' : 'back'
+
+        // Cache current container before replacement and inform the
+        // cache which direction the history shifted.
+        containerCache[direction](pjax.state.id, container.clone(true, true).contents())
+      }
+
+      var options = {
         id: state.id,
         url: state.url,
         container: container,
         push: false,
         fragment: state.fragment,
-        timeout: state.timeout
-      })
+        timeout: state.timeout,
+        scrollTo: false
+      }
+
+      if (contents) {
+        // pjax event is deprecated
+        $(document).trigger('pjax', [null, options])
+        container.trigger('pjax:start', [null, options])
+        // end.pjax event is deprecated
+        container.trigger('start.pjax', [null, options])
+
+        container.html(contents)
+        pjax.state = state
+
+        container.trigger('pjax:end', [null, options])
+        // end.pjax event is deprecated
+        container.trigger('end.pjax', [null, options])
+      } else {
+        $.pjax(options)
+      }
+
+      // Force reflow/relayout before the browser tries to restore the
+      // scroll position.
+      container[0].offsetHeight
     } else {
       window.location = location.href
     }
@@ -537,6 +672,7 @@ if ( !$.support.pjax ) {
     form.submit()
   }
   $.pjax.click = $.noop
+  $.pjax.reload = window.location.reload
   $.fn.pjax = function() { return this }
 }
 
