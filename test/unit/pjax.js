@@ -43,7 +43,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("sets title to response <title>", function() {
+  asyncTest("sets title to response title tag", function() {
     var frame = this.frame
 
     frame.$.pjax({
@@ -57,7 +57,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("sets title to response nested <title>", function() {
+  asyncTest("sets title to response nested title tag", function() {
     var frame = this.frame
 
     frame.$.pjax({
@@ -71,7 +71,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("sets title to response last <title>", function() {
+  asyncTest("sets title to response last title tag", function() {
     var frame = this.frame
 
     frame.$.pjax({
@@ -248,7 +248,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("fragment sets title to response <title>", function() {
+  asyncTest("fragment sets title to response title tag", function() {
     var frame = this.frame
 
     frame.$.pjax({

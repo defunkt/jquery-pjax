@@ -42,7 +42,7 @@ if ($.support.pjax) {
     frame.$("a[href='/dinosaurs.html']").click()
   })
 
-  asyncTest("sets title to response <title>", function() {
+  asyncTest("sets title to response title tag", function() {
     var frame = this.frame
 
     frame.$("a").pjax({ container: "#main" })
