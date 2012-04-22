@@ -54,11 +54,19 @@ function handleClick(event, container, options) {
   var link = event.currentTarget
 
   // If current target isnt a link, try to find the first A descendant
-  if (link.tagName.toUpperCase() !== 'A')
-    link = $(link).find('a')[0]
+  if (link.tagName.toUpperCase() !== 'A' && !$(link).attr("data-href"))
+      link = $(link).find('a, [data-href]')[0]
 
   if (!link)
-    throw "$.fn.pjax or $.pjax.click requires an anchor element"
+    throw "$.fn.pjax or $.pjax.click requires an anchor element or an element with attribute data-href"
+    
+  var originalLink = link
+  
+  // create a link element to parse data-href
+  if(link.tagName.toUpperCase() !== 'A') {
+    link = document.createElement('a')
+  	link.href = $(originalLink).attr("data-href")
+  }
 
   // Middle click, cmd click, and ctrl click should open
   // links in a new tab as normal.
@@ -70,15 +78,15 @@ function handleClick(event, container, options) {
     return
 
   // Ignore anchors on the same page
-  if ( link.hash && link.href.replace(link.hash, '') ===
+  if ( link.tagName.toUpperCase() == 'A' && link.hash && link.href.replace(link.hash, '') ===
        location.href.replace(location.hash, '') )
     return
 
   var defaults = {
     url: link.href,
     container: $(link).attr('data-pjax'),
-    target: link,
-    clickedElement: $(link), // DEPRECATED: use target
+    target: originalLink,
+    clickedElement: $(originalLink), // DEPRECATED: use target
     fragment: null
   }
 
