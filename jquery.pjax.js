@@ -583,6 +583,12 @@ $(window).bind('popstate', function(event){
         containerCache[direction](pjax.state.id, container.clone(true, true).contents())
       }
 
+      var popstateEvent = $.Event('pjax:popstate', {
+        state: state,
+        direction: direction
+      })
+      container.trigger(popstateEvent)
+
       var options = {
         id: state.id,
         url: state.url,
