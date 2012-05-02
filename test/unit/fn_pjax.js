@@ -142,6 +142,19 @@ if ($.support.pjax) {
   })
 
 
+  asyncTest("doesn't ignore left click", function() {
+    var frame = this.frame
+
+    frame.$("a").pjax({ container: "#main" })
+
+    var event = frame.$.Event('click')
+    event.which = 0
+    frame.$("a[href='/dinosaurs.html']").trigger(event)
+    ok(event.isDefaultPrevented())
+
+    start()
+  })
+
   asyncTest("ignores middle clicks", function() {
     var frame = this.frame
 
@@ -150,7 +163,7 @@ if ($.support.pjax) {
     var event = frame.$.Event('click')
     event.which = 3
     frame.$("a[href='/dinosaurs.html']").trigger(event)
-    notEqual(event.result, false)
+    ok(!event.isDefaultPrevented())
 
     start()
   })
@@ -163,7 +176,20 @@ if ($.support.pjax) {
     var event = frame.$.Event('click')
     event.metaKey = true
     frame.$("a[href='/dinosaurs.html']").trigger(event)
-    notEqual(event.result, false)
+    ok(!event.isDefaultPrevented())
+
+    start()
+  })
+
+  asyncTest("ignores ctrl clicks", function() {
+    var frame = this.frame
+
+    frame.$("a").pjax({ container: "#main" })
+
+    var event = frame.$.Event('click')
+    event.ctrlKey = true
+    frame.$("a[href='/dinosaurs.html']").trigger(event)
+    ok(!event.isDefaultPrevented())
 
     start()
   })
