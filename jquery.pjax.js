@@ -58,7 +58,7 @@ function handleClick(event, container, options) {
 
   // Middle click, cmd click, and ctrl click should open
   // links in a new tab as normal.
-  if ( event.which > 1 || event.metaKey )
+  if ( event.which > 1 || event.metaKey || event.ctrlKey )
     return
 
   // Ignore cross origin links
