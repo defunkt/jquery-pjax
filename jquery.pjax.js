@@ -215,6 +215,7 @@ var pjax = $.pjax = function( options ) {
     pjax.state = {
       id: options.id || uniqueId(),
       url: container.url,
+      title: container.title,
       container: context.selector,
       fragment: options.fragment,
       timeout: options.timeout
@@ -256,6 +257,7 @@ var pjax = $.pjax = function( options ) {
     pjax.state = {
       id: uniqueId(),
       url: window.location.href,
+      title: document.title,
       container: context.selector,
       fragment: options.fragment,
       timeout: options.timeout
@@ -606,6 +608,7 @@ $(window).bind('popstate', function(event){
         // end.pjax event is deprecated
         container.trigger('start.pjax', [null, options])
 
+        if (state.title) document.title = state.title
         container.html(contents)
         pjax.state = state
 
