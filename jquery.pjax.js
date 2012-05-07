@@ -154,6 +154,7 @@ var pjax = $.pjax = function( options ) {
 
     xhr.setRequestHeader('X-PJAX', 'true')
     xhr.setRequestHeader('X-PJAX-Container', context.selector)
+    xhr.setRequestHeader('X-PJAX-Referer', settings.referer || window.location.href)
 
     var result
 
@@ -596,6 +597,7 @@ $(window).bind('popstate', function(event){
         url: state.url,
         container: container,
         push: false,
+        referer: pjax.state.url,
         fragment: state.fragment,
         timeout: state.timeout,
         scrollTo: false
