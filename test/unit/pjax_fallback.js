@@ -76,6 +76,21 @@ asyncTest("sets title to response <title>", function() {
   })
 })
 
+asyncTest("sends correct HTTP referer", function() {
+  var frame = this.frame
+
+  this.loaded = function(frame) {
+    var referer = frame.document.getElementById("referer").textContent
+    ok(referer.match("/home.html"), referer)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "/referer.html",
+    container: "#main"
+  })
+})
+
 asyncTest("adds entry to browser history", function() {
   var frame = this.frame
   var count = 0
