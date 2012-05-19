@@ -260,8 +260,20 @@ var pjax = $.pjax = function( options ) {
     xhr.abort()
   }
 
+  // Tranform url for Ajax request if fragmentUrl is given
+  function ajaxOptions(pjaxOptions) {
+    if (typeof pjaxOptions.fragmentUrl === 'string') {
+      // static url for fragment
+      $.extend({}, pjaxOptions, {url: pjaxOptions.fragmentUrl})
+    } else if (typeof pjaxOptions.fragmentUrl === 'function') {
+      // dynamic url received from the function that gets the link url as parameter
+      $.extend({}, pjaxOptions, {url: pjaxOptions.fragmentUrl(pjaxOptions.url)})
+    }
+    // no transformations, using url from the link
+    return pjaxOptions
+  }
   pjax.options = options
-  var xhr = pjax.xhr = $.ajax(options)
+  var xhr = pjax.xhr = $.ajax(ajaxOptions(options))
 
   if (xhr.readyState > 0) {
     // pjax event is deprecated
