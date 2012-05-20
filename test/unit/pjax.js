@@ -838,4 +838,34 @@ if ($.support.pjax) {
     ok(frame.$.pjax.state.id)
     oldId = frame.$.pjax.state.id
   })
+
+  asyncTest("gets fragment from differnet, static url", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "long.html",
+      fragmentUrl: "hello.html",
+      container: "#main",
+      success: function() {
+        equal(frame.location.pathname, "/long.html")
+        equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+        start()
+      }
+    })
+  })
+
+  asyncTest("gets fragment from differnet, dynamic url", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "long.html",
+      fragmentUrl: function(url) { return url.replace('long', 'hello') },
+      container: "#main",
+      success: function() {
+        equal(frame.location.pathname, "/long.html")
+        equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+        start()
+      }
+    })
+  })
 }

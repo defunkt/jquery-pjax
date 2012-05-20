@@ -189,20 +189,20 @@ var pjax = $.pjax = function( options ) {
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (textStatus !== 'abort' && allowed)
-      window.location = container.url
+      window.location = options.url
   }
 
   options.success = function(data, status, xhr) {
     var container = extractContainer(data, xhr, options)
 
     if (!container.contents) {
-      window.location = container.url
+      window.location = options.url
       return
     }
 
     pjax.state = {
       id: options.id || uniqueId(),
-      url: container.url,
+      url: options.url,
       title: container.title,
       container: context.selector,
       fragment: options.fragment,
@@ -210,7 +210,7 @@ var pjax = $.pjax = function( options ) {
     }
 
     if (options.push || options.replace) {
-      window.history.replaceState(pjax.state, container.title, container.url)
+      window.history.replaceState(pjax.state, container.title, options.url)
     }
 
     if (container.title) document.title = container.title
@@ -264,10 +264,10 @@ var pjax = $.pjax = function( options ) {
   function ajaxOptions(pjaxOptions) {
     if (typeof pjaxOptions.fragmentUrl === 'string') {
       // static url for fragment
-      $.extend({}, pjaxOptions, {url: pjaxOptions.fragmentUrl})
+      return $.extend({}, pjaxOptions, {url: pjaxOptions.fragmentUrl})
     } else if (typeof pjaxOptions.fragmentUrl === 'function') {
       // dynamic url received from the function that gets the link url as parameter
-      $.extend({}, pjaxOptions, {url: pjaxOptions.fragmentUrl(pjaxOptions.url)})
+      return $.extend({}, pjaxOptions, {url: pjaxOptions.fragmentUrl(pjaxOptions.url)})
     }
     // no transformations, using url from the link
     return pjaxOptions
@@ -282,7 +282,6 @@ var pjax = $.pjax = function( options ) {
     if (options.push && !options.replace) {
       // Cache current container element before replacing it
       containerCache.push(pjax.state.id, context.clone(true, true).contents())
-
       window.history.pushState(null, "", options.url)
     }
 
