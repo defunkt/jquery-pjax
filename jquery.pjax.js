@@ -165,6 +165,13 @@ var pjax = $.pjax = function( options ) {
 
     if (!fire('pjax:beforeSend', [xhr, settings]))
       return false
+
+    function qualifyURL(url) {
+      var a = document.createElement('a')
+      a.href = url
+      return a.href
+    }
+    options.requestUrl = qualifyURL(settings.url)
   }
 
   options.complete = function(xhr, textStatus) {
@@ -412,7 +419,7 @@ function extractContainer(data, xhr, options) {
 
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
-  obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.url)
+  obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
 
   // Attempt to parse response html into elements
   var $data = $(data)
