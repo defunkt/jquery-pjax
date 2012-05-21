@@ -166,12 +166,7 @@ var pjax = $.pjax = function( options ) {
     if (!fire('pjax:beforeSend', [xhr, settings]))
       return false
 
-    function qualifyURL(url) {
-      var a = document.createElement('a')
-      a.href = url
-      return a.href
-    }
-    pjax.requestUrl = qualifyURL(settings.url)
+    pjax.requestUrl = parseURL(settings.url).href
   }
 
   options.complete = function(xhr, textStatus) {
