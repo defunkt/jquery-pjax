@@ -189,20 +189,20 @@ var pjax = $.pjax = function( options ) {
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (textStatus !== 'abort' && allowed)
-      window.location = options.url
+      window.location = container.url
   }
 
   options.success = function(data, status, xhr) {
     var container = extractContainer(data, xhr, options)
 
     if (!container.contents) {
-      window.location = options.url
+      window.location = container.url
       return
     }
 
     pjax.state = {
       id: options.id || uniqueId(),
-      url: options.url,
+      url: container.url,
       title: container.title,
       container: context.selector,
       fragment: options.fragment,
@@ -210,7 +210,7 @@ var pjax = $.pjax = function( options ) {
     }
 
     if (options.push || options.replace) {
-      window.history.replaceState(pjax.state, container.title, options.url)
+      window.history.replaceState(pjax.state, container.title, container.url)
     }
 
     if (container.title) document.title = container.title
