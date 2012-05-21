@@ -34,6 +34,10 @@ get '/jquery.pjax.js' do
   send_file "#{settings.root}/../jquery.pjax.js"
 end
 
+get '/lib/:file' do
+  send_file "#{settings.root}/../lib/#{params[:file]}"
+end
+
 get '/env.html' do
   erb :env, :layout => !pjax?
 end
