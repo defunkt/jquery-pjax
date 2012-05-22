@@ -20,7 +20,7 @@ helpers do
 end
 
 after do
-  if pjax?
+  if pjax? && params[:redirect] == "true"
     response.headers['X-PJAX-URL'] = request.url
   end
 end
@@ -55,7 +55,7 @@ delete '/env.html' do
 end
 
 get '/redirect.html' do
-  redirect "/hello.html"
+  redirect "/hello.html?redirect=true"
 end
 
 get '/timeout.html' do
