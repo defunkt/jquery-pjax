@@ -100,7 +100,11 @@ following additions:
                      be pulled out of the response HTML and inserted
                      into the `container`. Useful if the server always returns
                      full HTML pages.
-
+* `fragmentUrl`    - URL for the fragment to be fetched with Ajax. This allows
+                     you to get the content from different URL from the one
+                     visible to user i.e. the one used for pushState.
+                     It can be a String or a function returning the URL as String.
+                     The function gets the `target` as parameter.
 
 ## $.pjax( options )
 

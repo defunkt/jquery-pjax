@@ -165,6 +165,7 @@ var pjax = $.pjax = function( options ) {
     if (!fire('pjax:beforeSend', [xhr, settings]))
       return false
 
+    // If were using fragmentUrl, use option.url for pushState
     if (options.fragmentUrl)
       options.requestUrl = options.url
     else
