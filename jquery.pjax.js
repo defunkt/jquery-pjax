@@ -106,9 +106,8 @@ function handleClick(event, container, options) {
 var pjax = $.pjax = function( options ) {
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
-  if ($.isFunction(options.url)) {
-    options.url = options.url()
-  }
+  if ($.isFunction(options.url)) options.url = options.url()
+  if ($.isFunction(options.fragmentUrl)) options.fragmentUrl = options.fragmentUrl(options.url)
 
   var target = options.target
 
@@ -166,7 +165,10 @@ var pjax = $.pjax = function( options ) {
     if (!fire('pjax:beforeSend', [xhr, settings]))
       return false
 
-    options.requestUrl = parseURL(settings.url).href
+    if (options.fragmentUrl)
+      options.requestUrl = options.url
+    else
+      options.requestUrl = parseURL(settings.url).href
   }
 
   options.complete = function(xhr, textStatus) {
@@ -264,14 +266,8 @@ var pjax = $.pjax = function( options ) {
 
   // Tranform url for Ajax request if fragmentUrl is given
   function ajaxOptions(pjaxOptions) {
-    if (typeof pjaxOptions.fragmentUrl === 'string') {
-      // static url for fragment
+    if (pjaxOptions.fragmentUrl)
       return $.extend({}, pjaxOptions, {url: pjaxOptions.fragmentUrl})
-    } else if (typeof pjaxOptions.fragmentUrl === 'function') {
-      // dynamic url received from the function that gets the link url as parameter
-      return $.extend({}, pjaxOptions, {url: pjaxOptions.fragmentUrl(pjaxOptions.url)})
-    }
-    // no transformations, using url from the link
     return pjaxOptions
   }
   pjax.options = options
