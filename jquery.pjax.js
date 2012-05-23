@@ -107,7 +107,7 @@ var pjax = $.pjax = function( options ) {
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
   if ($.isFunction(options.url)) options.url = options.url()
-  if ($.isFunction(options.fragmentUrl)) options.fragmentUrl = options.fragmentUrl(options.url)
+  if ($.isFunction(options.fragmentUrl)) options.fragmentUrl = options.fragmentUrl(options.target)
 
   var target = options.target
 

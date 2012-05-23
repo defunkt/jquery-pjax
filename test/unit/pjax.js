@@ -856,13 +856,15 @@ if ($.support.pjax) {
 
   asyncTest("gets fragment from differnet, dynamic url", function() {
     var frame = this.frame
+    var aliens = frame.$('a[href$="aliens.html"]')
 
     frame.$.pjax({
-      url: "long.html",
-      fragmentUrl: function(url) { return url.replace('long', 'hello') },
+      url: aliens.attr("href"),
+      target: aliens.get(),
+      fragmentUrl: function(link) { return $(link).attr("href").replace('aliens', 'hello') },
       container: "#main",
       success: function() {
-        equal(frame.location.pathname, "/long.html")
+        equal(frame.location.pathname, aliens.attr("href"))
         equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
         start()
       }
