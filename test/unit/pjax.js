@@ -838,4 +838,36 @@ if ($.support.pjax) {
     ok(frame.$.pjax.state.id)
     oldId = frame.$.pjax.state.id
   })
+
+  asyncTest("gets fragment from differnet, static url", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "long.html",
+      fragmentUrl: "hello.html",
+      container: "#main",
+      success: function() {
+        equal(frame.location.pathname, "/long.html")
+        equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+        start()
+      }
+    })
+  })
+
+  asyncTest("gets fragment from differnet, dynamic url", function() {
+    var frame = this.frame
+    var aliens = frame.$('a[href$="aliens.html"]')
+
+    frame.$.pjax({
+      url: aliens.attr("href"),
+      target: aliens.get(),
+      fragmentUrl: function(link) { return $(link).attr("href").replace('aliens', 'hello') },
+      container: "#main",
+      success: function() {
+        equal(frame.location.pathname, aliens.attr("href"))
+        equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+        start()
+      }
+    })
+  })
 }

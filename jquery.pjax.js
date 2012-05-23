@@ -106,9 +106,8 @@ function handleClick(event, container, options) {
 var pjax = $.pjax = function( options ) {
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
-  if ($.isFunction(options.url)) {
-    options.url = options.url()
-  }
+  if ($.isFunction(options.url)) options.url = options.url()
+  if ($.isFunction(options.fragmentUrl)) options.fragmentUrl = options.fragmentUrl(options.target)
 
   var target = options.target
 
@@ -166,7 +165,11 @@ var pjax = $.pjax = function( options ) {
     if (!fire('pjax:beforeSend', [xhr, settings]))
       return false
 
-    options.requestUrl = parseURL(settings.url).href
+    // If were using fragmentUrl, use option.url for pushState
+    if (options.fragmentUrl)
+      options.requestUrl = options.url
+    else
+      options.requestUrl = parseURL(settings.url).href
   }
 
   options.complete = function(xhr, textStatus) {
@@ -262,8 +265,14 @@ var pjax = $.pjax = function( options ) {
     xhr.abort()
   }
 
+  // Tranform url for Ajax request if fragmentUrl is given
+  function ajaxOptions(pjaxOptions) {
+    if (pjaxOptions.fragmentUrl)
+      return $.extend({}, pjaxOptions, {url: pjaxOptions.fragmentUrl})
+    return pjaxOptions
+  }
   pjax.options = options
-  var xhr = pjax.xhr = $.ajax(options)
+  var xhr = pjax.xhr = $.ajax(ajaxOptions(options))
 
   if (xhr.readyState > 0) {
     // pjax event is deprecated
@@ -272,7 +281,6 @@ var pjax = $.pjax = function( options ) {
     if (options.push && !options.replace) {
       // Cache current container element before replacing it
       containerCache.push(pjax.state.id, context.clone(true, true).contents())
-
       window.history.pushState(null, "", options.url)
     }
 
