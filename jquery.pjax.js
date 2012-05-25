@@ -420,8 +420,12 @@ function extractContainer(data, xhr, options) {
   var $data = $(data)
 
   // If response data is empty, return fast
-  if ($data.length === 0)
-    return obj
+  if ($data.length === 0) {
+    if (data.length === 0)
+      return obj
+    else
+      $data = $("<span/>").html(data)
+  }
 
   // If there's a <title> tag in the response, use it as
   // the page's title.
