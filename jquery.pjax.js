@@ -216,8 +216,11 @@ var pjax = $.pjax = function( options ) {
     }
 
     if (container.title) document.title = container.title
-    context.html(container.contents)
-
+    if (options.replaceContainer) {
+    	context.replaceWith(container.contents);
+    } else {
+    	context.html(container.contents)
+    }
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
       $(window).scrollTop(options.scrollTo)
@@ -482,7 +485,8 @@ pjax.defaults = {
   type: 'GET',
   dataType: 'html',
   scrollTo: 0,
-  maxCacheLength: 20
+  maxCacheLength: 20,
+  replaceContainer: false
 }
 
 // Internal: History DOM caching class.
@@ -614,7 +618,11 @@ $(window).bind('popstate', function(event){
         container.trigger('start.pjax', [null, options])
 
         if (state.title) document.title = state.title
-        container.html(contents)
+        if (options.replaceContainer) {
+        	container.replaceWith(contents);
+        } else {
+        	container.html(contents);
+        }
         pjax.state = state
 
         container.trigger('pjax:end', [null, options])
