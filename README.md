@@ -175,6 +175,7 @@ Django: <https://github.com/jacobian/django-pjax>
 
 Asp.Net MVC3: <http://biasecurities.com/blog/2011/using-pjax-with-asp-net-mvc3/>
 
+FuelPHP: <https://github.com/rcrowe/fuel-pjax>
 
 ## page titles
 
