@@ -217,7 +217,9 @@ var pjax = $.pjax = function( options ) {
 
     if (container.title) document.title = container.title
     if (options.replaceContainer) {
-    	context.replaceWith(container.contents);
+    	c = $(container.contents);
+    	context.replaceWith(c);
+    	context = c;
     } else {
     	context.html(container.contents)
     }
@@ -619,7 +621,9 @@ $(window).bind('popstate', function(event){
 
         if (state.title) document.title = state.title
         if (options.replaceContainer) {
-        	container.replaceWith(contents);
+        	c = $(contents);
+	    	container.replaceWith(c);
+	    	container = c;
         } else {
         	container.html(contents);
         }
