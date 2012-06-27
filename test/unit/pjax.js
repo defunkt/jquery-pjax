@@ -774,7 +774,7 @@ if ($.support.pjax) {
     })
 
     ok(frame.$.pjax.state.id)
-    equal(frame.$.pjax.state.url, frame.location.origin + "/home.html")
+    ok(frame.$.pjax.state.url.match("/home.html"))
     equal(frame.$.pjax.state.container, "#main")
   })
 
@@ -786,7 +786,7 @@ if ($.support.pjax) {
       container: "#main",
       success: function() {
         ok(frame.$.pjax.state.id)
-        equal(frame.$.pjax.state.url, frame.location.origin + "/hello.html")
+        ok(frame.$.pjax.state.url.match("/hello.html"))
         equal(frame.$.pjax.state.container, "#main")
         start()
       }
