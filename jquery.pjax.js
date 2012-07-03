@@ -558,21 +558,11 @@ var containerCache = new Cache
 pjax.click = handleClick
 
 
-// Used to detect initial (useless) popstate.
-// If history.state exists, assume browser isn't going to fire initial popstate.
-var popped = ('state' in window.history), initialURL = location.href
-
-
 // popstate handler takes care of the back and forward buttons
 //
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
 $(window).bind('popstate', function(event){
-  // Ignore inital popstate that some browsers fire on page load
-  var initialPop = !popped && location.href == initialURL
-  popped = true
-  if ( initialPop ) return
-
   var state = event.state
 
   if (state && state.container) {
