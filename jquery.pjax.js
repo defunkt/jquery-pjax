@@ -233,7 +233,19 @@ var pjax = $.pjax = function( options ) {
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
     if ( hash !== '' ) {
-      window.location.href = hash
+      // Avoid using simple hash set here. Will add another history
+      // entry. Replace the url with replaceState and scroll to target
+      // by hand.
+      //
+      //   window.location.hash = hash
+      var url = parseURL(container.url)
+      url.hash = hash
+
+      pjax.state.url = url.href
+      window.history.replaceState(pjax.state, container.title, url.href)
+
+      var target = $(url.hash)
+      if (target.length) $(window).scrollTop(target.offset().top)
     }
 
     // DEPRECATED: Invoke original `success` handler
