@@ -132,6 +132,55 @@ asyncTest("scrolls to top of the page", function() {
   })
 })
 
+asyncTest("scrolls to anchor at top page", function() {
+  var frame = this.frame
+
+  equal(frame.window.scrollY, 0)
+
+  this.loaded = function(frame) {
+    equal(frame.window.scrollY, 8)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "/anchor.html#top",
+    container: "#main"
+  })
+})
+
+asyncTest("empty anchor doesn't scroll page", function() {
+  var frame = this.frame
+
+  equal(frame.window.scrollY, 0)
+
+  this.loaded = function(frame) {
+    equal(frame.window.scrollY, 0)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "/anchor.html#",
+    container: "#main"
+  })
+})
+
+asyncTest("scrolls to anchor at bottom page", function() {
+  var frame = this.frame
+
+  equal(frame.window.scrollY, 0)
+
+  this.loaded = function(frame) {
+    equal(frame.window.scrollY, 10008)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "/anchor.html#bottom",
+    container: "#main"
+  })
+})
+
+
 
 asyncTest("sets GET method", function() {
   var frame = this.frame
