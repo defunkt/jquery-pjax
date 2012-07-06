@@ -287,7 +287,7 @@ var pjax = $.pjax = function( options ) {
 
     if (options.push && !options.replace) {
       // Cache current container element before replacing it
-      containerCache.push(pjax.state.id, context.clone().contents())
+      cachePush(pjax.state.id, context.clone().contents())
 
       window.history.pushState(null, "", options.url)
     }
@@ -502,11 +502,9 @@ pjax.defaults = {
 }
 
 // Internal: History DOM caching class.
-function Cache() {
-  this.mapping      = {}
-  this.forwardStack = []
-  this.backStack    = []
-}
+var cacheMapping      = {}
+var cacheForwardStack = []
+var cacheBackStack    = []
 // Push previous state id and container contents into the history
 // cache. Should be called in conjunction with `pushState` to save the
 // previous container contents.
@@ -515,59 +513,44 @@ function Cache() {
 // value - DOM Element to cache
 //
 // Returns nothing.
-Cache.prototype.push = function(id, value) {
-  this.mapping[id] = value
-  this.backStack.push(id)
+function cachePush(id, value) {
+  cacheMapping[id] = value
+  cacheBackStack.push(id)
 
   // Remove all entires in forward history stack after pushing
   // a new page.
-  while (this.forwardStack.length)
-    delete this.mapping[this.forwardStack.shift()]
+  while (cacheForwardStack.length)
+    delete cacheMapping[cacheForwardStack.shift()]
 
   // Trim back history stack to max cache length.
-  while (this.backStack.length > pjax.defaults.maxCacheLength)
-    delete this.mapping[this.backStack.shift()]
+  while (cacheBackStack.length > pjax.defaults.maxCacheLength)
+    delete cacheMapping[cacheBackStack.shift()]
 }
-// Retrieve cached DOM Element for state id.
-//
-// id - State ID Number
-//
-// Returns DOM Element(s) or undefined if cache miss.
-Cache.prototype.get = function(id) {
-  return this.mapping[id]
-}
-// Shifts cache from forward history cache to back stack. Should be
+// Shifts cache from directional history cache. Should be
 // called on `popstate` with the previous state id and container
 // contents.
 //
-// id    - State ID Number
-// value - DOM Element to cache
+// direction - "forward" or "back" String
+// id        - State ID Number
+// value     - DOM Element to cache
 //
 // Returns nothing.
-Cache.prototype.forward = function(id, value) {
-  this.mapping[id] = value
-  this.backStack.push(id)
+function cachePop(direction, id, value) {
+  var pushStack, popStack
+  cacheMapping[id] = value
 
-  if (id = this.forwardStack.pop())
-    delete this.mapping[id]
+  if (direction === 'forward') {
+    pushStack = cacheBackStack
+    popStack  = cacheForwardStack
+  } else {
+    pushStack = cacheForwardStack
+    popStack  = cacheBackStack
+  }
+
+  pushStack.push(id)
+  if (id = popStack.pop())
+    delete cacheMapping[id]
 }
-// Shifts cache from back history cache to forward stack. Should be
-// called on `popstate` with the previous state id and container
-// contents.
-//
-// id    - State ID Number
-// value - DOM Element to cache
-//
-// Returns nothing.
-Cache.prototype.back = function(id, value) {
-  this.mapping[id] = value
-  this.forwardStack.push(id)
-
-  if (id = this.backStack.pop())
-    delete this.mapping[id]
-}
-
-var containerCache = new Cache
 
 
 // Export $.pjax.click
@@ -584,7 +567,7 @@ $(window).bind('popstate', function(event){
   if (state && state.container) {
     var container = $(state.container)
     if (container.length) {
-      var contents = containerCache.get(state.id)
+      var contents = cacheMapping[state.id]
 
       if (pjax.state) {
         // Since state ids always increase, we can deduce the history
@@ -593,7 +576,7 @@ $(window).bind('popstate', function(event){
 
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
-        containerCache[direction](pjax.state.id, container.clone().contents())
+        cachePop(direction, pjax.state.id, container.clone().contents())
       }
 
       var popstateEvent = $.Event('pjax:popstate', {
