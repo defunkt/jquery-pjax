@@ -65,17 +65,14 @@ function handleClick(event, container, options) {
   if ( location.protocol !== link.protocol || location.host !== link.host )
     return
 
-  if ( link.hash ) {
-    // Ignore anchors on the same page
-    if ( link.href.replace(link.hash, '') ===
-         location.href.replace(location.hash, '') )
-      return
-  } else {
-    // Ignore trailing (empty) anchors on the same page (href="(.*)#"),
-    // which get treated differently (link.hash = '', link.href ends with a #)
-    if ( link.href === location.href + '#' )
-      return
-  }
+  // Ignore anchors on the same page
+  if (link.hash && link.href.replace(link.hash, '') ===
+       location.href.replace(location.hash, ''))
+    return
+
+  // Ignore empty anchor "foo.html#"
+  if (link.href === location.href + '#')
+    return
 
   var defaults = {
     url: link.href,
