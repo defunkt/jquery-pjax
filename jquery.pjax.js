@@ -66,8 +66,12 @@ function handleClick(event, container, options) {
     return
 
   // Ignore anchors on the same page
-  if ( link.hash && link.href.replace(link.hash, '') ===
-       location.href.replace(location.hash, '') )
+  if (link.hash && link.href.replace(link.hash, '') ===
+       location.href.replace(location.hash, ''))
+    return
+
+  // Ignore empty anchor "foo.html#"
+  if (link.href === location.href + '#')
     return
 
   var defaults = {
