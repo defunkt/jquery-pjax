@@ -224,7 +224,12 @@ var pjax = $.pjax = function( options ) {
 
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
-      $(window).scrollTop(options.scrollTo)
+      try {
+        $(window).scrollTop(options.scrollTo)
+      }
+      catch (err) {
+        console.log(err.message);
+      }
 
     // Google Analytics support
     if ( (options.replace || options.push) && window._gaq )
