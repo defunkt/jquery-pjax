@@ -579,6 +579,26 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("POST never times out", function() {
+    var frame = this.frame
+
+    frame.$("#main").on("pjax:timeout", function(event, xhr) {
+      ok(false)
+    })
+    this.iframe.onload = function() { ok(false) }
+
+    frame.$.pjax({
+      type: 'POST',
+      url: "timeout.html",
+      container: "#main",
+      complete: function(xhr, status) {
+        equal(frame.$("#main p").html(), "SLOW DOWN!")
+        equal(frame.location.pathname, "/timeout.html")
+        start()
+      }
+    })
+  })
+
   asyncTest("500 loads fallback", function() {
     var frame = this.frame
 

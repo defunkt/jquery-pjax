@@ -145,6 +145,12 @@ function pjax(options) {
   var timeoutTimer
 
   options.beforeSend = function(xhr, settings) {
+    // No timeout for non-GET requests
+    // Its not safe to request the resource again with a fallback method.
+    if (settings.type !== 'GET') {
+      settings.timeout = 0
+    }
+
     if (settings.timeout > 0) {
       timeoutTimer = setTimeout(function() {
         if (fire('pjax:timeout', [xhr, options]))

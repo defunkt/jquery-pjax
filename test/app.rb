@@ -67,6 +67,16 @@ get '/timeout.html' do
   end
 end
 
+post '/timeout.html' do
+  if pjax?
+    sleep 1
+    erb :timeout, :layout => false
+  else
+    status 500
+    erb :boom
+  end
+end
+
 get '/boom.html' do
   status 500
   erb :boom, :layout => !pjax?
