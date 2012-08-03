@@ -23,7 +23,7 @@
 // the options object.
 //
 // Returns the jQuery object
-$.fn.pjax = function( container, options ) {
+function fnPjax(container, options) {
   return this.live('click.pjax', function(event){
     handleClick(event, container, options)
   })
@@ -82,11 +82,10 @@ function handleClick(event, container, options) {
     fragment: null
   }
 
-  $.pjax($.extend({}, defaults, options))
+  pjax($.extend({}, defaults, options))
 
   event.preventDefault()
 }
-
 
 // Loads a URL with ajax, puts the response body inside a container,
 // then pushState()'s the loaded URL.
@@ -107,7 +106,7 @@ function handleClick(event, container, options) {
 //   console.log( xhr.readyState )
 //
 // Returns whatever $.ajax returns.
-var pjax = $.pjax = function( options ) {
+function pjax(options) {
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
   if ($.isFunction(options.url)) {
@@ -302,6 +301,121 @@ var pjax = $.pjax = function( options ) {
   return pjax.xhr
 }
 
+// Public: Reload current page with pjax.
+//
+// Returns whatever $.pjax returns.
+function pjaxReload(container, options) {
+  var defaults = {
+    url: window.location.href,
+    push: false,
+    replace: true,
+    scrollTo: false
+  }
+
+  return pjax($.extend(defaults, optionsFor(container, options)))
+}
+
+// popstate handler takes care of the back and forward buttons
+//
+// You probably shouldn't use pjax on pages with other pushState
+// stuff yet.
+function onPjaxPopstate(event) {
+  var state = event.state
+
+  if (state && state.container) {
+    var container = $(state.container)
+    if (container.length) {
+      var contents = cacheMapping[state.id]
+
+      if (pjax.state) {
+        // Since state ids always increase, we can deduce the history
+        // direction from the previous state.
+        var direction = pjax.state.id < state.id ? 'forward' : 'back'
+
+        // Cache current container before replacement and inform the
+        // cache which direction the history shifted.
+        cachePop(direction, pjax.state.id, container.clone().contents())
+      }
+
+      var popstateEvent = $.Event('pjax:popstate', {
+        state: state,
+        direction: direction
+      })
+      container.trigger(popstateEvent)
+
+      var options = {
+        id: state.id,
+        url: state.url,
+        container: container,
+        push: false,
+        fragment: state.fragment,
+        timeout: state.timeout,
+        scrollTo: false
+      }
+
+      if (contents) {
+        // pjax event is deprecated
+        $(document).trigger('pjax', [null, options])
+        container.trigger('pjax:start', [null, options])
+        // end.pjax event is deprecated
+        container.trigger('start.pjax', [null, options])
+
+        if (state.title) document.title = state.title
+        container.html(contents)
+        pjax.state = state
+
+        container.trigger('pjax:end', [null, options])
+        // end.pjax event is deprecated
+        container.trigger('end.pjax', [null, options])
+      } else {
+        pjax(options)
+      }
+
+      // Force reflow/relayout before the browser tries to restore the
+      // scroll position.
+      container[0].offsetHeight
+    } else {
+      window.location = location.href
+    }
+  }
+}
+
+// Fallback version of main pjax function for browsers that don't
+// support pushState.
+//
+// Returns nothing since it retriggers a hard form submission.
+function fallbackPjax(options) {
+  var url = $.isFunction(options.url) ? options.url() : options.url,
+      method = options.type ? options.type.toUpperCase() : 'GET'
+
+  var form = $('<form>', {
+    method: method === 'GET' ? 'GET' : 'POST',
+    action: url,
+    style: 'display:none'
+  })
+
+  if (method !== 'GET' && method !== 'POST') {
+    form.append($('<input>', {
+      type: 'hidden',
+      name: '_method',
+      value: method.toLowerCase()
+    }))
+  }
+
+  var data = options.data
+  if (typeof data === 'string') {
+    $.each(data.split('&'), function(index, value) {
+      var pair = value.split('=')
+      form.append($('<input>', {type: 'hidden', name: pair[0], value: pair[1]}))
+    })
+  } else if (typeof data === 'object') {
+    for (key in data)
+      form.append($('<input>', {type: 'hidden', name: key, value: data[key]}))
+  }
+
+  $(document.body).append(form)
+  form.submit()
+}
 
 // Internal: Generate unique id for state object.
 //
@@ -476,35 +590,11 @@ function extractContainer(data, xhr, options) {
   return obj
 }
 
-// Public: Reload current page with pjax.
-//
-// Returns whatever $.pjax returns.
-pjax.reload = function(container, options) {
-  var defaults = {
-    url: window.location.href,
-    push: false,
-    replace: true,
-    scrollTo: false
-  }
-
-  return $.pjax($.extend(defaults, optionsFor(container, options)))
-}
-
-
-pjax.defaults = {
-  timeout: 650,
-  push: true,
-  replace: false,
-  type: 'GET',
-  dataType: 'html',
-  scrollTo: 0,
-  maxCacheLength: 20
-}
-
 // Internal: History DOM caching class.
 var cacheMapping      = {}
 var cacheForwardStack = []
 var cacheBackStack    = []
+
 // Push previous state id and container contents into the history
 // cache. Should be called in conjunction with `pushState` to save the
 // previous container contents.
@@ -526,6 +616,7 @@ function cachePush(id, value) {
   while (cacheBackStack.length > pjax.defaults.maxCacheLength)
     delete cacheMapping[cacheBackStack.shift()]
 }
+
 // Shifts cache from directional history cache. Should be
 // called on `popstate` with the previous state id and container
 // contents.
@@ -552,75 +643,54 @@ function cachePop(direction, id, value) {
     delete cacheMapping[id]
 }
 
-
-// Export $.pjax.click
-pjax.click = handleClick
-
-
-// popstate handler takes care of the back and forward buttons
+// Install pjax functions on $.pjax to enable pushState behavior.
 //
-// You probably shouldn't use pjax on pages with other pushState
-// stuff yet.
-$(window).bind('popstate', function(event){
-  var state = event.state
-
-  if (state && state.container) {
-    var container = $(state.container)
-    if (container.length) {
-      var contents = cacheMapping[state.id]
-
-      if (pjax.state) {
-        // Since state ids always increase, we can deduce the history
-        // direction from the previous state.
-        var direction = pjax.state.id < state.id ? 'forward' : 'back'
-
-        // Cache current container before replacement and inform the
-        // cache which direction the history shifted.
-        cachePop(direction, pjax.state.id, container.clone().contents())
-      }
-
-      var popstateEvent = $.Event('pjax:popstate', {
-        state: state,
-        direction: direction
-      })
-      container.trigger(popstateEvent)
-
-      var options = {
-        id: state.id,
-        url: state.url,
-        container: container,
-        push: false,
-        fragment: state.fragment,
-        timeout: state.timeout,
-        scrollTo: false
-      }
-
-      if (contents) {
-        // pjax event is deprecated
-        $(document).trigger('pjax', [null, options])
-        container.trigger('pjax:start', [null, options])
-        // end.pjax event is deprecated
-        container.trigger('start.pjax', [null, options])
-
-        if (state.title) document.title = state.title
-        container.html(contents)
-        pjax.state = state
-
-        container.trigger('pjax:end', [null, options])
-        // end.pjax event is deprecated
-        container.trigger('end.pjax', [null, options])
-      } else {
-        $.pjax(options)
-      }
-
-      // Force reflow/relayout before the browser tries to restore the
-      // scroll position.
-      container[0].offsetHeight
-    } else {
-      window.location = location.href
-    }
+// Does nothing if already enabled.
+//
+// Examples
+//
+//     $.pjax.enable()
+//
+// Returns nothing.
+function enable() {
+  $.fn.pjax = fnPjax
+  $.pjax = pjax
+  $.pjax.enable = $.noop
+  $.pjax.disable = disable
+  $.pjax.click = handleClick
+  $.pjax.reload = pjaxReload
+  $.pjax.defaults = {
+    timeout: 650,
+    push: true,
+    replace: false,
+    type: 'GET',
+    dataType: 'html',
+    scrollTo: 0,
+    maxCacheLength: 20
   }
-})
+  $(window).bind('popstate.pjax', onPjaxPopstate)
+}
+
+// Disable pushState behavior.
+//
+// This is the case when a browser doesn't support pushState. It is
+// sometimes useful to disable pushState for debugging on a modern
+// browser.
+//
+// Examples
+//
+//     $.pjax.disable()
+//
+// Returns nothing.
+function disable() {
+  $.fn.pjax = function() { return this }
+  $.pjax = fallbackPjax
+  $.pjax.enable = enable
+  $.pjax.disable = $.noop
+  $.pjax.click = $.noop
+  $.pjax.reload = window.location.reload
+  $(window).unbind('popstate.pjax', onPjaxPopstate)
+}
 
 
 // Add the state property to jQuery's event object so we can use it in
@@ -628,50 +698,12 @@ $(window).bind('popstate', function(event){
 if ( $.inArray('state', $.event.props) < 0 )
   $.event.props.push('state')
 
-
-// Is pjax supported by this browser?
+ // Is pjax supported by this browser?
 $.support.pjax =
-  window.history && window.history.pushState && window.history.replaceState
+  window.history && window.history.pushState && window.history.replaceState &&
   // pushState isn't reliable on iOS until 5.
-  && !navigator.userAgent.match(/((iPod|iPhone|iPad).+\bOS\s+[1-4]|WebApps\/.+CFNetwork)/)
+  !navigator.userAgent.match(/((iPod|iPhone|iPad).+\bOS\s+[1-4]|WebApps\/.+CFNetwork)/)
 
-// Fall back to normalcy for older browsers.
-if ( !$.support.pjax ) {
-  $.pjax = function( options ) {
-    var url = $.isFunction(options.url) ? options.url() : options.url,
-        method = options.type ? options.type.toUpperCase() : 'GET'
-
-    var form = $('<form>', {
-      method: method === 'GET' ? 'GET' : 'POST',
-      action: url,
-      style: 'display:none'
-    })
-
-    if (method !== 'GET' && method !== 'POST') {
-      form.append($('<input>', {
-        type: 'hidden',
-        name: '_method',
-        value: method.toLowerCase()
-      }))
-    }
-
-    var data = options.data
-    if (typeof data === 'string') {
-      $.each(data.split('&'), function(index, value) {
-        var pair = value.split('=')
-        form.append($('<input>', {type: 'hidden', name: pair[0], value: pair[1]}))
-      })
-    } else if (typeof data === 'object') {
-      for (key in data)
-        form.append($('<input>', {type: 'hidden', name: key, value: data[key]}))
-    }
-
-    $(document.body).append(form)
-    form.submit()
-  }
-  $.pjax.click = $.noop
-  $.pjax.reload = window.location.reload
-  $.fn.pjax = function() { return this }
-}
+$.support.pjax ? enable() : disable()
 
 })(jQuery);
