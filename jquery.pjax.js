@@ -200,14 +200,14 @@ function pjax(options) {
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (textStatus !== 'abort' && allowed)
-      window.location = container.url
+      window.location.replace(container.url)
   }
 
   options.success = function(data, status, xhr) {
     var container = extractContainer(data, xhr, options)
 
     if (!container.contents) {
-      window.location = container.url
+      window.location.replace(container.url)
       return
     }
 
@@ -381,7 +381,7 @@ function onPjaxPopstate(event) {
       // scroll position.
       container[0].offsetHeight
     } else {
-      window.location = location.href
+      window.location.replace(location.href)
     }
   }
 }
