@@ -525,7 +525,7 @@ function findContainerFor(container) {
 //
 // Returns a jQuery object.
 function findAll(elems, selector) {
-  return elems.find('*').andSelf().filter(selector);
+  return elems.filter(selector).add(elems.find(selector));
 }
 
 // Internal: Extracts container and metadata from response.
