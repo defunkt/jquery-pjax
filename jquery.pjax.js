@@ -700,6 +700,7 @@ function enable() {
   $.pjax.enable = $.noop
   $.pjax.disable = disable
   $.pjax.click = handleClick
+  $.pjax.submit = handleSubmit
   $.pjax.reload = pjaxReload
   $.pjax.defaults = {
     timeout: 650,
@@ -730,6 +731,7 @@ function disable() {
   $.pjax.enable = enable
   $.pjax.disable = $.noop
   $.pjax.click = $.noop
+  $.pjax.submit = $.noop
   $.pjax.reload = window.location.reload
   $(window).unbind('popstate.pjax', onPjaxPopstate)
 }
