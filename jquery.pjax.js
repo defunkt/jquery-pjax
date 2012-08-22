@@ -117,7 +117,7 @@ function handleSubmit(event, container, options) {
   var defaults = {
     type: form.method,
     url: form.action,
-    data: $(form).serializeArray()
+    data: $(form).serializeArray(),
     container: $(form).attr('data-pjax'),
     target: form,
     fragment: null,
