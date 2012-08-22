@@ -232,6 +232,52 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("GET data is appended to query string", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "env.html",
+      data: { foo: 1, bar: 2 },
+      container: "#main",
+      complete: function() {
+        equal(frame.location.pathname, "/env.html")
+        equal(frame.location.search, "?foo=1&bar=2")
+
+        var env = JSON.parse(frame.$("#env").text())
+        equal(env['rack.request.query_hash']['foo'], '1')
+        equal(env['rack.request.query_hash']['bar'], '2')
+        start()
+      }
+    })
+
+    // URL is set immediately
+    equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "?foo=1&bar=2")
+  })
+
+  asyncTest("GET data is merged into query string", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "env.html?foo=1",
+      data: { bar: 2 },
+      container: "#main",
+      complete: function() {
+        equal(frame.location.pathname, "/env.html")
+        equal(frame.location.search, "?foo=1&bar=2")
+
+        var env = JSON.parse(frame.$("#env").text())
+        equal(env['rack.request.query_hash']['foo'], '1')
+        equal(env['rack.request.query_hash']['bar'], '2')
+        start()
+      }
+    })
+
+    // URL is set immediately
+    equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "?foo=1&bar=2")
+  })
+
 
   asyncTest("only fragment is inserted", function() {
     var frame = this.frame

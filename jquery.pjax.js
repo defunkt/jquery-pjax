@@ -294,7 +294,7 @@ function pjax(options) {
       // Cache current container element before replacing it
       cachePush(pjax.state.id, context.clone().contents())
 
-      window.history.pushState(null, "", options.url)
+      window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
     }
 
     fire('pjax:start', [xhr, options])
