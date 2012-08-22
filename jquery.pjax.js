@@ -110,10 +110,6 @@ function handleSubmit(event, container, options) {
   if (form.tagName.toUpperCase() !== 'FORM')
     throw "$.pjax.submit requires a form element"
 
-  // Ignore cross origin links
-  if ( location.protocol !== link.protocol || location.host !== link.host )
-    return
-
   var defaults = {
     type: form.method,
     url: form.action,
