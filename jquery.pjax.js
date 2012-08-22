@@ -44,10 +44,10 @@ function fnPjax(container, options) {
 //
 //  $(document).on('click', 'a', function(event) {
 //    var container = $(this).closest('[data-pjax-container]')
-//    return $.pjax.click(event, container)
+//    $.pjax.click(event, container)
 //  })
 //
-// Returns false if pjax runs, otherwise nothing.
+// Returns nothing.
 function handleClick(event, container, options) {
   options = optionsFor(container, options)
 
@@ -80,6 +80,48 @@ function handleClick(event, container, options) {
     target: link,
     clickedElement: $(link), // DEPRECATED: use target
     fragment: null
+  }
+
+  pjax($.extend({}, defaults, options))
+
+  event.preventDefault()
+}
+
+// Public: pjax on form submit handler
+//
+// Exported as $.pjax.submit
+//
+// event   - "click" jQuery.Event
+// options - pjax options
+//
+// Examples
+//
+//  $(document).on('submit', 'form', function(event) {
+//    var container = $(this).closest('[data-pjax-container]')
+//    $.pjax.submit(event, container)
+//  })
+//
+// Returns nothing.
+function handleSubmit(event, container, options) {
+  options = optionsFor(container, options)
+
+  var form = event.currentTarget
+
+  if (form.tagName.toUpperCase() !== 'FORM')
+    throw "$.pjax.submit requires a form element"
+
+  // Ignore cross origin links
+  if ( location.protocol !== link.protocol || location.host !== link.host )
+    return
+
+  var defaults = {
+    type: form.method,
+    url: form.action,
+    data: $(form).serializeArray()
+    container: $(form).attr('data-pjax'),
+    target: form,
+    fragment: null,
+    timeout: 0
   }
 
   pjax($.extend({}, defaults, options))
