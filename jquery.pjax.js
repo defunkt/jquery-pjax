@@ -259,7 +259,7 @@ function pjax(options) {
     }
 
     if (options.push || options.replace) {
-      window.history.replaceState(pjax.state, container.title, container.url)
+      pjax.replaceState(pjax.state, container.title, container.url)
     }
 
     if (container.title) document.title = container.title
@@ -285,7 +285,7 @@ function pjax(options) {
       url.hash = hash
 
       pjax.state.url = url.href
-      window.history.replaceState(pjax.state, container.title, url.href)
+      pjax.replaceState(pjax.state, container.title, url.href)
 
       var target = $(url.hash)
       if (target.length) $(window).scrollTop(target.offset().top)
@@ -311,7 +311,7 @@ function pjax(options) {
       fragment: options.fragment,
       timeout: options.timeout
     }
-    window.history.replaceState(pjax.state, document.title)
+    pjax.replaceState(pjax.state, document.title)
   }
 
   // Cancel the current request if we're already pjaxing
@@ -332,7 +332,7 @@ function pjax(options) {
       // Cache current container element before replacing it
       cachePush(pjax.state.id, context.clone().contents())
 
-      window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
+      pjax.pushState(null, "", stripPjaxParam(options.requestUrl))
     }
 
     fire('pjax:start', [xhr, options])
@@ -681,6 +681,18 @@ function cachePop(direction, id, value) {
     delete cacheMapping[id]
 }
 
+// A wrapper around window.history.pushState. This can be replaced with
+// a no-op when enabling without push state
+function pushState(state, title, url) {
+  window.history.pushState(state, title, url);
+}
+
+// A wrapper around window.history.replaceState. This can be replaced with
+// a no-op when enabling without push state
+function replaceState(state, title, url) {
+  window.history.replaceState(state, title, url);
+}
+
 // Install pjax functions on $.pjax to enable pushState behavior.
 //
 // Does nothing if already enabled.
@@ -695,6 +707,9 @@ function enable() {
   $.pjax = pjax
   $.pjax.enable = $.noop
   $.pjax.disable = disable
+  $.pjax.enableWithoutPushState = enableWithoutPushState
+  $.pjax.pushState = pushState
+  $.pjax.replaceState = replaceState
   $.pjax.click = handleClick
   $.pjax.submit = handleSubmit
   $.pjax.reload = pjaxReload
@@ -726,10 +741,30 @@ function disable() {
   $.pjax = fallbackPjax
   $.pjax.enable = enable
   $.pjax.disable = $.noop
+  $.pjax.enableWithoutPushState = enableWithoutPushState
+  $.pjax.pushState = $.noop
+  $.pjax.replaceState = $.noop
   $.pjax.click = $.noop
   $.pjax.submit = $.noop
   $.pjax.reload = window.location.reload
   $(window).unbind('popstate.pjax', onPjaxPopstate)
+}
+
+// Another option for graceful degradation of PJAX
+//
+// All queries are still fired via AJAX, but the URL is not updated to
+// reflect the new page.
+//
+// Examples
+//
+//     $.pjax.enableWithoutPushState()
+//
+// Returns nothing.
+function enableWithoutPushState() {
+  enable();
+  $.pjax.enableWithoutPushState = $.noop
+  $.pjax.pushState = $.noop
+  $.pjax.replaceState = $.noop
 }
 
 
