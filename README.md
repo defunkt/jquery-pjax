@@ -54,7 +54,7 @@ Two. Slightly obtrusive, passing a container and binding an error handler:
 ```js
 $('.js-pjax').pjax('#main')
 
-$('#main').live('pjax:error', function(e, xhr, err) {
+$('#main').on('pjax:error', function(e, xhr, err) {
   $('.error').text('Something went wrong: ' + err)
 })
 ```
@@ -73,7 +73,7 @@ Three. Unobtrusive, showing a 'loading' spinner:
 ```
 
 ```js
-$('a').pjax('#main').live('click', function(){
+$('a').pjax('#main').on('click', function(){
   $(this).showLoader()
 })
 ```
