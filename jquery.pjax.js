@@ -238,14 +238,14 @@ function pjax(options) {
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (textStatus !== 'abort' && allowed)
-      window.location.replace(container.url)
+      locationReplace(container.url)
   }
 
   options.success = function(data, status, xhr) {
     var container = extractContainer(data, xhr, options)
 
     if (!container.contents) {
-      window.location.replace(container.url)
+      locationReplace(container.url)
       return
     }
 
@@ -359,6 +359,17 @@ function pjaxReload(container, options) {
   return pjax($.extend(defaults, optionsFor(container, options)))
 }
 
+// Internal: Hard replace current state with url.
+//
+// Work for around WebKit
+//   https://bugs.webkit.org/show_bug.cgi?id=93506
+//
+// Returns nothing.
+function locationReplace(url) {
+  window.history.replaceState(null, "", "#")
+  window.location.replace(url)
+}
+
 // popstate handler takes care of the back and forward buttons
 //
 // You probably shouldn't use pjax on pages with other pushState
@@ -419,7 +430,7 @@ function onPjaxPopstate(event) {
       // scroll position.
       container[0].offsetHeight
     } else {
-      window.location.replace(location.href)
+      locationReplace(location.href)
     }
   }
 }
