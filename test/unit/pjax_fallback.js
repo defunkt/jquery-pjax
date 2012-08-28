@@ -146,8 +146,10 @@ asyncTest("scrolls to anchor at top page"+s, function() {
   equal(frame.window.scrollY, 0)
 
   this.loaded = function(frame) {
-    equal(frame.window.scrollY, 8)
-    start()
+    setTimeout(function() {
+      equal(frame.window.scrollY, 8)
+      start()
+    }, 10)
   }
 
   frame.$.pjax({
@@ -162,8 +164,10 @@ asyncTest("empty anchor doesn't scroll page"+s, function() {
   equal(frame.window.scrollY, 0)
 
   this.loaded = function(frame) {
-    equal(frame.window.scrollY, 0)
-    start()
+    setTimeout(function() {
+      equal(frame.window.scrollY, 0)
+      start()
+    }, 10)
   }
 
   frame.$.pjax({
@@ -178,8 +182,10 @@ asyncTest("scrolls to anchor at bottom page"+s, function() {
   equal(frame.window.scrollY, 0)
 
   this.loaded = function(frame) {
-    equal(frame.window.scrollY, 10008)
-    start()
+    setTimeout(function() {
+      equal(frame.window.scrollY, 10008)
+      start()
+    }, 10)
   }
 
   frame.$.pjax({
