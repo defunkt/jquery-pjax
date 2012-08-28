@@ -367,7 +367,7 @@ function pjaxReload(container, options) {
 // Returns nothing.
 function locationReplace(url) {
   window.history.replaceState(null, "", "#")
-  window.location.replace = url
+  window.location.replace(url)
 }
 
 // popstate handler takes care of the back and forward buttons
