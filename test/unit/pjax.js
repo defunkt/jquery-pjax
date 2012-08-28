@@ -658,6 +658,104 @@ if ($.support.pjax) {
     }, 0)
   }
 
+  asyncTest("no caching - going back makes ajax call", function(){
+    var frame = this.frame, ajaxCallCount = 0
+
+    frame.$.pjax.defaults.maxCacheLength = 0
+
+    frame.$("#main").one("pjax:end", function() {
+
+      frame.$("#main").on("pjax:success", function(event, xhr) {
+        ajaxCallCount++
+      })
+
+      goBack(frame, function() {
+        equal(ajaxCallCount, 1, 'ajax calls')
+        start()
+      })
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
+  asyncTest("caching - going back doesn't make ajax call", function(){
+    var frame = this.frame, ajaxCallCount = 0
+
+    frame.$.pjax.defaults.maxCacheLength = 1
+
+    frame.$("#main").one("pjax:end", function() {
+
+      frame.$("#main").on("pjax:success", function(event, xhr) {
+        ajaxCallCount++
+      })
+
+      goBack(frame, function() {
+        equal(ajaxCallCount, 0, 'ajax calls')
+        start()
+      })
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
+  asyncTest("no caching - going forward makes ajax call", function(){
+    var frame = this.frame, ajaxCallCount = 0
+
+    frame.$.pjax.defaults.maxCacheLength = 0
+
+    frame.$("#main").one("pjax:end", function() {
+
+      goBack(frame, function() {
+
+        frame.$("#main").on("pjax:success", function() {
+          ajaxCallCount++
+        })
+
+        goForward(frame, function() {
+          equal(ajaxCallCount, 1, 'ajax calls')
+          start()
+        })
+      })
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
+  asyncTest("caching - going forward doesn't make ajax call", function(){
+    var frame = this.frame, ajaxCallCount = 0
+
+    frame.$.pjax.defaults.maxCacheLength = 1
+
+    frame.$("#main").one("pjax:end", function() {
+
+      goBack(frame, function() {
+
+        frame.$("#main").on("pjax:success", function() {
+          ajaxCallCount++
+        })
+
+        goForward(frame, function() {
+          equal(ajaxCallCount, 0, 'ajax calls')
+          start()
+        })
+      })
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
   asyncTest("popstate going back to page", function() {
     var frame = this.frame
 
