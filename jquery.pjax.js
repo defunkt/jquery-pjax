@@ -378,7 +378,7 @@ function onPjaxPopstate(event) {
   var state = event.state
 
   if (state && state.container) {
-    var container = $(state.container)
+    var container = $($.pjax.state.container)
     if (container.length) {
       var contents = cacheMapping[state.id]
 
