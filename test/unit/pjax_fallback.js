@@ -16,7 +16,7 @@ module("$.pjax fallback"+s, {
     }
     window.iframeLoad = function(frame) {
       setTimeout(function() {
-        if (disabled) frame.$.pjax.disable()
+        if (disabled && frame.$ && frame.$.pjax) frame.$.pjax.disable()
         self.loaded(frame)
       }, 0)
     }
