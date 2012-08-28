@@ -1,6 +1,11 @@
 // $.pjax fallback tests should run on both pushState and
 // non-pushState compatible browsers.
-module("$.pjax fallback", {
+$.each([true, false], function() {
+
+var disabled = this == false
+var s = disabled ? " (disabled)" : ""
+
+module("$.pjax fallback"+s, {
   setup: function() {
     var self = this
     stop()
@@ -10,7 +15,10 @@ module("$.pjax fallback", {
       start()
     }
     window.iframeLoad = function(frame) {
-      setTimeout(function() { self.loaded(frame) }, 0)
+      setTimeout(function() {
+        if (disabled) frame.$.pjax.disable()
+        self.loaded(frame)
+      }, 0)
     }
     $("#qunit-fixture").append("<iframe src='home.html'>")
   },
@@ -20,7 +28,7 @@ module("$.pjax fallback", {
 })
 
 
-asyncTest("sets new url", function() {
+asyncTest("sets new url"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -34,7 +42,7 @@ asyncTest("sets new url", function() {
   })
 })
 
-asyncTest("sets new url for function", function() {
+asyncTest("sets new url for function"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -48,7 +56,7 @@ asyncTest("sets new url for function", function() {
   })
 })
 
-asyncTest("updates container html", function() {
+asyncTest("updates container html"+s, function() {
   var frame = this.frame
 
   this.loaded = function(frame) {
@@ -62,7 +70,7 @@ asyncTest("updates container html", function() {
   })
 })
 
-asyncTest("sets title to response <title>", function() {
+asyncTest("sets title to response <title>"+s, function() {
   var frame = this.frame
 
   this.loaded = function(frame) {
@@ -76,7 +84,7 @@ asyncTest("sets title to response <title>", function() {
   })
 })
 
-asyncTest("sends correct HTTP referer", function() {
+asyncTest("sends correct HTTP referer"+s, function() {
   var frame = this.frame
 
   this.loaded = function(frame) {
@@ -91,7 +99,7 @@ asyncTest("sends correct HTTP referer", function() {
   })
 })
 
-asyncTest("adds entry to browser history", function() {
+asyncTest("adds entry to browser history"+s, function() {
   var frame = this.frame
   var count = 0
 
@@ -115,7 +123,7 @@ asyncTest("adds entry to browser history", function() {
   })
 })
 
-asyncTest("scrolls to top of the page", function() {
+asyncTest("scrolls to top of the page"+s, function() {
   var frame = this.frame
 
   frame.window.scrollTo(0, 100)
@@ -132,7 +140,7 @@ asyncTest("scrolls to top of the page", function() {
   })
 })
 
-asyncTest("scrolls to anchor at top page", function() {
+asyncTest("scrolls to anchor at top page"+s, function() {
   var frame = this.frame
 
   equal(frame.window.scrollY, 0)
@@ -148,7 +156,7 @@ asyncTest("scrolls to anchor at top page", function() {
   })
 })
 
-asyncTest("empty anchor doesn't scroll page", function() {
+asyncTest("empty anchor doesn't scroll page"+s, function() {
   var frame = this.frame
 
   equal(frame.window.scrollY, 0)
@@ -164,7 +172,7 @@ asyncTest("empty anchor doesn't scroll page", function() {
   })
 })
 
-asyncTest("scrolls to anchor at bottom page", function() {
+asyncTest("scrolls to anchor at bottom page"+s, function() {
   var frame = this.frame
 
   equal(frame.window.scrollY, 0)
@@ -182,7 +190,7 @@ asyncTest("scrolls to anchor at bottom page", function() {
 
 
 
-asyncTest("sets GET method", function() {
+asyncTest("sets GET method"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -200,7 +208,7 @@ asyncTest("sets GET method", function() {
 })
 
 
-asyncTest("sets POST method", function() {
+asyncTest("sets POST method"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -217,7 +225,7 @@ asyncTest("sets POST method", function() {
   })
 })
 
-asyncTest("sets PUT method", function() {
+asyncTest("sets PUT method"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -234,7 +242,7 @@ asyncTest("sets PUT method", function() {
   })
 })
 
-asyncTest("sets DELETE method", function() {
+asyncTest("sets DELETE method"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -252,7 +260,7 @@ asyncTest("sets DELETE method", function() {
 })
 
 
-asyncTest("GET with data object", function() {
+asyncTest("GET with data object"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -274,7 +282,7 @@ asyncTest("GET with data object", function() {
   })
 })
 
-asyncTest("POST with data object", function() {
+asyncTest("POST with data object"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -296,7 +304,7 @@ asyncTest("POST with data object", function() {
   })
 })
 
-asyncTest("GET with data string", function() {
+asyncTest("GET with data string"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -318,7 +326,7 @@ asyncTest("GET with data string", function() {
   })
 })
 
-asyncTest("POST with data string", function() {
+asyncTest("POST with data string"+s, function() {
   var frame = this.frame
 
   this.loaded = function() {
@@ -338,4 +346,6 @@ asyncTest("POST with data string", function() {
     data: "foo=bar",
     container: "#main"
   })
+})
+
 })
