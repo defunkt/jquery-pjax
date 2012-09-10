@@ -41,7 +41,7 @@ One. Functionally obtrusive, loading the href with ajax into data-pjax:
 ```
 
 ```js
-$('a[data-pjax]').pjax()
+$(document).pjax('a[data-pjax]')
 ```
 
 
@@ -52,9 +52,7 @@ Two. Slightly obtrusive, passing a container and binding an error handler:
 ```
 
 ```js
-$('.js-pjax').pjax('#main')
-
-$('#main').on('pjax:error', function(e, xhr, err) {
+$('#main').pjax('.js-pjax').on('pjax:error', function(e, xhr, err) {
   $('.error').text('Something went wrong: ' + err)
 })
 ```
@@ -73,17 +71,17 @@ Three. Unobtrusive, showing a 'loading' spinner:
 ```
 
 ```js
-$('a').pjax('#main').on('click', function(){
+$('#main').pjax('a').on('pjax:send', function(){
   $(this).showLoader()
 })
 ```
 
 
-## $(link).pjax( container, options )
+## $(container).pjax( link, options )
 
-The `$(link).pjax()` function accepts a container, an options object,
-or both. The container MUST be a string selector - this is because we
-cannot persist jQuery objects using the History API between page loads.
+The `$(container).pjax(selector)` uses the jquery context as the
+default container pjax. The link selector is used to match against
+delegated click events to start pjaxing.
 
 The options are the same as jQuery's `$.ajax` options with the
 following additions:
@@ -195,8 +193,7 @@ reponse body into:
 This allows you to, say, display a loading indicator upon pjaxing:
 
 ```js
-$('a.pjax').pjax('#main')
-$('#main')
+$('#main').pjax('a.pjax')
   .on('pjax:start', function() { $('#loading').show() })
   .on('pjax:end',   function() { $('#loading').hide() })
 ```
@@ -204,7 +201,7 @@ $('#main')
 Because these events bubble, you can also set them on the document:
 
 ```js
-$('a.pjax').pjax()
+$('#main').pjax('a.pjax')
 $(document)
   .on('pjax:start', function() { $('#loading').show() })
   .on('pjax:end',   function() { $('#loading').hide() })
