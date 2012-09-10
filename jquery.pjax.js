@@ -226,8 +226,6 @@ function pjax(options) {
     fire('pjax:complete', [xhr, textStatus, options])
 
     fire('pjax:end', [xhr, options])
-    // end.pjax is deprecated
-    fire('end.pjax', [xhr, options])
   }
 
   options.error = function(xhr, textStatus, errorThrown) {
@@ -325,9 +323,6 @@ function pjax(options) {
   var xhr = pjax.xhr = $.ajax(options)
 
   if (xhr.readyState > 0) {
-    // pjax event is deprecated
-    $(document).trigger('pjax', [xhr, options])
-
     if (options.push && !options.replace) {
       // Cache current container element before replacing it
       cachePush(pjax.state.id, context.clone().contents())
@@ -336,9 +331,6 @@ function pjax(options) {
     }
 
     fire('pjax:start', [xhr, options])
-    // start.pjax is deprecated
-    fire('start.pjax', [xhr, options])
-
     fire('pjax:send', [xhr, options])
   }
 
@@ -409,19 +401,13 @@ function onPjaxPopstate(event) {
       }
 
       if (contents) {
-        // pjax event is deprecated
-        $(document).trigger('pjax', [null, options])
         container.trigger('pjax:start', [null, options])
-        // end.pjax event is deprecated
-        container.trigger('start.pjax', [null, options])
 
         if (state.title) document.title = state.title
         container.html(contents)
         pjax.state = state
 
         container.trigger('pjax:end', [null, options])
-        // end.pjax event is deprecated
-        container.trigger('end.pjax', [null, options])
       } else {
         pjax(options)
       }
