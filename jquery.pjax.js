@@ -78,7 +78,6 @@ function handleClick(event, container, options) {
     url: link.href,
     container: $(link).attr('data-pjax'),
     target: link,
-    clickedElement: $(link), // DEPRECATED: use target
     fragment: null
   }
 
@@ -152,9 +151,6 @@ function pjax(options) {
   }
 
   var target = options.target
-
-  // DEPRECATED: use options.target
-  if (!target && options.clickedElement) target = options.clickedElement[0]
 
   var hash = parseURL(options.url).hash
 

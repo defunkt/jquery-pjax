@@ -111,21 +111,6 @@ if ($.support.pjax) {
     frame.$("a[href='/dinosaurs.html']").click()
   })
 
-  asyncTest("sets clickedElement to target jquery object", function() {
-    var frame = this.frame
-
-    frame.$("a").pjax({ container: "#main" })
-
-    var link = frame.$("a[href='/dinosaurs.html']")[0]
-
-    frame.$("#main").on("pjax:end", function(event, xhr, options) {
-      equal(link, options.clickedElement[0])
-      start()
-    })
-
-    frame.$(link).click()
-  })
-
   asyncTest("sets relatedTarget to clicked element", function() {
     var frame = this.frame
 
