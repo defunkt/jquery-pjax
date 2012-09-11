@@ -154,13 +154,6 @@ function pjax(options) {
 
   var hash = parseURL(options.url).hash
 
-  // DEPRECATED: Save references to original event callbacks. However,
-  // listening for custom pjax:* events is prefered.
-  var oldBeforeSend = options.beforeSend,
-      oldComplete   = options.complete,
-      oldSuccess    = options.success,
-      oldError      = options.error
-
   var context = options.context = findContainerFor(options.container)
 
   // We want the browser to maintain two separate internal caches: one
@@ -200,12 +193,6 @@ function pjax(options) {
 
     var result
 
-    // DEPRECATED: Invoke original `beforeSend` handler
-    if (oldBeforeSend) {
-      result = oldBeforeSend.apply(this, arguments)
-      if (result === false) return false
-    }
-
     if (!fire('pjax:beforeSend', [xhr, settings]))
       return false
 
@@ -216,9 +203,6 @@ function pjax(options) {
     if (timeoutTimer)
       clearTimeout(timeoutTimer)
 
-    // DEPRECATED: Invoke original `complete` handler
-    if (oldComplete) oldComplete.apply(this, arguments)
-
     fire('pjax:complete', [xhr, textStatus, options])
 
     fire('pjax:end', [xhr, options])
@@ -226,9 +210,6 @@ function pjax(options) {
 
   options.error = function(xhr, textStatus, errorThrown) {
     var container = extractContainer("", xhr, options)
-
-    // DEPRECATED: Invoke original `error` handler
-    if (oldError) oldError.apply(this, arguments)
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (textStatus !== 'abort' && allowed)
@@ -284,9 +265,6 @@ function pjax(options) {
       var target = $(url.hash)
       if (target.length) $(window).scrollTop(target.offset().top)
     }
-
-    // DEPRECATED: Invoke original `success` handler
-    if (oldSuccess) oldSuccess.apply(this, arguments)
 
     fire('pjax:success', [data, status, xhr, options])
   }
