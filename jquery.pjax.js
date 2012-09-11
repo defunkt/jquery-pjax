@@ -4,28 +4,36 @@
 
 (function($){
 
-// When called on a link, fetches the href with ajax into the
-// container specified as the first parameter or with the data-pjax
-// attribute on the link itself.
+// When called on a container with a selector, fetches the href with
+// ajax into the container or with the data-pjax attribute on the link
+// itself.
 //
 // Tries to make sure the back button and ctrl+click work the way
 // you'd expect.
 //
+// Exported as $.fn.pjax
+//
 // Accepts a jQuery ajax options object that may include these
 // pjax specific options:
 //
+//
 // container - Where to stick the response body. Usually a String selector.
 //             $(container).html(xhr.responseBody)
+//             (default: current jquery context)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
 //
-// For convenience the first parameter can be either the container or
+// For convenience the second parameter can be either the container or
 // the options object.
 //
 // Returns the jQuery object
-function fnPjax(container, options) {
-  return this.live('click.pjax', function(event){
-    handleClick(event, container, options)
+function fnPjax(selector, container, options) {
+  var context = this
+  return this.on('click.pjax', selector, function(event) {
+    options = optionsFor(container, options)
+    if (!options.container)
+      options.container = $(this).attr('data-pjax') || context
+    handleClick(event, options)
   })
 }
 
@@ -38,9 +46,9 @@ function fnPjax(container, options) {
 //
 // Examples
 //
-//   $('a').live('click', $.pjax.click)
+//   $(document).on('click', 'a', $.pjax.click)
 //   // is the same as
-//   $('a').pjax()
+//   $(document).pjax('a')
 //
 //  $(document).on('click', 'a', function(event) {
 //    var container = $(this).closest('[data-pjax-container]')

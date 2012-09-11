@@ -19,9 +19,7 @@ if ($.support.pjax) {
   asyncTest("pushes new url", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
-
-    frame.$("#main").on("pjax:end", function() {
+    frame.$("#main").pjax("a").on("pjax:end", function() {
       equal(frame.location.pathname, "/dinosaurs.html")
       start()
     })
@@ -32,9 +30,7 @@ if ($.support.pjax) {
   asyncTest("replaces container html from response data", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
-
-    frame.$("#main").on("pjax:end", function() {
+    frame.$("#main").pjax("a").on("pjax:end", function() {
       equal(frame.$("iframe").attr('title'), "YouTube video player")
       start()
     })
@@ -45,9 +41,7 @@ if ($.support.pjax) {
   asyncTest("sets title to response title tag", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
-
-    frame.$("#main").on("pjax:end", function() {
+    frame.$("#main").pjax("a").on("pjax:end", function() {
       equal(frame.document.title, "dinosaurs")
       start()
     })
@@ -56,12 +50,10 @@ if ($.support.pjax) {
   })
 
 
-  asyncTest("uses first argument as container", function() {
+  asyncTest("uses second argument as container", function() {
     var frame = this.frame
 
-    frame.$("a").pjax("#main")
-
-    frame.$("#main").on("pjax:end", function() {
+    frame.$("body").pjax("a", "#main").on("pjax:end", "#main", function() {
       equal(frame.location.pathname, "/dinosaurs.html")
       start()
     })
@@ -69,12 +61,10 @@ if ($.support.pjax) {
     frame.$("a[href='/dinosaurs.html']").click()
   })
 
-  asyncTest("uses first argument as options", function() {
+  asyncTest("uses second argument as options", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({container: "#main", push: true})
-
-    frame.$("#main").on("pjax:end", function() {
+    frame.$("#main").pjax("a", {push: true}).on("pjax:end", function() {
       equal(frame.location.pathname, "/dinosaurs.html")
       start()
     })
@@ -82,12 +72,10 @@ if ($.support.pjax) {
     frame.$("a[href='/dinosaurs.html']").click()
   })
 
-  asyncTest("uses first argument as container and second as options", function() {
+  asyncTest("uses second argument as container and third as options", function() {
     var frame = this.frame
 
-    frame.$("a").pjax("#main", {push: true})
-
-    frame.$("#main").on("pjax:end", function() {
+    frame.$("body").pjax("a", "#main", {push: true}).on("pjax:end", function() {
       equal(frame.location.pathname, "/dinosaurs.html")
       start()
     })
@@ -101,7 +89,7 @@ if ($.support.pjax) {
 
     frame.$("a").attr('data-pjax', "#main")
 
-    frame.$("a").pjax()
+    frame.$("body").pjax("a")
 
     frame.$("#main").on("pjax:end", function() {
       equal(frame.location.pathname, "/dinosaurs.html")
@@ -114,7 +102,7 @@ if ($.support.pjax) {
   asyncTest("sets relatedTarget to clicked element", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
+    frame.$("#main").pjax("a")
 
     var link = frame.$("a[href='/dinosaurs.html']")[0]
 
@@ -130,7 +118,7 @@ if ($.support.pjax) {
   asyncTest("doesn't ignore left click", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
+    frame.$("#main").pjax("a")
 
     var event = frame.$.Event('click')
     event.which = 0
@@ -143,7 +131,7 @@ if ($.support.pjax) {
   asyncTest("ignores middle clicks", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
+    frame.$("#main").pjax("a")
 
     var event = frame.$.Event('click')
     event.which = 3
@@ -156,7 +144,7 @@ if ($.support.pjax) {
   asyncTest("ignores command clicks", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
+    frame.$("#main").pjax("a")
 
     var event = frame.$.Event('click')
     event.metaKey = true
@@ -169,7 +157,7 @@ if ($.support.pjax) {
   asyncTest("ignores ctrl clicks", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
+    frame.$("#main").pjax("a")
 
     var event = frame.$.Event('click')
     event.ctrlKey = true
@@ -182,7 +170,7 @@ if ($.support.pjax) {
   asyncTest("ignores cross origin links", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
+    frame.$("#main").pjax("a")
 
     var event = frame.$.Event('click')
     frame.$("a[href='https://www.google.com/']").trigger(event)
@@ -194,7 +182,7 @@ if ($.support.pjax) {
   asyncTest("ignores same page anchors", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
+    frame.$("#main").pjax("a")
 
     var event = frame.$.Event('click')
     frame.$("a[href='#main']").trigger(event)
@@ -206,9 +194,7 @@ if ($.support.pjax) {
   asyncTest("scrolls to anchor after load", function() {
     var frame = this.frame
 
-    frame.$("a").pjax({ container: "#main" })
-
-    frame.$("#main").on("pjax:end", function() {
+    frame.$("#main").pjax("a").on("pjax:end", function() {
       equal(frame.location.pathname, "/dinosaurs.html")
       equal(frame.location.hash, "#main")
       start()
