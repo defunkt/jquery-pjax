@@ -252,6 +252,39 @@ Replace `path/to/js` with the path to your JavaScript directory,
 e.g. `public/javascripts`.
 
 
+## upgrade it
+
+pjax 1.0 includes some breaking changes.
+
+The main API was changed.
+
+Old: `$(link).pjax( container, options )`
+
+New: `$(container).pjax( link, options )`
+
+Instead of this:
+
+    $('a[data-pjax]').pjax()
+
+Do this:
+
+    $(document).pjax('a[data-pjax]')
+
+These options were removed:
+
+* `clickedElement` - Use `target` instead
+* `beforeSend` - Bind to `pjax:beforeSend` instead
+* `complete` - Bind to `pjax:complete` instead
+* `success` - Bind to `pjax:success` instead
+* `error` - Bind to `pjax:error` instead
+
+These events were removed:
+
+* `pjax` - Use `pjax:start`
+* `start.pjax` - Use `pjax:start`
+* `end.pjax` - Use `pjax:end`
+
+
 ## minimize it
 
 ```
