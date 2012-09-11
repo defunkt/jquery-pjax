@@ -1,5 +1,8 @@
 {
   "name": "jquery-pjax",
   "version": "1.0.0",
-  "main": "./jquery.pjax.js"
+  "main": "./jquery.pjax.js",
+  "dependencies": {
+    "jquery": "~1.7"
+  }
 }
