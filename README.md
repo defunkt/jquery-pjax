@@ -173,6 +173,12 @@ Django: <https://github.com/jacobian/django-pjax>
 
 Asp.Net MVC3: <http://biasecurities.com/blog/2011/using-pjax-with-asp-net-mvc3/>
 
+FuelPHP: <https://github.com/rcrowe/fuel-pjax>
+
+Grails: <http://www.bobbywarner.com/2012/04/23/add-some-pjax-to-grails/>
+
+Express: <https://github.com/abdelsaid/express-pjax-demo>
+
 
 ## page titles
 
