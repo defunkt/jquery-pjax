@@ -85,3 +85,7 @@ end
 get '/:page.html' do
   erb :"#{params[:page]}", :layout => !pjax?
 end
+
+delete '/payload.html' do
+  erb :payload, :layout => !pjax?
+end

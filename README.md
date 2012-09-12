@@ -226,6 +226,33 @@ callbacks.
 **CAUTION** Callback handlers passed to `$.pjax` **cannot** be persisted
 across full page reloads. Its recommended you use custom events instead.
 
+
+## outside of container
+
+pjax is not limited to replacing the html in the container. Using the `payload_items`
+option, you can tell pjax to replace items outside the container.
+
+For example, if you want to change the background color of the page you might:
+
+```js
+$.pjax({
+  container: "#main",
+  payload_items: [{id: "body_bg", eval: '$("body").attr({"background-color": "__pjax_value__"});', default: ""}]
+})
+```
+
+And in the HTML that is returned to the `pjax`:
+
+```html
+<div id="body_bg">#ff0000</div>
+```
+
+The `payload_items` options takes an array of objects, each with the following parameters:
+
+* `id`        - In the HTML that is returned from the `pjax` call, the id should match the dom id of the element to extract the value.
+* `eval`      - A string of javascript that will be evaluated on each `pjax.success`. The string `__pjax_value__` will be replaced by the value that is returned from the `pjax` call.
+* `default`   - The default value, this is the value for any pjax response where there is no value to change.
+
 ## browser support
 
 pjax only works with browsers that support the history.pushState API.
