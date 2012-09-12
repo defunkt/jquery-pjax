@@ -79,7 +79,8 @@ function handleClick(event, container, options) {
     container: $(link).attr('data-pjax'),
     target: link,
     clickedElement: $(link), // DEPRECATED: use target
-    fragment: null
+    fragment: null,
+    payload_items: []
   }
 
   pjax($.extend({}, defaults, options))
@@ -117,7 +118,8 @@ function handleSubmit(event, container, options) {
     container: $(form).attr('data-pjax'),
     target: form,
     fragment: null,
-    timeout: 0
+    timeout: 0,
+    payload_items: []
   }
 
   pjax($.extend({}, defaults, options))
@@ -157,6 +159,7 @@ function pjax(options) {
   if (!target && options.clickedElement) target = options.clickedElement[0]
 
   var hash = parseURL(options.url).hash
+  
 
   // DEPRECATED: Save references to original event callbacks. However,
   // listening for custom pjax:* events is prefered.
@@ -257,6 +260,17 @@ function pjax(options) {
       fragment: options.fragment,
       timeout: options.timeout
     }
+    
+    var payload_i = []
+    $.each(options.payload_items, function(index, item){
+      item.value = container[item.id].value
+      if (item.value != undefined)
+        item.eval = item.eval.replace(new RegExp("__pjax_value__", "g"), item.value)
+      payload_i.push(i)
+      pjax.state[item.id] = item
+    })
+    pjax.state.payload_items = payload_i
+    
 
     if (options.push || options.replace) {
       window.history.replaceState(pjax.state, container.title, container.url)
@@ -264,7 +278,14 @@ function pjax(options) {
 
     if (container.title) document.title = container.title
     context.html(container.contents)
-
+    
+    $.each(options.payload_items, function(index, item){
+      if (item.value != undefined){
+        item.eval = item.eval.replace(new RegExp("__pjax_value__", "g"), item.value)
+        eval(item.eval)
+      }
+    })
+    
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
       $(window).scrollTop(options.scrollTo)
@@ -309,8 +330,20 @@ function pjax(options) {
       title: document.title,
       container: context.selector,
       fragment: options.fragment,
-      timeout: options.timeout
+      timeout: options.timeout,
+      payload_items: options.payload_items
     }
+    
+    payload_i = []
+    $.each(options.payload_items, function(index, item){
+      i = $.extend({}, item)
+      if (i.value == undefined)
+        i.value = i.default
+      i.eval = i.eval.replace(new RegExp("__pjax_value__", "g"), i.value)
+      payload_i.push(i)
+      pjax.state[i.id] = i
+    })
+    pjax.state.payload_items = payload_i
     window.history.replaceState(pjax.state, document.title)
   }
 
@@ -376,7 +409,7 @@ function locationReplace(url) {
 // stuff yet.
 function onPjaxPopstate(event) {
   var state = event.state
-
+  
   if (state && state.container) {
     var container = $(state.container)
     if (container.length) {
@@ -386,7 +419,6 @@ function onPjaxPopstate(event) {
         // Since state ids always increase, we can deduce the history
         // direction from the previous state.
         var direction = pjax.state.id < state.id ? 'forward' : 'back'
-
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
         cachePop(direction, pjax.state.id, container.clone().contents())
@@ -405,8 +437,12 @@ function onPjaxPopstate(event) {
         push: false,
         fragment: state.fragment,
         timeout: state.timeout,
-        scrollTo: false
+        scrollTo: false,
+        payload_items: state.payload_items
       }
+      
+      
+      
 
       if (contents) {
         // pjax event is deprecated
@@ -417,6 +453,11 @@ function onPjaxPopstate(event) {
 
         if (state.title) document.title = state.title
         container.html(contents)
+        
+        $.each(state.payload_items, function(index, item){
+          //if (state[item.id].value != undefined)
+            eval(state[item.id].eval)
+        })
         pjax.state = state
 
         container.trigger('pjax:end', [null, options])
@@ -605,6 +646,11 @@ function extractContainer(data, xhr, options) {
   // If there's a <title> tag in the response, use it as
   // the page's title.
   obj.title = findAll($data, 'title').last().text()
+  
+  $.each(options.payload_items, function(index, item){
+    item.value = findAll($data, "#" + item.id).last().text()
+    obj[item.id] = item
+  })
 
   if (options.fragment) {
     // If they specified a fragment, look for it in the response
@@ -618,6 +664,13 @@ function extractContainer(data, xhr, options) {
       // on the fragment
       if (!obj.title)
         obj.title = $fragment.attr('title') || $fragment.data('title')
+        
+      $.each(options.payload_items, function(index, item){
+        if (!obj[item.id]){
+          item.value = $fragment.attr(item.id) || $fragment.data(item.id)
+          obj[item.id] =  item
+        }
+      })
     }
 
   } else if (!/<html/i.test(data)) {
@@ -631,10 +684,19 @@ function extractContainer(data, xhr, options) {
 
     // Then scrub any titles from their descendents
     obj.contents.find('title').remove()
+    
+    $.each(options.payload_items, function(index, item){
+      obj.contents.find("#" + item.id).remove() 
+    })
   }
 
   // Trim any whitespace off the title
   if (obj.title) obj.title = $.trim(obj.title)
+  
+  $.each(options.payload_items, function(index, item){
+    if(obj[item.id]) obj[item.id].value = $.trim(obj[item.id].value)
+  })
+  
 
   return obj
 }
@@ -716,7 +778,8 @@ function enable() {
     type: 'GET',
     dataType: 'html',
     scrollTo: 0,
-    maxCacheLength: 20
+    maxCacheLength: 20,
+    payload_items: []
   }
   $(window).bind('popstate.pjax', onPjaxPopstate)
 }

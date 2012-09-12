@@ -904,4 +904,108 @@ if ($.support.pjax) {
     ok(frame.$.pjax.state.id)
     oldId = frame.$.pjax.state.id
   })
+  
+}
+
+
+if ($.support.pjax) {
+  module("pjax_payload", {
+    setup: function() {
+      var self = this
+      stop()
+      window.iframeLoad = function(frame) {
+        self.frame = frame
+        window.iframeLoad = $.noop
+        start()
+      }
+      $("#qunit-fixture").append("<iframe src='payload_home.html'>")
+      this.iframe = $("iframe")[0]
+    },
+    teardown: function() {
+      delete window.iframeLoad
+    }
+  })
+
+  
+  asyncTest("sets body bgcolor in response to payload", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "payload.html",
+      container: "#main",
+      payload_items: [{id: "body_bg", eval: '$("body").attr({"background-color": "__pjax_value__"});', default: ""}],
+      success: function() {
+        equal(frame.document.title, "Hello")
+        equal(frame.$("body").attr("background-color"), "#ff0000")
+        start()
+      }
+    })
+  })
+  
+  
+  asyncTest("fragment body bgcolor in response to payload", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "payload.html?layout=true",
+      fragment: "#main",
+      container: "#main",
+      payload_items: [{id: "body_bg", eval: '$("body").attr({"background-color": "__pjax_value__"});', default: ""}],
+      success: function(data) {
+        equal(frame.document.title, "Hello")
+        equal(frame.$("body").attr("background-color"), "#ff0000")
+        start()
+      }
+    })
+  })
+  
+  function goBack(frame, callback) {
+    setTimeout(function() {
+      frame.$("#main").one("pjax:end", callback)
+      frame.history.back()
+    }, 0)
+  }
+
+  function goForward(frame, callback) {
+    setTimeout(function() {
+      frame.$("#main").one("pjax:end", callback)
+      frame.history.forward()
+    }, 0)
+  }
+
+  asyncTest("popstate going back to page", function() {
+    var frame = this.frame
+  
+    equal(frame.location.pathname, "/payload_home.html")
+    equal(frame.document.title, "Payload Home")
+    equal(frame.$("body").attr("background-color"), undefined)
+  
+    frame.$.pjax({
+      url: "payload.html",
+      container: "#main",
+      payload_items: [{id: "body_bg", eval: '$("body").attr({"background-color": "__pjax_value__"});', default: ""}],
+      complete: function() {
+        equal(frame.location.pathname, "/payload.html")
+        equal(frame.document.title, "Hello")
+        equal(frame.$("body").attr("background-color"), "#ff0000")
+  
+        ok(frame.history.length > 1)
+
+        goBack(frame, function() {
+          equal(frame.location.pathname, "/payload_home.html")
+          equal(frame.document.title, "Payload Home")
+          equal(frame.$("body").attr("background-color"), "")
+
+          goForward(frame, function() {
+            equal(frame.location.pathname, "/payload.html")
+            equal(frame.document.title, "Hello")
+            equal(frame.$("body").attr("background-color"), "#ff0000")
+            start()
+          })
+        })
+      }
+    })
+  })
+
+
 }
