@@ -294,6 +294,22 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("use body as fragment", function() {
+    var frame = this.frame
+
+    frame.$('body').on('pjax:success', function(event, data) {
+      equal(typeof data, 'string')
+      equal(frame.$("body").html().trim(), "<p>Hello!</p>")
+      equal(frame.document.title, "Hello")
+      start()
+    })
+    frame.$.pjax({
+      url: "hello.html?layout=true",
+      fragment: "body",
+      container: "body"
+    })
+  })
+
   asyncTest("fragment sets title to response title tag", function() {
     var frame = this.frame
 
