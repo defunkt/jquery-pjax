@@ -889,4 +889,17 @@ if ($.support.pjax) {
     ok(frame.$.pjax.state.id)
     oldId = frame.$.pjax.state.id
   })
+
+  asyncTest("plain text responses are ok when pjaxing", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "plain.txt",
+      container: "#main",
+      success: function() {
+        equal(frame.$("#main").text(), "Plain text.")
+        start()
+      }
+    })
+  })
 }

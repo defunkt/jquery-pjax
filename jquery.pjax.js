@@ -563,12 +563,15 @@ function extractContainer(data, xhr, options) {
   // using the original requested url.
   obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
 
+  // If response data is empty, return fast
+  if (data.length === 0)
+    return obj
+
   // Attempt to parse response html into elements
   var $data = $(data)
 
-  // If response data is empty, return fast
   if ($data.length === 0)
-    return obj
+    $data = $("<span/>").html(data)
 
   // If there's a <title> tag in the response, use it as
   // the page's title.

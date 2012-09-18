@@ -82,6 +82,14 @@ get '/boom.html' do
   erb :boom, :layout => !pjax?
 end
 
+get '/plain.txt' do
+  if pjax?
+    "Plain text."
+  else
+    "<htmL><body>You need to call with pjax for plain text.</body></html>"
+  end
+end
+
 get '/:page.html' do
   erb :"#{params[:page]}", :layout => !pjax?
 end
