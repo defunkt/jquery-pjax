@@ -231,9 +231,14 @@ function pjax(options) {
       locationReplace(container.url)
       return
     }
+    var nextId = window.history.length - 1
+    if(pjax.state)
+    {
+      nextId = pjax.state.id + 1;
+    }
 
     pjax.state = {
-      id: options.id || uniqueId(),
+      id: options.id || nextId,
       url: container.url,
       title: container.title,
       container: context.selector,
@@ -284,7 +289,7 @@ function pjax(options) {
   // behavior.
   if (!pjax.state) {
     pjax.state = {
-      id: uniqueId(),
+      id: window.history.length - 1
       url: window.location.href,
       title: document.title,
       container: context.selector,
@@ -307,7 +312,7 @@ function pjax(options) {
   if (xhr.readyState > 0) {
     if (options.push && !options.replace) {
       // Cache current container element before replacing it
-      cachePush(pjax.state.id, context.clone().contents())
+      cacheCurrentPage(context.clone().contents());
 
       window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
     }
@@ -360,10 +365,6 @@ function onPjaxPopstate(event) {
         // Since state ids always increase, we can deduce the history
         // direction from the previous state.
         var direction = pjax.state.id < state.id ? 'forward' : 'back'
-
-        // Cache current container before replacement and inform the
-        // cache which direction the history shifted.
-        cachePop(direction, pjax.state.id, container.clone().contents())
       }
 
       var popstateEvent = $.Event('pjax:popstate', {
@@ -438,16 +439,6 @@ function fallbackPjax(options) {
 
   $(document.body).append(form)
   form.submit()
-}
-
-// Internal: Generate unique id for state object.
-//
-// Use a timestamp instead of a counter since ids should still be
-// unique across page loads.
-//
-// Returns Number.
-function uniqueId() {
-  return (new Date).getTime()
 }
 
 // Internal: Strips _pjax param from url
@@ -617,9 +608,8 @@ function extractContainer(data, xhr, options) {
 }
 
 // Internal: History DOM caching class.
-var cacheMapping      = {}
-var cacheForwardStack = []
-var cacheBackStack    = []
+var cacheMapping      = [];
+
 
 // Push previous state id and container contents into the history
 // cache. Should be called in conjunction with `pushState` to save the
@@ -629,45 +619,15 @@ var cacheBackStack    = []
 // value - DOM Element to cache
 //
 // Returns nothing.
-function cachePush(id, value) {
-  cacheMapping[id] = value
-  cacheBackStack.push(id)
-
-  // Remove all entires in forward history stack after pushing
-  // a new page.
-  while (cacheForwardStack.length)
-    delete cacheMapping[cacheForwardStack.shift()]
-
-  // Trim back history stack to max cache length.
-  while (cacheBackStack.length > pjax.defaults.maxCacheLength)
-    delete cacheMapping[cacheBackStack.shift()]
+function cacheCurrentPage(value) {
+  cacheMapping[pjax.state.id] = value;
+}
+function constrainPageCacheTo(limit) {
+  delete cacheMapping[pjax.state.id- limit];
 }
 
-// Shifts cache from directional history cache. Should be
-// called on `popstate` with the previous state id and container
-// contents.
-//
-// direction - "forward" or "back" String
-// id        - State ID Number
-// value     - DOM Element to cache
-//
-// Returns nothing.
-function cachePop(direction, id, value) {
-  var pushStack, popStack
-  cacheMapping[id] = value
 
-  if (direction === 'forward') {
-    pushStack = cacheBackStack
-    popStack  = cacheForwardStack
-  } else {
-    pushStack = cacheForwardStack
-    popStack  = cacheBackStack
-  }
 
-  pushStack.push(id)
-  if (id = popStack.pop())
-    delete cacheMapping[id]
-}
 
 // Install pjax functions on $.pjax to enable pushState behavior.
 //
