@@ -289,7 +289,7 @@ function pjax(options) {
   // behavior.
   if (!pjax.state) {
     pjax.state = {
-      id: window.history.length - 1
+      id: window.history.length - 1,
       url: window.location.href,
       title: document.title,
       container: context.selector,
