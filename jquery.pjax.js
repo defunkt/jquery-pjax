@@ -365,6 +365,9 @@ function onPjaxPopstate(event) {
         // Since state ids always increase, we can deduce the history
         // direction from the previous state.
         var direction = pjax.state.id < state.id ? 'forward' : 'back'
+
+        // Cache current container before replacement
+        cacheCurrentPage(container.clone().contents());
       }
 
       var popstateEvent = $.Event('pjax:popstate', {
