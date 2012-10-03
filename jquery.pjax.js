@@ -30,10 +30,10 @@
 function fnPjax(selector, container, options) {
   var context = this
   return this.on('click.pjax', selector, function(event) {
-    options = optionsFor(container, options)
-    if (!options.container)
-      options.container = $(this).attr('data-pjax') || context
-    handleClick(event, options)
+    var opts = $.extend({}, optionsFor(container, options))
+    if (!opts.container)
+      opts.container = $(this).attr('data-pjax') || context
+    handleClick(event, opts)
   })
 }
 
