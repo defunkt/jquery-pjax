@@ -33,7 +33,7 @@ function fnPjax(selector, container, options) {
     var opts = $.extend({}, optionsFor(container, options))
     if (!opts.container)
       opts.container = $(this).attr('data-pjax') || context
-    handleClick(event, opts)
+    handleClick.call(this, event, opts)
   })
 }
 
@@ -59,8 +59,10 @@ function fnPjax(selector, container, options) {
 function handleClick(event, container, options) {
   options = optionsFor(container, options)
 
-  var link = event.currentTarget
+  var link = event[$(event.target).is("a") ? "target" : "currentTarget"]
 
+  if (link === event.delegateTarget)
+    return
   if (link.tagName.toUpperCase() !== 'A')
     throw "$.fn.pjax or $.pjax.click requires an anchor element"
 
@@ -163,6 +165,7 @@ function pjax(options) {
   var hash = parseURL(options.url).hash
 
   var context = options.context = findContainerFor(options.container)
+  var callbacks = $.extend({}, options)
 
   // We want the browser to maintain two separate internal caches: one
   // for pjax'd partial page loads and one for normal page loads.
@@ -205,6 +208,7 @@ function pjax(options) {
       return false
 
     options.requestUrl = parseURL(settings.url).href
+    callbacks.beforeSend && callbacks.beforeSend.apply(this, arguments)
   }
 
   options.complete = function(xhr, textStatus) {
@@ -214,6 +218,7 @@ function pjax(options) {
     fire('pjax:complete', [xhr, textStatus, options])
 
     fire('pjax:end', [xhr, options])
+    callbacks.complete && callbacks.complete.apply(this, arguments)
   }
 
   options.error = function(xhr, textStatus, errorThrown) {
@@ -222,6 +227,7 @@ function pjax(options) {
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (textStatus !== 'abort' && allowed)
       locationReplace(container.url)
+    callbacks.error && callbacks.error.apply(this, arguments)
   }
 
   options.success = function(data, status, xhr) {
@@ -275,6 +281,7 @@ function pjax(options) {
     }
 
     fire('pjax:success', [data, status, xhr, options])
+    callbacks.success && callbacks.success.apply(this, arguments)
   }
 
 
