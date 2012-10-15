@@ -238,7 +238,8 @@ function pjax(options) {
       title: container.title,
       container: context.selector,
       fragment: options.fragment,
-      timeout: options.timeout
+      timeout: options.timeout,
+      data: xhr.getResponseHeader('X-PJAX-DATA')
     }
 
     if (options.push || options.replace) {
