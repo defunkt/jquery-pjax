@@ -716,7 +716,8 @@ function disable() {
   $.pjax.disable = $.noop
   $.pjax.click = $.noop
   $.pjax.submit = $.noop
-  $.pjax.reload = window.location.reload
+  $.pjax.reload = function () {window.location.reload()}
+
   $(window).unbind('popstate.pjax', onPjaxPopstate)
 }
 
