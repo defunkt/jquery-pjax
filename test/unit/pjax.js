@@ -659,6 +659,27 @@ if ($.support.pjax) {
     }
   })
 
+  asyncTest("POST 500 never loads fallback", function() {
+    var frame = this.frame
+
+    frame.$("#main").on("pjax:complete", function() {
+      equal(frame.location.pathname, "/boom.html")
+      start()
+    })
+    frame.$("#main").on("pjax:error", function(event, xhr) {
+      ok(true)
+    })
+    frame.$("#main").on("pjax:timeout", function(event, xhr) {
+      ok(false)
+    })
+    this.iframe.onload = function() { ok(false) }
+
+    frame.$.pjax({
+      type: 'POST',
+      url: "boom.html",
+      container: "#main"
+    })
+  })
 
   function goBack(frame, callback) {
     setTimeout(function() {
