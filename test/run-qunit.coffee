@@ -12,10 +12,13 @@ deferTimeout = ->
     phantom.exit 1
   , 3000
 
+exited = false
 page.open phantom.args[0], ->
   deferTimeout()
 
   setInterval ->
+    return if exited
+
     tests = page.evaluate ->
       tests = document.getElementById('qunit-tests').children
       for test in tests when test.className isnt 'running' and not test.recorded
@@ -44,5 +47,8 @@ page.open phantom.args[0], ->
 
       return
 
-    phantom.exit result if result?
+    if result?
+      exited = true
+      phantom.exit result
+
   , 100
