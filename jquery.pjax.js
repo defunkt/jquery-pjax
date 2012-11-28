@@ -365,6 +365,11 @@ function onPjaxPopstate(event) {
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
         cachePop(direction, pjax.state.id, container.clone().contents())
+      } else {
+        // Page was reloaded but we have an existing history entry.
+        // Set it to our initial state.
+        pjax.state = state;
+        return;
       }
 
       var popstateEvent = $.Event('pjax:popstate', {
