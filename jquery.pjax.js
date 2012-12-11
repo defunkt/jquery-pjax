@@ -186,6 +186,14 @@ function pjax(options) {
       settings.timeout = 0
     }
 
+    xhr.setRequestHeader('X-PJAX', 'true')
+    xhr.setRequestHeader('X-PJAX-Container', context.selector)
+
+    var result
+
+    if (!fire('pjax:beforeSend', [xhr, settings]))
+      return false
+
     if (settings.timeout > 0) {
       timeoutTimer = setTimeout(function() {
         if (fire('pjax:timeout', [xhr, options]))
@@ -195,14 +203,6 @@ function pjax(options) {
       // Clear timeout setting so jquerys internal timeout isn't invoked
       settings.timeout = 0
     }
-
-    xhr.setRequestHeader('X-PJAX', 'true')
-    xhr.setRequestHeader('X-PJAX-Container', context.selector)
-
-    var result
-
-    if (!fire('pjax:beforeSend', [xhr, settings]))
-      return false
 
     options.requestUrl = parseURL(settings.url).href
   }
