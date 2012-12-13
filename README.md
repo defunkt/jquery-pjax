@@ -47,7 +47,7 @@ Or add `jquery-pjax` to your apps `component.json`.
 
 ### standalone
 
-Since theres only one file, you can also download it directly into your apps public directory. Just be sure to have jQuery loaded first.
+Since theres only one file, you can just download it directly into your apps public directory. Just be sure to have jQuery loaded first.
 
 ```
 curl -O https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
@@ -61,9 +61,9 @@ Requires jQuery 1.7.x and higher.
 
 ## Compatibility
 
-pjax only works with [browsers that support the `history.pushState` API](http://caniuse.com/#search=pushstate). However, there is a fallback mode for browsers that don't. `$.fn.pjax` calls will be no-ops and `$.pjax` will hard load the given url. This mode targets the browser requirements of the jQuery version being used.
+pjax only works with [browsers that support the `history.pushState` API](http://caniuse.com/#search=pushstate). However, there is a fallback mode for browsers that don't. `$.fn.pjax` calls will be a no-op and `$.pjax` will hard load the given url. This mode targets the browser requirements of the jQuery version being used.
 
-For debugging purposes, you can intentionally disable pjax even if the browser supports `pushState`. Just call `$.pjax.disable()`. To see if pjax is actually using `pushState`, check `$.support.pjax`.
+For debugging purposes, you can intentionally disable pjax even if the browser supports `pushState`. Just call `$.pjax.disable()`. To see if pjax is actually supports `pushState`, check `$.support.pjax`.
 
 ## Usage
 
@@ -100,7 +100,7 @@ The most basic thing to get started with is
 $(document).pjax('a', '#pjax-container');
 ```
 
-This will enable pjax on all links (probably not what you'll actually want) and designate the container as `#pjax-container'.
+This will enable pjax on all links (probably not what you'll actually want) and designate the container as `#pjax-container`.
 
 If you are migrating an existing site, you probably can't just enable pjax everywhere just yet. So try annotating links that do work with pjax with `data-pjax`. Then use `'a[data-pjax]'` as your selector.
 
@@ -110,7 +110,7 @@ Or try this selector thats matches any `<a data-pjax href=>` link and any link i
 $(document).pjax('[data-pjax] a, a[data-pjax]', '#pjax-container');
 ```
 
-Theres a few different argument styles you can pass in.
+When invoking `$.fn.pjax`, theres a few different argument styles you can pass in.
 
 1. The first argument will always be a `String` selector used for delegation.
 2. The second argument can either be a `String` container selector or an options object.
@@ -118,7 +118,7 @@ Theres a few different argument styles you can pass in.
 
 ### `$.pjax.click`
 
-Is a lower level function used by `$.fn.pjax` itself. It always you to get a little more control over the pjax event handling.
+Is a lower level function used by `$.fn.pjax` itself. It allows you to get a little more control over the pjax event handling.
 
 This example uses the current click context to set an ancestor as the container.
 
@@ -147,9 +147,16 @@ $(document).on('submit', 'form[data-pjax]', function(event) {
 
 Manual pjax invocation. Used mainly when you want to start a pjax request in a handler that didn't originate from a click. If you can get access to a click `event`, consider `$.pjax.click(event)` instead.
 
+``` javascript
+function applyFilters() {
+  var url = urlForFilters();
+  $.pjax({url: url, container: '#pjax-container'});
+}
+```
+
 ### Events
 
-No matter which why you invoke pjax, it will fire the following events.
+No matter which way you invoke pjax, it will fire the following events.
 
 All events are fired from the container, not the link was clicked.
 
