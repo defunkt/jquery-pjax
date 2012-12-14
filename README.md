@@ -25,13 +25,13 @@
 
 pjax is a jQuery plugin that uses ajax and pushState to deliver a fast browsing experience with real permalinks, page titles, and a working back button. 
 
-pjax works by grabbing html from your server via ajax and replacing the content of a container on your page with the ajax'd html. It then updates the browser's current url using pushState without reloading your page's layout or any resources (js, css), giving the appearance of a fast full page load. But really it's just ajax and pushState. For [browsers that don't support pushState][compat] pjax fully degrades.
+pjax works by grabbing html from your server via ajax and replacing the content of a container on your page with the ajax'd html. It then updates the browser's current url using pushState without reloading your page's layout or any resources (js, css), giving the appearance of a fast, full page load. But really it's just ajax and pushState. 
 
-pjax enhances the browsing experience - nothing more.
+For [browsers that don't support pushState][compat] pjax fully degrades.
 
 ## Overview
 
-pjax is not fully automatic. You'll need to setup and designate a containing element on your page that will be replaced when you navigate between pages.
+pjax is not fully automatic. You'll need to setup and designate a containing element on your page that will be replaced when you navigate your site.
 
 Consider the following page.
 
@@ -50,9 +50,9 @@ Consider the following page.
 </html>
 ```
 
-We want pjax to use ajax to grab the url `/page/2` then replace `#pjax-container` with what it gets back. No styles or scripts will be reloaded and even the h1 can stay the same - we just want to change the `.container` element.
+We want pjax to grab the url `/page/2` then replace `#pjax-container` with whatever it gets back. No styles or scripts will be reloaded and even the h1 can stay the same - we just want to change the `#pjax-container` element.
 
-We do this by telling pjax to attach to `a` tags and to replace the content in `#pjax-container` with the ajax response from the `a` tag's href:
+We do this by telling pjax to listen on `a` tags and use `#pjax-container` as the target container:
 
 ``` javascript
 $(document).pjax('a', '#pjax-container')
