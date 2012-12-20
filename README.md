@@ -76,6 +76,8 @@ end
 
 If you'd like a more automatic solution than pjax for Rails check out [Turbolinks](https://github.com/rails/turbolinks).
 
+Also check out [RailsCasts #294 : Playing with PJAX](http://railscasts.com/episodes/294-playing-with-pjax)
+
 ## Installation
 
 ### bower
