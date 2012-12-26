@@ -179,6 +179,26 @@ function pjax(options) {
   var timeoutTimer
 
   options.beforeSend = function(xhr, settings) {
+    
+    /* Include CSS Files */
+    var css_content=settings.css;
+    if(css_content!=''){
+        var charExists = (css_content.indexOf(',') >= 0) ? true : false;
+        if(charExists==true){
+            var css_content_array = new Array();
+            css_content_array=css_content.split(',');
+var length = css_content_array.length;
+                for (var i = 0; i < length; i++) {
+                $('head').append('<link rel="stylesheet" href="'+css_content_array[i]+'" type="text/css" />');
+                }
+        }
+        else
+            {
+                $('head').append('<link rel="stylesheet" href="'+css_content+'" type="text/css" />');
+            }
+    }
+    /* Include CSS Files */
+    
     // No timeout for non-GET requests
     // Its not safe to request the resource again with a fallback method.
     if (settings.type !== 'GET') {
@@ -696,6 +716,7 @@ function enable() {
     push: true,
     replace: false,
     type: 'GET',
+    css: '',
     dataType: 'html',
     scrollTo: 0,
     maxCacheLength: 20
