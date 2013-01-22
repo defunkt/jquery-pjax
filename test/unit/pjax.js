@@ -34,7 +34,7 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.$('#main').on('pjax:success', function() {
-      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+      equal(frame.$("#main > p").html().trim(), "Hello!")
       start()
     })
     frame.$.pjax({
@@ -123,7 +123,7 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.$('#main').on('pjax:success', function() {
-      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+      equal(frame.$("#main > p").html().trim(), "Hello!")
       start()
     })
     frame.$.pjax({
@@ -136,7 +136,7 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.$('#main').on('pjax:success', function() {
-      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+      equal(frame.$("#main > p").html().trim(), "Hello!")
       start()
     })
     frame.$.pjax({
@@ -149,7 +149,7 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.$('#main').on('pjax:success', function() {
-      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+      equal(frame.$("#main > p").html().trim(), "Hello!")
       start()
     })
     frame.$.pjax({
@@ -162,7 +162,7 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.$('#main').on('pjax:success', function() {
-      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+      equal(frame.$("#main > p").html().trim(), "Hello!")
       start()
     })
     frame.$.pjax({
@@ -284,7 +284,7 @@ if ($.support.pjax) {
 
     frame.$('#main').on('pjax:success', function(event, data) {
       equal(typeof data, 'string')
-      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+      equal(frame.$("#main > p").html().trim(), "Hello!")
       start()
     })
     frame.$.pjax({
@@ -299,7 +299,7 @@ if ($.support.pjax) {
 
     frame.$('body').on('pjax:success', function(event, data) {
       equal(typeof data, 'string')
-      equal(frame.$("body").html().trim(), "<p>Hello!</p>")
+      equal(frame.$("body > p").html().trim(), "Hello!")
       equal(frame.document.title, "Hello")
       start()
     })
@@ -887,7 +887,7 @@ if ($.support.pjax) {
 
     frame.$('#main').on("pjax:success", function() {
       equal(frame.location.pathname, "/hello.html")
-      equal(frame.$("#main").html().trim(), "<p>Hello!</p>")
+      equal(frame.$("#main > p").html().trim(), "Hello!")
       start()
     })
     frame.$.pjax({
