@@ -796,6 +796,7 @@ if ($.support.pjax) {
     })
   })
 
+  // Test is fragile
   asyncTest("no initial pjax:popstate event", function() {
     var frame = this.frame
     var count = 0;
@@ -812,12 +813,15 @@ if ($.support.pjax) {
       } else if (count == 3) {
         equal(frame.location.pathname, "/env.html")
         frame.history.back()
+        setTimeout(function() { window.iframeLoad(frame) }, 1000)
       } else if (count == 4) {
         equal(frame.location.pathname, "/hello.html")
         frame.history.back()
+        setTimeout(function() { window.iframeLoad(frame) }, 1000)
       } else if (count == 5) {
         equal(frame.location.pathname, "/home.html")
         frame.history.forward()
+        setTimeout(function() { window.iframeLoad(frame) }, 1000)
       } else if (count == 6) {
         // Should skip pjax:popstate since theres no initial pjax.state
         frame.$('#main').on('pjax:popstate', function(event) {
@@ -834,8 +838,9 @@ if ($.support.pjax) {
           if (count == 6) {
             count++
             frame.history.forward()
+            setTimeout(function() { window.iframeLoad(frame) }, 1000)
           } else {
-            start()
+            setTimeout(function() { start() }, 1000)
           }
         })
       }
