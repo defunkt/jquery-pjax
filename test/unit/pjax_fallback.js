@@ -103,6 +103,10 @@ asyncTest("adds entry to browser history"+s, function() {
   var frame = this.frame
   var count = 0
 
+  frame.onpopstate = function() {
+    window.iframeLoad(frame)
+  }
+
   this.loaded = function() {
     count++
 
