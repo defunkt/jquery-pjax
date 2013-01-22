@@ -550,6 +550,10 @@ function findAll(elems, selector) {
   return elems.filter(selector).add(elems.find(selector));
 }
 
+function parseHTML(html) {
+  return $.parseHTML(html, document, true)
+}
+
 // Internal: Extracts container and metadata from response.
 //
 // 1. Extracts X-PJAX-URL header if set
@@ -570,10 +574,10 @@ function extractContainer(data, xhr, options) {
 
   // Attempt to parse response html into elements
   if (/<html/i.test(data)) {
-    var $head = $($.parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
-    var $body = $($.parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
+    var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
+    var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
   } else {
-    var $head = $body = $($.parseHTML(data))
+    var $head = $body = $(parseHTML(data))
   }
 
   // If response data is empty, return fast
