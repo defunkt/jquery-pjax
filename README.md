@@ -23,9 +23,9 @@
 
 ## pjax = pushState + ajax
 
-pjax is a jQuery plugin that uses ajax and pushState to deliver a fast browsing experience with real permalinks, page titles, and a working back button. 
+pjax is a jQuery plugin that uses ajax and pushState to deliver a fast browsing experience with real permalinks, page titles, and a working back button.
 
-pjax works by grabbing html from your server via ajax and replacing the content of a container on your page with the ajax'd html. It then updates the browser's current url using pushState without reloading your page's layout or any resources (js, css), giving the appearance of a fast, full page load. But really it's just ajax and pushState. 
+pjax works by grabbing html from your server via ajax and replacing the content of a container on your page with the ajax'd html. It then updates the browser's current url using pushState without reloading your page's layout or any resources (js, css), giving the appearance of a fast, full page load. But really it's just ajax and pushState.
 
 For [browsers that don't support pushState][compat] pjax fully degrades.
 
@@ -60,7 +60,7 @@ $(document).pjax('a', '#pjax-container')
 
 Now when someone in a pjax-compatible browser clicks "next page" the content of `#pjax-container` will be replaced with the body of `/pjax/2`.
 
-Magic! Almost. You still need to configure you server to look for pjax requests then send back pjax-specific content. 
+Magic! Almost. You still need to configure you server to look for pjax requests then send back pjax-specific content.
 
 The pjax ajax request sends an `X-PJAX` header so in this example (and in most cases) we return a page without a layout to any requests with that header.
 
@@ -108,7 +108,7 @@ curl -O https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
 
 ## Dependencies
 
-Requires jQuery 1.7.x or higher.
+Requires jQuery 1.8.x or higher.
 
 ## Compatibility
 
@@ -285,7 +285,7 @@ $ cd jquery-pjax/
 To run the test suite locally, start up the Sinatra test application.
 
 ```
-$ ruby test/app.rb 
+$ ruby test/app.rb
 == Sinatra/1.3.2 has taken the stage on 4567 for development with backup from WEBrick
 
 $ open http://localhost:4567/
