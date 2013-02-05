@@ -118,7 +118,7 @@ function handleSubmit(event, container, options) {
     throw "$.pjax.submit requires a form element"
 
   var defaults = {
-    type: form.method,
+    type: form.method.toUpperCase(),
     url: form.action,
     data: $(form).serializeArray(),
     container: $(form).attr('data-pjax'),
