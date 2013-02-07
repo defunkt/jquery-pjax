@@ -272,6 +272,9 @@ function pjax(options) {
       if (target.length) $(window).scrollTop(target.offset().top)
     }
 
+    // Cache current container element before replacing it
+    cachePush(pjax.state.id, context.clone().contents());
+
     fire('pjax:success', [data, status, xhr, options])
   }
 
@@ -304,9 +307,6 @@ function pjax(options) {
 
   if (xhr.readyState > 0) {
     if (options.push && !options.replace) {
-      // Cache current container element before replacing it
-      cachePush(pjax.state.id, context.clone().contents())
-
       window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
     }
 
