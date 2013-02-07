@@ -596,7 +596,11 @@ function extractContainer(data, xhr, options) {
     }
 
     if ($fragment.length) {
-      obj.contents = $fragment.contents()
+      // If the fragment was the body, then the contents in the fragment itself.
+      if (options.fragment === 'body')
+        obj.contents = $fragment;
+      else
+        obj.contents = $fragment.contents();
 
       // If there's no title, look for data-title and title attributes
       // on the fragment
