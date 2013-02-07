@@ -244,7 +244,13 @@ function pjax(options) {
     }
 
     if (container.title) document.title = container.title
-    context.html(container.contents)
+
+    if (options.animate && options.animate === true) {
+      context.trigger('pjax:animate', {container: context, contents: container.contents})
+    } else {
+      context.html(container.contents)
+    }
+
 
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
