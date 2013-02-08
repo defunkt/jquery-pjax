@@ -611,7 +611,7 @@ function extractContainer(data, xhr, options) {
   // Clean up any <title> tags
   if (obj.contents) {
     // Remove any parent title elements
-    obj.contents = obj.contents.not('title')
+    obj.contents = obj.contents.not(function() { return $(this).is('title') })
 
     // Then scrub any titles from their descendents
     obj.contents.find('title').remove()
