@@ -354,27 +354,25 @@ function onPjaxPopstate(event) {
     if (container.length) {
       var contents = cacheMapping[state.id]
 
-      if (pjax.state) {
-        // Since state ids always increase, we can deduce the history
-        // direction from the previous state.
-        var direction = pjax.state.id < state.id ? 'forward' : 'back'
-
-        // Cache current container before replacement and inform the
-        // cache which direction the history shifted.
-        cachePop(direction, pjax.state.id, container.clone().contents())
-      } else {
+      if (!pjax.state) {
         // Page was reloaded but we have an existing history entry.
         // Set it to our initial state.
         pjax.state = state;
-        return;
       }
+      // Since state ids always increase, we can deduce the history
+      // direction from the previous state.
+      var direction = pjax.state.id < state.id ? 'forward' : 'back'
+
+      // Cache current container before replacement and inform the
+      // cache which direction the history shifted.
+      cachePop(direction, pjax.state.id, container.clone().contents())
 
       var popstateEvent = $.Event('pjax:popstate', {
         state: state,
         direction: direction
       })
       container.trigger(popstateEvent)
-
+console.log('pop')
       var options = {
         id: state.id,
         url: state.url,
@@ -628,6 +626,7 @@ var cacheMapping      = {}
 var cacheForwardStack = []
 var cacheBackStack    = []
 
+
 // Push previous state id and container contents into the history
 // cache. Should be called in conjunction with `pushState` to save the
 // previous container contents.
@@ -693,6 +692,7 @@ function enable() {
   $.pjax.click = handleClick
   $.pjax.submit = handleSubmit
   $.pjax.reload = pjaxReload
+  $.pjax.cacheMapping = cacheMapping
   $.pjax.defaults = {
     timeout: 650,
     push: true,

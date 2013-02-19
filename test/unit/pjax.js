@@ -722,22 +722,20 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.$('#main').on('pjax:success', function() {
-      frame.location.reload(true)
-      equal(frame.location.pathname, "/hello.html")
-      equal(frame.document.title, "Hello")
-      frame.history.back()
-      check_pathname = function () {
-        setTimeout(function() {
-          if (frame.location.pathname == "/home.html") {
-            equal(frame.location.pathname, "/home.html")
-            equal(frame.document.title, "Home")
-            start()
-          } else {
-            check_pathname()
-          }
-        }, 5)
+      original_iframeLoad = window.iframeLoad
+      // when iframe reloads
+      window.iframeLoad = function(frame) {
+        // Once history back is complete
+        frame.$('#main').on('pjax:complete', function() {
+          equal(frame.location.pathname, "/home.html")
+          equal(frame.document.title, "Home")
+          start()
+        })
+        frame.history.back()
+        original_iframeLoad()
+        window.iframeLoad = original_iframeLoad
       }
-      check_pathname()
+      frame.location.reload(true)
     })
     frame.$.pjax({
       url: "hello.html",
