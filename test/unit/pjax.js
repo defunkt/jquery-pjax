@@ -718,6 +718,29 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("popstate going back to page after reload", function() {
+    var frame = this.frame
+
+    frame.$('#main').on('pjax:success', function() {
+      original_iframeLoad = window.iframeLoad
+      window.iframeLoad = function(frame) {
+        frame.$('#main').on('pjax:complete', function() {
+          equal(frame.location.pathname, "/home.html")
+          equal(frame.document.title, "Home")
+          start()
+        })
+        frame.history.back()
+        original_iframeLoad()
+        window.iframeLoad = original_iframeLoad
+      }
+      frame.location.reload(true)
+    })
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
   asyncTest("popstate going forward to page", function() {
     var frame = this.frame
 
