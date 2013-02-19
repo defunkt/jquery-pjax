@@ -718,6 +718,44 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("popstate going back to page with missing cache reloads", function() {
+    var frame = this.frame
+
+    frame.$('#main').on('pjax:success', function() {
+      original_iframeLoad = window.iframeLoad
+      // when iframe reloads
+      window.iframeLoad = function(frame) {
+        // Once history back is complete
+        frame.$('#main').on('pjax:complete', function() {
+          equal(frame.location.pathname, "/home.html")
+          equal(frame.document.title, "Home")
+          start()
+        })
+        frame.history.back()
+        original_iframeLoad()
+        window.iframeLoad = original_iframeLoad
+      }
+      frame.location.reload(true)
+    })
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+
+    // frame.$('#main').on("pjax:complete", function() {
+    //   frame.location.reload()
+    //   equal(frame.location.pathname, "/hello.html")
+    //   goBack(frame)
+    //   equal(frame.location.pathname, "/home.html")
+    //   equal(frame.document.title, "Home")
+    //   start()
+    // })
+    // frame.$.pjax({
+    //   url: "hello.html",
+    //   container: "#main"
+    // })
+  })
+
   asyncTest("popstate going forward to page", function() {
     var frame = this.frame
 

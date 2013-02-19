@@ -133,7 +133,7 @@ asyncTest("scrolls to top of the page"+s, function() {
   frame.window.scrollTo(0, 100)
   equal(frame.window.scrollY, 100)
 
-  this.loaded = function(frame) {
+  this.loaded = function() {
     equal(frame.window.scrollY, 0)
     start()
   }
