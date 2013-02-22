@@ -130,7 +130,7 @@ This will enable pjax on all links and designate the container as `#pjax-contain
 
 If you are migrating an existing site you probably don't want to enable pjax everywhere just yet. Instead of using a global selector like `a` try annotating pjaxable links with `data-pjax`, then use `'a[data-pjax]'` as your selector.
 
-Or try this selector thats matches any `<a data-pjax href=>` links inside a `<div data-pjax>` container.
+Or try this selector that matches any `<a data-pjax href=>` links inside a `<div data-pjax>` container.
 
 ``` javascript
 $(document).pjax('[data-pjax] a, a[data-pjax]', '#pjax-container')
