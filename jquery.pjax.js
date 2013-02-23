@@ -246,6 +246,18 @@ function pjax(options) {
     if (container.title) document.title = container.title
     context.html(container.contents)
 
+	// Load any scripts by appending them to the container.
+	if (container.scripts) {
+	  $(container.scripts).each(function(_, script) {
+		var $script = $(script)
+		if(!$script.attr('src')) return
+		var tag = document.createElement('script')
+		tag.type = $script.attr('type') || "text/javascript"
+		tag.src  = $script.attr('src')
+		context.get(0).appendChild(tag)
+	  })
+	}
+
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
       $(window).scrollTop(options.scrollTo)
@@ -548,8 +560,11 @@ function findAll(elems, selector) {
   return elems.filter(selector).add(elems.find(selector));
 }
 
-function parseHTML(html) {
-  return $.parseHTML(html, document, true)
+function parseHTML(html, strip_scripts) {
+  if(strip_scripts === undefined) {
+	  strip_scripts = false
+  }
+  return $.parseHTML(html, document, !strip_scripts)
 }
 
 // Internal: Extracts container and metadata from response.
@@ -572,11 +587,12 @@ function extractContainer(data, xhr, options) {
 
   // Attempt to parse response html into elements
   if (/<html/i.test(data)) {
-    var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
-    var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
+    var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0], true))
+    var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0], true))
   } else {
-    var $head = $body = $(parseHTML(data))
+    var $head = $body = $(parseHTML(data, true))
   }
+  obj.scripts = $(parseHTML(data, false)).find('script')
 
   // If response data is empty, return fast
   if ($body.length === 0)
