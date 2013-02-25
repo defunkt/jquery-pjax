@@ -317,9 +317,6 @@ function pjax(options) {
   return pjax.xhr
 }
 
-// If we've reloaded the page but the history has state load that into pjax
-pjax.state = history.state
-
 // Public: Reload current page with pjax.
 //
 // Returns whatever $.pjax returns.
@@ -357,26 +354,30 @@ function onPjaxPopstate(event) {
     if (container.length) {
       var contents = cacheMapping[state.id]
 
-      if (pjax.state) {
-        // Since state ids always increase, we can deduce the history
-        // direction from the previous state.
-        var direction = pjax.state.id < state.id ? 'forward' : 'back'
-
-        // Cache current container before replacement and inform the
-        // cache which direction the history shifted.
-        cachePop(direction, pjax.state.id, container.clone().contents())
-      } else {
+      if (!pjax.state) {
+        no_pjax_state = true
         // Page was reloaded but we have an existing history entry.
         // Set it to our initial state.
         pjax.state = state;
-        return;
+      } else {
+        no_pjax_state = false
       }
 
-      var popstateEvent = $.Event('pjax:popstate', {
-        state: state,
-        direction: direction
-      })
-      container.trigger(popstateEvent)
+      // Since state ids always increase, we can deduce the history
+      // direction from the previous state.
+      var direction = pjax.state.id < state.id ? 'forward' : 'back'
+
+      // Cache current container before replacement and inform the
+      // cache which direction the history shifted.
+      cachePop(direction, pjax.state.id, container.clone().contents())
+
+      if (!no_pjax_state) {
+        var popstateEvent = $.Event('pjax:popstate', {
+          state: state,
+          direction: direction
+        })
+        container.trigger(popstateEvent)
+      }
 
       var options = {
         id: state.id,
