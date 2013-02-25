@@ -604,7 +604,7 @@ function extractContainer(data, xhr, options) {
         obj.title = $fragment.attr('title') || $fragment.data('title')
     }
 
-  } else if (!/<html/i.test(data)) {
+  } else {
     obj.contents = $body
   }
 
