@@ -246,15 +246,22 @@ function pjax(options) {
     if (container.title) document.title = container.title
     context.html(container.contents)
 
-	// Load any scripts by appending them to the container.
+	// Load any scripts by appending them to <head>
+	// but only if we hanve't seen them before.
 	if (container.scripts) {
 	  $(container.scripts).each(function(_, script) {
 		var $script = $(script)
-		if(!$script.attr('src')) return
+		var src = ""
+		if(!(src = $script.attr('src'))) return
+		if($('script[src="' + src + '"]').length) return
+
 		var tag = document.createElement('script')
 		tag.type = $script.attr('type') || "text/javascript"
+		// Async is off to emulate the eval order
+		// that would have existed had this been a full page load
+		tag.async = false
 		tag.src  = $script.attr('src')
-		context.get(0).appendChild(tag)
+		document.head.appendChild(tag)
 	  })
 	}
 
