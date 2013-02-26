@@ -248,12 +248,14 @@ function pjax(options) {
 
 	container.scripts.each(function(_, script) {
 	  var $script = $(script)
+	  var src = $script.attr('src')
 	  var target = document.head || context.get(0)
 	  var tag = document.createElement('script')
 	  tag.type = $script.attr('type') || "text/javascript"
 	  tag.async = false
-	  tag.src  = $script.attr('src')
-	  target.appendChild(tag)
+	  tag.src  = src
+	  if(!$('script[src="' + src + '"]').length)
+		target.appendChild(tag)
 	})
 
     // Scroll to top by default
@@ -588,7 +590,7 @@ function extractContainer(data, xhr, options) {
     var $head = $body = $(parseHTML(data))
   }
   obj.scripts = findAll($body, 'script[src]')
-  $body = $body.remove('script[src]')
+  findAll($body, 'script[src]').remove()
 
   // If response data is empty, return fast
   if ($body.length === 0)
