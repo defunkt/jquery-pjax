@@ -243,6 +243,26 @@ An `X-PJAX` request header is set to differentiate a pjax request from normal XH
 
 Check if your favorite server framework supports pjax here: https://gist.github.com/4283721
 
+#### Layout Reloading
+
+Layouts can be forced to do a hard reload assets or html changes.
+
+First set the initial layout version in your header with a custom meta tag.
+
+``` html
+<meta http-equiv="x-pjax-version" content="v123">
+```
+
+Then from the server side, set the `X-PJAX-Version` header to the same.
+
+``` ruby
+if request.headers['X-PJAX']
+  response.headers['X-PJAX-Version'] = "v123"
+end
+```
+
+Deploying a deploy, bumping the version constant to force clients to do a full reload the next request getting the new layout and assets.
+
 ### Legacy API
 
 Pre 1.0 versions used an older style syntax that was analogous to the now deprecated `$.fn.live` api. The current api is based off `$.fn.on`.
