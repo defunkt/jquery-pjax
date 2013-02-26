@@ -400,6 +400,23 @@ if ($.support.pjax) {
     }
   })
 
+  asyncTest("header version mismatch does a full load", function() {
+    var frame = this.frame
+
+    frame.$.pjax.defaults.version = 'v2'
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+
+    this.iframe.onload = function() {
+      equal(frame.$("#main p").html(), "Hello!")
+      equal(frame.location.pathname, "/hello.html")
+      start()
+    }
+  })
+
 
   asyncTest("triggers pjax:start event from container", function() {
     var frame = this.frame

@@ -22,6 +22,7 @@ end
 after do
   if pjax?
     response.headers['X-PJAX-URL'] = request.url
+    response.headers['X-PJAX-Version'] = 'v1'
   end
 end
 
