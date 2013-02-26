@@ -246,6 +246,16 @@ function pjax(options) {
     if (container.title) document.title = container.title
     context.html(container.contents)
 
+	container.scripts.each(function(_, script) {
+	  var $script = $(script)
+	  var target = document.head || context.get(0)
+	  var tag = document.createElement('script')
+	  tag.type = $script.attr('type') || "text/javascript"
+	  tag.async = false
+	  tag.src  = $script.attr('src')
+	  target.appendChild(tag)
+	})
+
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
       $(window).scrollTop(options.scrollTo)
@@ -577,6 +587,8 @@ function extractContainer(data, xhr, options) {
   } else {
     var $head = $body = $(parseHTML(data))
   }
+  obj.scripts = findAll($body, 'script[src]')
+  $body = $body.remove('script[src]')
 
   // If response data is empty, return fast
   if ($body.length === 0)
