@@ -223,8 +223,23 @@ function pjax(options) {
   }
 
   options.success = function(data, status, xhr) {
+    // If $.pjax.defaults.version is a function, invoke it first.
+    // Otherwise it can be a static string.
+    var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
+      $.pjax.defaults.version() :
+      $.pjax.defaults.version
+
+    var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
+
     var container = extractContainer(data, xhr, options)
 
+    // If there is a layout version mismatch, hard load the new url
+    if (currentVersion && latestVersion && currentVersion !== latestVersion) {
+      locationReplace(container.url)
+      return
+    }
+
+    // If the new response is missing a body, hard load the page
     if (!container.contents) {
       locationReplace(container.url)
       return
@@ -676,6 +691,16 @@ function cachePop(direction, id, value) {
     delete cacheMapping[id]
 }
 
+// Public: Find version identifier for the initial page load.
+//
+// Returns String version or undefined.
+function findVersion() {
+  return $('meta').filter(function() {
+    var name = $(this).attr('http-equiv')
+    return name && name.toUpperCase() === 'X-PJAX-VERSION'
+  }).attr('content')
+}
+
 // Install pjax functions on $.pjax to enable pushState behavior.
 //
 // Does nothing if already enabled.
@@ -700,7 +725,8 @@ function enable() {
     type: 'GET',
     dataType: 'html',
     scrollTo: 0,
-    maxCacheLength: 20
+    maxCacheLength: 20,
+    version: findVersion
   }
   $(window).bind('popstate.pjax', onPjaxPopstate)
 }
