@@ -121,11 +121,11 @@ if ($.support.pjax) {
   asyncTest("evals scripts", function() {
     var frame = this.frame
 
-    frame.$('#main').on('pjax:success', function() {
+    frame.evaledScriptLoaded = function() {
       equal(true, frame.evaledSrcScript)
       equal(true, frame.evaledInlineScript)
       start()
-    })
+    }
     frame.$.pjax({
       url: "scripts.html",
       container: "#main"
