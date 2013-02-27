@@ -153,7 +153,7 @@ asyncTest("scrolls to anchor at top page"+s, function() {
     setTimeout(function() {
       equal(frame.window.scrollY, 8)
       start()
-    }, 10)
+    }, 100)
   }
 
   frame.$.pjax({
