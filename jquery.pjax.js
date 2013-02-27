@@ -605,8 +605,7 @@ function extractContainer(data, xhr, options) {
   } else {
     var $head = $body = $(parseHTML(data))
   }
-  obj.scripts = findAll($body, 'script[src]')
-  findAll($body, 'script[src]').remove()
+  obj.scripts = findAll($body, 'script[src]').remove()
 
   // If response data is empty, return fast
   if ($body.length === 0)
