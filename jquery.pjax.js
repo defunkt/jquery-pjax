@@ -593,7 +593,6 @@ function extractContainer(data, xhr, options) {
   } else {
     var $head = $body = $(parseHTML(data))
   }
-  obj.scripts = findAll($body, 'script[src]').remove()
 
   // If response data is empty, return fast
   if ($body.length === 0)
@@ -632,6 +631,10 @@ function extractContainer(data, xhr, options) {
 
     // Then scrub any titles from their descendents
     obj.contents.find('title').remove()
+
+    // Gather all script[src] elements
+    obj.scripts = findAll(obj.contents, 'script[src]').remove()
+    obj.contents = obj.contents.not(obj.scripts)
   }
 
   // Trim any whitespace off the title
