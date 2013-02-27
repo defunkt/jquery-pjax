@@ -260,19 +260,7 @@ function pjax(options) {
 
     if (container.title) document.title = container.title
     context.html(container.contents)
-
-    container.scripts.each(function(_, script) {
-      var $script = $(script)
-      var src = $script.attr('src')
-      if ($('script[src="' + src + '"]').length) return
-
-      var target = document.head || context.get(0)
-      var tag = document.createElement('script')
-      tag.type = $script.attr('type') || "text/javascript"
-      tag.async = false
-      tag.src  = src
-      target.appendChild(tag)
-    })
+    executeScriptTags(container.scripts)
 
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
@@ -650,6 +638,26 @@ function extractContainer(data, xhr, options) {
   if (obj.title) obj.title = $.trim(obj.title)
 
   return obj
+}
+
+// Download and execute script tags once.
+//
+// scripts - Array of script Elements
+//
+// Returns nothing.
+function executeScriptTags(scripts) {
+  scripts.each(function(_, script) {
+    var $script = $(script)
+    var src = $script.attr('src')
+    if ($('script[src="' + src + '"]').length) return
+
+    var target = document.head || context.get(0)
+    var tag = document.createElement('script')
+    tag.type = $script.attr('type') || "text/javascript"
+    tag.async = false
+    tag.src  = src
+    target.appendChild(tag)
+  })
 }
 
 // Internal: History DOM caching class.
