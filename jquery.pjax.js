@@ -395,11 +395,6 @@ function onPjaxPopstate(event) {
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
         cachePop(direction, pjax.state.id, container.clone().contents())
-      } else {
-        // Unknown case: If you happen to hit it, please open an issue on
-        // https://github.com/defunkt/jquery-pjax/issues?sort=updated&state=open
-        // with steps to reproduce.
-        throw "missing initial pjax state"
       }
 
       var popstateEvent = $.Event('pjax:popstate', {
