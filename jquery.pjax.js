@@ -643,23 +643,30 @@ function extractContainer(data, xhr, options) {
   return obj
 }
 
-// Download and execute script tags once.
+// Load an execute scripts using standard script request.
 //
-// scripts - Array of script Elements
+// Avoids jQuery's traditional $.getScript which does a XHR request and
+// globalEval.
+//
+// scripts - jQuery object of script Elements
 //
 // Returns nothing.
 function executeScriptTags(scripts) {
-  scripts.each(function(_, script) {
-    var $script = $(script)
-    var src = $script.attr('src')
-    if ($('script[src="' + src + '"]').length) return
+  if (!scripts) return
 
-    var target = document.head || context.get(0)
-    var tag = document.createElement('script')
-    tag.type = $script.attr('type') || "text/javascript"
-    tag.async = false
-    tag.src  = src
-    target.appendChild(tag)
+  var existingScripts = $('script[src]')
+
+  scripts.each(function() {
+    var src = this.src
+    var matchedScripts = existingScripts.filter(function() {
+      return this.src === src
+    })
+    if (matchedScripts.length) return
+
+    var script = document.createElement('script')
+    script.type = $(this).attr('type')
+    script.src = $(this).attr('src')
+    document.head.appendChild(script)
   })
 }
 
