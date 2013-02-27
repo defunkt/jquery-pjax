@@ -35,6 +35,7 @@ if ($.support.pjax) {
 
     frame.$('#main').on('pjax:success', function() {
       equal(frame.$("#main > p").html().trim(), "Hello!")
+      equal(frame.$("#main").contents().eq(1).text().trim(), "How's it going?")
       start()
     })
     frame.$.pjax({
