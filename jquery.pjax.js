@@ -358,6 +358,18 @@ function locationReplace(url) {
   window.location.replace(url)
 }
 
+
+var initialPop = true
+var initialURL = window.location.href
+var initialState = window.history.state
+
+// Initialize $.pjax.state if possible
+// Happens when reloading a page and coming forward from a different
+// session history.
+if (initialState && initialState.container) {
+  pjax.state = initialState
+}
+
 // popstate handler takes care of the back and forward buttons
 //
 // You probably shouldn't use pjax on pages with other pushState
@@ -366,23 +378,28 @@ function onPjaxPopstate(event) {
   var state = event.state
 
   if (state && state.container) {
+    // When coming forward from a seperate history session, will get an
+    // initial pop with a state we are already at. Skip reloading the current
+    // page.
+    if (initialPop && initialURL == state.url) return
+
     var container = $(state.container)
     if (container.length) {
-      var contents = cacheMapping[state.id]
+      var direction, contents = cacheMapping[state.id]
 
       if (pjax.state) {
         // Since state ids always increase, we can deduce the history
         // direction from the previous state.
-        var direction = pjax.state.id < state.id ? 'forward' : 'back'
+        direction = pjax.state.id < state.id ? 'forward' : 'back'
 
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
         cachePop(direction, pjax.state.id, container.clone().contents())
       } else {
-        // Page was reloaded but we have an existing history entry.
-        // Set it to our initial state.
-        pjax.state = state;
-        return;
+        // Unknown case: If you happen to hit it, please open an issue on
+        // https://github.com/defunkt/jquery-pjax/issues?sort=updated&state=open
+        // with steps to reproduce.
+        throw "missing initial pjax state"
       }
 
       var popstateEvent = $.Event('pjax:popstate', {
@@ -420,6 +437,7 @@ function onPjaxPopstate(event) {
       locationReplace(location.href)
     }
   }
+  initialPop = false
 }
 
 // Fallback version of main pjax function for browsers that don't
