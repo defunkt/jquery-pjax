@@ -90,10 +90,10 @@ function handleClick(event, container, options) {
   }
 
   var opts = $.extend({}, defaults, options)
-  var event = $.Event('pjax:click')
-  $(link).trigger(event, [opts])
+  var clickEvent = $.Event('pjax:click')
+  $(link).trigger(clickEvent, [opts])
 
-  if (!event.isDefaultPrevented()) {
+  if (!clickEvent.isDefaultPrevented()) {
     pjax(opts)
     event.preventDefault()
   }
