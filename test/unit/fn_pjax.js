@@ -204,4 +204,17 @@ if ($.support.pjax) {
     link.attr('href', "/dinosaurs.html#main")
     link.click()
   })
+
+  asyncTest("triggers pjax:click event from link", function() {
+    var frame = this.frame
+
+    frame.$("#main").pjax("a").on("pjax:click", function(event, options) {
+      ok(event)
+      ok(options.container.is('#main'))
+      ok(options.url.match("/dinosaurs.html"))
+      start()
+    })
+
+    frame.$("a[href='/dinosaurs.html']").click()
+  })
 }

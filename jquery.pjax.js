@@ -89,9 +89,14 @@ function handleClick(event, container, options) {
     fragment: null
   }
 
-  pjax($.extend({}, defaults, options))
+  var opts = $.extend({}, defaults, options)
+  var event = $.Event('pjax:click')
+  $(link).trigger(event, [opts])
 
-  event.preventDefault()
+  if (!event.isDefaultPrevented()) {
+    pjax(opts)
+    event.preventDefault()
+  }
 }
 
 // Public: pjax on form submit handler
