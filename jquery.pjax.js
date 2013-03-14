@@ -269,7 +269,7 @@ function pjax(options) {
 
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
-      $(window).scrollTop(options.scrollTo)
+      $(window).scrollTo(0, options.scrollTo)
 
     // Google Analytics support
     if ( (options.replace || options.push) && window._gaq )
@@ -290,7 +290,7 @@ function pjax(options) {
       window.history.replaceState(pjax.state, container.title, url.href)
 
       var target = $(url.hash)
-      if (target.length) $(window).scrollTop(target.offset().top)
+      if (target.length) $(window).scrollTo(0, target.offset().top)
     }
 
     fire('pjax:success', [data, status, xhr, options])
