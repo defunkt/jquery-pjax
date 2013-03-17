@@ -193,9 +193,9 @@ All events are fired from the container, not the link was clicked.
 
 #### start and end
 
-* `pjax:start` - Fired when pjaxing begins
+* `pjax:start` - Fired when pjaxing begins.
 * `pjax:end` - Fired when pjaxing ends.
-  `pjax:click` - Fired when pjaxified link is clicked
+* `pjax:click` - Fired when pjaxified link is clicked.
 
 This pair events fire anytime a pjax request starts and finishes. This includes pjaxing on `popstate` and when pages are loaded from cache instead of making a request.
 
