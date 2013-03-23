@@ -70,7 +70,7 @@ function handleClick(event, container, options) {
     return
 
   // Ignore cross origin links
-  if ( location.protocol !== link.protocol || location.host !== link.host )
+  if ( location.protocol !== link.protocol || location.hostname !== link.hostname )
     return
 
   // Ignore anchors on the same page
