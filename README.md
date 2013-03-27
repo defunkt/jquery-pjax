@@ -58,7 +58,7 @@ We do this by telling pjax to listen on `a` tags and use `#pjax-container` as th
 $(document).pjax('a', '#pjax-container')
 ```
 
-Now when someone in a pjax-compatible browser clicks "next page" the content of `#pjax-container` will be replaced with the body of `/pjax/2`.
+Now when someone in a pjax-compatible browser clicks "next page" the content of `#pjax-container` will be replaced with the body of `/page/2`.
 
 Magic! Almost. You still need to configure you server to look for pjax requests then send back pjax-specific content.
 
