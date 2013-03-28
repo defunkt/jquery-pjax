@@ -314,7 +314,7 @@ if ($.support.pjax) {
 
     frame.$('body').on('pjax:success', function(event, data) {
       equal(typeof data, 'string')
-      equal(frame.$("body > p").html().trim(), "Hello!")
+      equal(frame.$("body > #main > p").html().trim(), "Hello!")
       equal(frame.document.title, "Hello")
       start()
     })
