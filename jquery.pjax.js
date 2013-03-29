@@ -271,9 +271,13 @@ function pjax(options) {
     if (typeof options.scrollTo === 'number')
       $(window).scrollTop(options.scrollTo)
 
-    // Google Analytics support
+    // Old style Google Analytics ga.js support
     if ( (options.replace || options.push) && window._gaq )
       _gaq.push(['_trackPageview'])
+    // New Google analytics.js support
+    if ( (options.replace || options.push) && window.ga ) {
+      ga('send', 'pageview')
+    }
 
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
