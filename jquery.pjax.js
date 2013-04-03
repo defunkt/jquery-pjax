@@ -276,8 +276,11 @@ function pjax(options) {
       _gaq.push(['_trackPageview'])
     // New Google analytics.js support
     if ( (options.replace || options.push) && window.ga ) {
-      var location = window.location.protocol + '//' + window.location.hostname + window.location.pathname + window.location.search;
-      ga('send', 'pageview', location)
+      var location = window.location.pathname + window.location.search;
+      ga('send', 'pageview', {
+        'page': location,
+        'title': document.title
+      });
     }
 
     // If the URL has a hash in it, make sure the browser
