@@ -271,10 +271,6 @@ function pjax(options) {
     if (typeof options.scrollTo === 'number')
       $(window).scrollTop(options.scrollTo)
 
-    // Google Analytics support
-    if ( (options.replace || options.push) && window._gaq )
-      _gaq.push(['_trackPageview'])
-
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
     if ( hash !== '' ) {
