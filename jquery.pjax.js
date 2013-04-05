@@ -172,8 +172,12 @@ function pjax(options) {
   // for pjax'd partial page loads and one for normal page loads.
   // Without adding this secret parameter, some browsers will often
   // confuse the two.
-  if (!options.data) options.data = []
-  options.data.push({name: '_pjax', value: context.selector})
+  if (!options.data) options.data = {}
+  if ($.isArray(options.data)) {
+    options.data.push({name: '_pjax', value: context.selector})
+  } else {
+    options.data._pjax = context.selector
+  }
 
   function fire(type, args) {
     var event = $.Event(type, { relatedTarget: target })
