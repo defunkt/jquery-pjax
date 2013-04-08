@@ -678,8 +678,12 @@ function executeScriptTags(scripts) {
     if (matchedScripts.length) return
 
     var script = document.createElement('script')
-    script.type = $(this).attr('type')
+
+    var type = $(this).attr('type')
+    if( type ) script.type = type
+
     script.src = $(this).attr('src')
+
     document.head.appendChild(script)
   })
 }
