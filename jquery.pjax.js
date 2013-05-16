@@ -2,7 +2,7 @@
 // copyright chris wanstrath
 // https://github.com/defunkt/jquery-pjax
 
-(function($){
+!function($){
 
 // When called on a container with a selector, fetches the href with
 // ajax into the container or with the data-pjax attribute on the link
@@ -251,12 +251,12 @@ function pjax(options) {
     }
 
     pjax.state = {
-      id: options.id || uniqueId(),
-      url: container.url,
-      title: container.title,
+      id       : options.id || uniqueId(),
+      url      : container.url,
+      title    : container.title,
       container: context.selector,
-      fragment: options.fragment,
-      timeout: options.timeout
+      fragment : options.fragment,
+      timeout  : options.timeout
     }
 
     if (options.push || options.replace) {
@@ -599,14 +599,15 @@ function parseHTML(html) {
 //
 // Returns an Object with url, title, and contents keys.
 function extractContainer(data, xhr, options) {
-  var obj = {}
+  var obj = {},
+      isHtml ;
 
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
   obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
 
   // Attempt to parse response html into elements
-  if (/<html/i.test(data)) {
+  if (isHtml = /<html/i.test(data)) {
     var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
     var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
   } else {
@@ -614,8 +615,7 @@ function extractContainer(data, xhr, options) {
   }
 
   // If response data is empty, return fast
-  if ($body.length === 0)
-    return obj
+  if ($body.length === 0) return obj;
 
   // If there's a <title> tag in the header, use it as
   // the page's title.
@@ -639,7 +639,7 @@ function extractContainer(data, xhr, options) {
         obj.title = $fragment.attr('title') || $fragment.data('title')
     }
 
-  } else if (!/<html/i.test(data)) {
+  } else if (!isHtml) {
     obj.contents = $body
   }
 
@@ -658,7 +658,6 @@ function extractContainer(data, xhr, options) {
 
   // Trim any whitespace off the title
   if (obj.title) obj.title = $.trim(obj.title)
-
   return obj
 }
 
@@ -819,4 +818,4 @@ $.support.pjax =
 
 $.support.pjax ? enable() : disable()
 
-})(jQuery);
+}(jQuery);
