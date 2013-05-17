@@ -226,8 +226,8 @@ function pjax(options) {
 
     xhr.setRequestHeader('X-PJAX', 'true')
     xhr.setRequestHeader('X-PJAX-Container', context.selector)
-
-    if (!fire('pjax:beforeSend', [xhr, settings]))
+    
+    if (!fire('pjax:beforeSend', [xhr, settings, options]))
       return false
 
     if (settings.timeout > 0) {
