@@ -779,7 +779,7 @@ function enable() {
     maxCacheLength: 20,
     version: findVersion
   }
-  $(window).bind('popstate.pjax', onPjaxPopstate)
+  $(window).on('popstate.pjax', onPjaxPopstate)
 }
 
 // Disable pushState behavior.
@@ -802,7 +802,7 @@ function disable() {
   $.pjax.submit = $.noop
   $.pjax.reload = function() { window.location.reload() }
 
-  $(window).unbind('popstate.pjax', onPjaxPopstate)
+  $(window).off('popstate.pjax', onPjaxPopstate)
 }
 
 
