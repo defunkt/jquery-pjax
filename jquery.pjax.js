@@ -2,7 +2,7 @@
 // copyright chris wanstrath
 // https://github.com/defunkt/jquery-pjax
 
-; (function ($) {
+;(function ($) {
 // /*#=$use_strict*/
  
 // When called on a container with a selector, fetches the href with
@@ -74,9 +74,9 @@ function handleClick(event, container, options) {
     link = parseURL(link);
   }
   
-  if(link.protocol == 'javascript:') {
-      throw '$.fn.pjax or $.pjax.click requires a valid URL address. "' + link.href + '" is not valid';
-  }
+  // if(link.protocol == 'javascript:') {
+      // throw '$.fn.pjax or $.pjax.click requires a valid URL address. "' + link.href + '" is not valid';
+  // }
   
   // Middle click, cmd click, and ctrl click should open
   // links in a new tab as normal.
@@ -295,8 +295,8 @@ function pjax(options) {
 
     if (container.title) document.title = container.title
     context.html(container.contents)
-    executeScriptTags(container.scripts)
     addHeadMeta(container.meta)
+    executeScriptTags(container.scripts) // Executed only on load, not at popstate
 
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
@@ -331,12 +331,13 @@ function pjax(options) {
   // behavior.
   if (!pjax.state) {
     pjax.state = {
-      id: uniqueId(),
-      url: window.location.href,
-      title: document.title,
+      id       : uniqueId(),
+      url      : window.location.href,
+      title    : document.title,
+      meta     : grabMeta('head'),
       container: context.selector,
-      fragment: options.fragment,
-      timeout: options.timeout
+      fragment : options.fragment,
+      timeout  : options.timeout
     }
     window.history.replaceState(pjax.state, document.title)
   }
@@ -448,11 +449,12 @@ function onPjaxPopstate(event) {
         id: state.id,
         url: state.url,
         container: container,
+        meta: state.meta,
         push: false,
         fragment: state.fragment,
         timeout: state.timeout,
         scrollTo: false
-      }
+      } ;
 
       if (contents) {
         container.trigger('pjax:start', [null, options])
@@ -623,6 +625,51 @@ function parseHTML(html) {
   return $.parseHTML(html, document, true)
 }
 
+// Collect meta from head and return it as a collection of strings, compatible with addHeadMeta()
+function grabMeta(head) {
+    function _am(m,v,k) {
+        if(k in m) $.isArray(m[k]) ? ( m[k][m[k].length] = v ) : ( m[k] = [m[k],v] ) ;
+        else m[k] = v
+        return v     
+    }    
+    var meta = {};
+    $.each({'itemprop':'meta','property':'meta','name':'meta','rel':'link'}, function(p,t,n) {
+        n = t == 'link' ? 'href' : 'content';
+        findAll($(head), t+'['+p+']').each(function(i,m,k) {
+           m = $(m);
+           k = m.attr(p);
+           _am(meta, t+'>'+p+'>'+k, m.attr(n))        
+        })
+    });
+    return meta
+}
+
+// Add meta tags to document head, replacing existing ones
+function addHeadMeta(meta) {
+  if (!meta) return ;
+  
+  var head = $('head:first'), 
+      m = {};
+  
+  $.each(meta, function (c,l) { $.each($.isArray(l) ? l : [l], function (i, n) {
+         i = m[n] || (m[n] = []);
+         i[i.length] = c;
+  }) });
+   
+  $.each(m, function (n,l) {
+     n = n.split(/>/);
+     var t = n[0],
+         p = n[1],
+         v = n[2],
+         k = t == 'link' ? 'href' : 'content';
+     
+     $.each(l, function (o,c) { l[o] = $('<'+t+' />').attr(p,v).attr(k,c) });
+     
+     head.find(t+'['+p+'="'+v+'"]').remove();
+     head.prepend(l);    
+  });
+}
+
 // Internal: Extracts container and metadata from response.
 //
 // 1. Extracts X-PJAX-URL header if set
@@ -701,16 +748,9 @@ function extractContainer(data, xhr, options) {
   // If received an HTML document with <head> tag, add some head properties to the document, 
   // also the <script> tags are important
   if($head && $head.length) {
-     var $meta = {}, 
+     var $meta = grabMeta($head), 
          $src  = findAll($head, 'script').remove(),
-         $js   = $src.not('[src]'),
-         _am =  function _am(m,v,k) {
-                    if(k in m) $.isArray(m[k]) ? ( m[k][m[k].length] = v ) : ( m[k] = [m[k],v] ) ;
-                    else m[k] = v
-                    return v     
-                };
-        
-     $.each({'itemprop':'meta','property':'meta','name':'meta','rel':'link'}, function(p,t,n) {
+         $js   = $src.not('[src]');
      
      if($js && $js.length) {
          $src = $src.not($js); // only script tags with src attribute
@@ -726,15 +766,7 @@ function extractContainer(data, xhr, options) {
          // add script tags with src from head at the begining of obj.scripts
          obj.scripts = $src.add(obj.scripts);
      }
-     
-         n = t == 'link' ? 'href' : 'content';
-         findAll($head, t+'['+p+']').each(function(i,m,k) {
-            m = $(m);
-            k = m.attr(p);
-            _am($meta, t+'>'+p+'>'+k, m.attr(n))        
-         })
-     });
-     
+
      if(!$.isEmptyObject($meta)) obj.meta = $meta     
   }
 
@@ -770,31 +802,6 @@ function executeScriptTags(scripts) {
   })
 }
 
-// Add meta tags to document head, replacing existing ones
-function addHeadMeta(meta) {
-  if (!meta) return ;
-  
-  var head = $('head:first'), 
-      m = {};
-  
-  $.each(meta, function (c,l) { $.each($.isArray(l) ? l : [l], function (i, n) {
-         i = m[n] || (m[n] = []);
-         i[i.length] = c;
-  }) });
-   
-  $.each(m, function (n,l) {
-     n = n.split(/>/);
-     var t = n[0],
-         p = n[1],
-         v = n[2],
-         k = t == 'link' ? 'href' : 'content';
-     
-     $.each(l, function (o,c) { l[o] = $('<'+t+' />').attr(p,v).attr(k,c) });
-     
-     head.find(t+'['+p+'="'+v+'"]').remove();
-     head.prepend(l);    
-  });
-}
 
 // Internal: History DOM caching class.
 var cacheMapping      = {}
