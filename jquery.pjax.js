@@ -101,10 +101,10 @@ function handleClick(event, container, options) {
     return
 
   var defaults = {
-    url: link.href,
+    url      : link.href,
     container: $t.attr('data-pjax'),
-    target: target,
-    fragment: null
+    target   : target,
+    fragment : null
   }
 
   var opts = $.extend({}, defaults, options)
@@ -251,7 +251,8 @@ function pjax(options) {
   }
 
   options.success = function(data, status, xhr) {
-    var currentVersion = options.version;
+    var currentVersion = options.version,
+        lastState = pjax.state;
     
     // If currentVersion is a function, invoke it first.
     // Otherwise it can be a static string.
@@ -280,22 +281,25 @@ function pjax(options) {
     }
     
     pjax.state = {
-      id       : options.id || uniqueId(),
-      url      : container.url,
-      title    : container.title,
-      meta     : container.meta,
-      container: context.selector,
-      fragment : options.fragment,
-      timeout  : options.timeout
+        id       : options.id || uniqueId(),
+        url      : container.url,
+        title    : container.title,
+        meta     : container.meta,
+        container: context.selector,
+        fragment : options.fragment,
+        timeout  : options.timeout
     }
 
     if (options.push || options.replace) {
-      window.history.replaceState(pjax.state, container.title, container.url)
+        window.history.replaceState(pjax.state, container.title, container.url)
     }
 
+    // Document properties:
     if (container.title) document.title = container.title
-    context.html(container.contents)
     addHeadMeta(container.meta)
+    // Document contents:
+    context.html(container.contents)
+    // Document actions:
     executeScriptTags(container.scripts) // Executed only on load, not at popstate
 
     // Scroll to top by default
@@ -632,42 +636,64 @@ function grabMeta(head) {
         else m[k] = v
         return v     
     }    
-    var meta = {};
-    $.each({'itemprop':'meta','property':'meta','name':'meta','rel':'link'}, function(p,t,n) {
+    var meta = {}, 
+        search = {itemprop:'meta', property:'meta', name:'meta', rel:'link'},
+        except = {rel:'<stylesheet<prefetch<'}; // don't touch meta|link with these attribute values
+    
+    $.each(search, function(p,t,n,g) {
         n = t == 'link' ? 'href' : 'content';
+        g = except[p];
         findAll($(head), t+'['+p+']').each(function(i,m,k) {
-           m = $(m);
-           k = m.attr(p);
-           _am(meta, t+'>'+p+'>'+k, m.attr(n))        
+            m = $(m);
+            k = m.attr(p);
+            if(!g || g.indexOf(k) < 0) _am(meta, t+'>'+p+'>'+k, m.attr(n));
         })
     });
     return meta
 }
 
 // Add meta tags to document head, replacing existing ones
-function addHeadMeta(meta) {
-  if (!meta) return ;
-  
-  var head = $('head:first'), 
-      m = {};
-  
-  $.each(meta, function (c,l) { $.each($.isArray(l) ? l : [l], function (i, n) {
-         i = m[n] || (m[n] = []);
-         i[i.length] = c;
-  }) });
-   
-  $.each(m, function (n,l) {
-     n = n.split(/>/);
-     var t = n[0],
-         p = n[1],
-         v = n[2],
-         k = t == 'link' ? 'href' : 'content';
-     
-     $.each(l, function (o,c) { l[o] = $('<'+t+' />').attr(p,v).attr(k,c) });
-     
-     head.find(t+'['+p+'="'+v+'"]').remove();
-     head.prepend(l);    
-  });
+function addHeadMeta(meta,head) {
+    if(!meta) return ; // no actions
+    if(!head) head = $('head:first'); // default head is the head of the current doc 
+
+    var m   = {},
+        add = $([]); // Colection of newly added meta|link tags
+    
+    // Expand compacted meta info to a list of tag-def -> value
+    $.each(meta, function (c,l) { $.each($.isArray(l) ? l : [l], function (i, n) {
+        i = m[n] || (m[n] = []);
+        i[i.length] = c;
+    }) });
+
+    // Create meta tags and replace/add them in/to head
+    $.each(m, function (n,a) {
+        n = n.split(/>/);
+        var t = n[0],
+            p = n[1],
+            v = n[2],
+            k = t == 'link' ? 'href' : 'content',
+            r = head.find(t+'['+p+'="'+v+'"]');
+        
+        $.each(a, function (i,c) { a[i] = $('<'+t+' />').attr(p,v).attr(k,c).get(0) });
+        
+        add = add.add(a);
+        
+        if(r.length) { // replace
+            r.last().after(a);
+            r.remove();
+        } else { // add
+            head.append(a);
+        }
+    });
+    
+    // .pjax class marks uri specific meta, that are deleted on pjax requests
+    head.find('meta.pjax,link.pjax').remove();
+    
+    // Mark newly added meta|link tags as pjax specific, so they get deleted on next pjax request
+    add.addClass('pjax');
+
+    return add;
 }
 
 // Internal: Extracts container and metadata from response.
