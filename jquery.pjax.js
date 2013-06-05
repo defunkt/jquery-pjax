@@ -2,8 +2,9 @@
 // copyright chris wanstrath
 // https://github.com/defunkt/jquery-pjax
 
-(function($){
-
+;(function ($) {
+// /*#=$use_strict*/
+ 
 // When called on a container with a selector, fetches the href with
 // ajax into the container or with the data-pjax attribute on the link
 // itself.
@@ -30,10 +31,12 @@
 function fnPjax(selector, container, options) {
   var context = this
   return this.on('click.pjax', selector, function(event) {
-    var opts = $.extend({}, optionsFor(container, options))
-    if (!opts.container)
-      opts.container = $(this).attr('data-pjax') || context
-    handleClick(event, opts)
+    options = $.extend({}, optionsFor(container, options))
+    
+    if (!options.container)
+      options.container = $(this).attr('data-pjax') || context
+      
+    handleClick(event, options)
   })
 }
 
@@ -59,14 +62,29 @@ function fnPjax(selector, container, options) {
 function handleClick(event, container, options) {
   options = optionsFor(container, options)
 
-  var link = event.currentTarget
+  var target = event.currentTarget, 
+      $t = $(target), 
+      link;
 
-  if (link.tagName.toUpperCase() !== 'A')
-    throw "$.fn.pjax or $.pjax.click requires an anchor element"
-
+  if ( $.nodeName(target, 'A') ) {
+    link = target;
+  } else {
+    link = $t.attr('data-href');
+    if(!link) throw '$.fn.pjax or $.pjax.click requires an anchor element or an element with data-href attribute';
+    link = parseURL(link);
+  }
+  
+  // if(link.protocol == 'javascript:') {
+      // throw '$.fn.pjax or $.pjax.click requires a valid URL address. "' + link.href + '" is not valid';
+  // }
+  
   // Middle click, cmd click, and ctrl click should open
   // links in a new tab as normal.
   if ( event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey )
+    return
+
+  // onclick event could stop link from oppening
+  if( event.isDefaultPrevented() )
     return
 
   // Ignore cross origin links
@@ -83,15 +101,15 @@ function handleClick(event, container, options) {
     return
 
   var defaults = {
-    url: link.href,
-    container: $(link).attr('data-pjax'),
-    target: link,
-    fragment: null
+    url      : link.href,
+    container: $t.attr('data-pjax'),
+    target   : target,
+    fragment : null
   }
 
   var opts = $.extend({}, defaults, options)
   var clickEvent = $.Event('pjax:click')
-  $(link).trigger(clickEvent, [opts])
+  $t.trigger(clickEvent, [opts])
 
   if (!clickEvent.isDefaultPrevented()) {
     pjax(opts)
@@ -168,6 +186,9 @@ function pjax(options) {
 
   var context = options.context = findContainerFor(options.container)
 
+  // Store query start time. On complete use this value to calculate query time
+  var qstart ;
+
   // We want the browser to maintain two separate internal caches: one
   // for pjax'd partial page loads and one for normal page loads.
   // Without adding this secret parameter, some browsers will often
@@ -187,13 +208,13 @@ function pjax(options) {
     // No timeout for non-GET requests
     // Its not safe to request the resource again with a fallback method.
     if (settings.type !== 'GET') {
-      settings.timeout = 0
+       settings.timeout = 0
     }
 
-    xhr.setRequestHeader('X-PJAX', 'true')
-    xhr.setRequestHeader('X-PJAX-Container', context.selector)
-
-    if (!fire('pjax:beforeSend', [xhr, settings]))
+    xhr.setRequestHeader('X-PJAX', context.selector) 
+    xhr.setRequestHeader('X-PJAX-Container', context.selector) // Don't waste bandwidth with two headers, one is enough
+    
+    if (!fire('pjax:beforeSend', [xhr, settings, options]))
       return false
 
     if (settings.timeout > 0) {
@@ -213,28 +234,31 @@ function pjax(options) {
     if (timeoutTimer)
       clearTimeout(timeoutTimer)
 
+    options.request_time = $.now() - qstart;
+
     fire('pjax:complete', [xhr, textStatus, options])
 
     fire('pjax:end', [xhr, options])
   }
 
   options.error = function(xhr, textStatus, errorThrown) {
-    var container = extractContainer("", xhr, options)
-
-    var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
-    if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
+    var container = extractContainer("", xhr, options),
+        allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options]);
+        
+    if (allowed && options.type == 'GET' && textStatus !== 'abort') {
       locationReplace(container.url)
     }
   }
 
   options.success = function(data, status, xhr) {
-    // If $.pjax.defaults.version is a function, invoke it first.
+    var currentVersion = options.version,
+        lastState = pjax.state;
+    
+    // If currentVersion is a function, invoke it first.
     // Otherwise it can be a static string.
-    var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
-      $.pjax.defaults.version() :
-      $.pjax.defaults.version
+    if(typeof currentVersion === 'function') currentVersion = currentVersion();
 
-    var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
+    var latestVersion = xhr.getResponseHeader('X-PJAX-Version');
 
     var container = extractContainer(data, xhr, options)
 
@@ -249,27 +273,39 @@ function pjax(options) {
       locationReplace(container.url)
       return
     }
-
+    
+    // If the layout version is loaded only via PJAX requests, 
+    // save it for comparing in next PJAX request
+    if (latestVersion && !currentVersion) {
+       $.pjax.defaults.version = latestVersion
+    }
+    
     pjax.state = {
-      id: options.id || uniqueId(),
-      url: container.url,
-      title: container.title,
-      container: context.selector,
-      fragment: options.fragment,
-      timeout: options.timeout
+        id       : options.id || uniqueId(),
+        url      : container.url,
+        title    : container.title,
+        meta     : container.meta,
+        container: context.selector,
+        fragment : options.fragment,
+        timeout  : options.timeout
     }
 
     if (options.push || options.replace) {
-      window.history.replaceState(pjax.state, container.title, container.url)
+        window.history.replaceState(pjax.state, container.title, container.url)
     }
 
+    // Document properties:
     if (container.title) document.title = container.title
+    addHeadMeta(container.meta)
+    // Document contents:
     context.html(container.contents)
-    executeScriptTags(container.scripts)
+    // Document actions:
+    executeScriptTags(container.scripts) // Executed only on load, not at popstate
 
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
-      $(window).scrollTop(options.scrollTo)
+      // $('html,body').animate({scrollTop:options.scrollTo}, 400, 'swing',function(){log(options.scrollTo)});
+      $(window).scrollTop(options.scrollTo);
 
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
@@ -299,12 +335,13 @@ function pjax(options) {
   // behavior.
   if (!pjax.state) {
     pjax.state = {
-      id: uniqueId(),
-      url: window.location.href,
-      title: document.title,
+      id       : uniqueId(),
+      url      : window.location.href,
+      title    : document.title,
+      meta     : grabMeta('head'),
       container: context.selector,
-      fragment: options.fragment,
-      timeout: options.timeout
+      fragment : options.fragment,
+      timeout  : options.timeout
     }
     window.history.replaceState(pjax.state, document.title)
   }
@@ -326,7 +363,10 @@ function pjax(options) {
 
       window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
     }
-
+    
+    // Register query start time
+    qstart = $.now()
+    
     fire('pjax:start', [xhr, options])
     fire('pjax:send', [xhr, options])
   }
@@ -413,17 +453,19 @@ function onPjaxPopstate(event) {
         id: state.id,
         url: state.url,
         container: container,
+        meta: state.meta,
         push: false,
         fragment: state.fragment,
         timeout: state.timeout,
         scrollTo: false
-      }
+      } ;
 
       if (contents) {
         container.trigger('pjax:start', [null, options])
 
         if (state.title) document.title = state.title
         container.html(contents)
+        addHeadMeta(state.meta)
         pjax.state = state
 
         container.trigger('pjax:end', [null, options])
@@ -587,6 +629,73 @@ function parseHTML(html) {
   return $.parseHTML(html, document, true)
 }
 
+// Collect meta from head and return it as a collection of strings, compatible with addHeadMeta()
+function grabMeta(head) {
+    function _am(m,v,k) {
+        if(k in m) $.isArray(m[k]) ? ( m[k][m[k].length] = v ) : ( m[k] = [m[k],v] ) ;
+        else m[k] = v
+        return v     
+    }    
+    var meta = {}, 
+        search = {itemprop:'meta', property:'meta', name:'meta', rel:'link'},
+        except = {rel:'<stylesheet<prefetch<'}; // don't touch meta|link with these attribute values
+    
+    $.each(search, function(p,t,n,g) {
+        n = t == 'link' ? 'href' : 'content';
+        g = except[p];
+        findAll($(head), t+'['+p+']').each(function(i,m,k) {
+            m = $(m);
+            k = m.attr(p);
+            if(!g || g.indexOf(k) < 0) _am(meta, t+'>'+p+'>'+k, m.attr(n));
+        })
+    });
+    return meta
+}
+
+// Add meta tags to document head, replacing existing ones
+function addHeadMeta(meta,head) {
+    if(!meta) return ; // no actions
+    if(!head) head = $('head:first'); // default head is the head of the current doc 
+
+    var m   = {},
+        add = $([]); // Colection of newly added meta|link tags
+    
+    // Expand compacted meta info to a list of tag-def -> value
+    $.each(meta, function (c,l) { $.each($.isArray(l) ? l : [l], function (i, n) {
+        i = m[n] || (m[n] = []);
+        i[i.length] = c;
+    }) });
+
+    // Create meta tags and replace/add them in/to head
+    $.each(m, function (n,a) {
+        n = n.split(/>/);
+        var t = n[0],
+            p = n[1],
+            v = n[2],
+            k = t == 'link' ? 'href' : 'content',
+            r = head.find(t+'['+p+'="'+v+'"]');
+        
+        $.each(a, function (i,c) { a[i] = $('<'+t+' />').attr(p,v).attr(k,c).get(0) });
+        
+        add = add.add(a);
+        
+        if(r.length) { // replace
+            r.last().after(a);
+            r.remove();
+        } else { // add
+            head.append(a);
+        }
+    });
+    
+    // .pjax class marks uri specific meta, that are deleted on pjax requests
+    head.find('meta.pjax,link.pjax').remove();
+    
+    // Mark newly added meta|link tags as pjax specific, so they get deleted on next pjax request
+    add.addClass('pjax');
+
+    return add;
+}
+
 // Internal: Extracts container and metadata from response.
 //
 // 1. Extracts X-PJAX-URL header if set
@@ -599,28 +708,35 @@ function parseHTML(html) {
 //
 // Returns an Object with url, title, and contents keys.
 function extractContainer(data, xhr, options) {
-  var obj = {}
+  var obj = {},
+      isHtml,
+      $head, $body, $html;
 
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
   obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
 
   // Attempt to parse response html into elements
-  if (/<html/i.test(data)) {
-    var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
-    var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
+  if (isHtml = /<html/i.test(data)) {
+    $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
+    $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
+    $html = $head.add($body)
   } else {
-    var $head = $body = $(parseHTML(data))
+    $body = $html = $(parseHTML(data))
   }
 
   // If response data is empty, return fast
-  if ($body.length === 0)
-    return obj
+  if ($body.length === 0) return obj;
 
   // If there's a <title> tag in the header, use it as
   // the page's title.
-  obj.title = findAll($head, 'title').last().text()
-
+  obj.title = findAll($html, 'title').last().text()
+      
+  // Response could contain important data, so save it for JS
+  options.html = $html 
+  
+  // If server is 'aware' of pjax, it could specify the container within the responce
+  if(!options.fragment) options.fragment = xhr.getResponseHeader('X-PJAX-Container');
   if (options.fragment) {
     // If they specified a fragment, look for it in the response
     // and pull it out.
@@ -638,15 +754,14 @@ function extractContainer(data, xhr, options) {
       if (!obj.title)
         obj.title = $fragment.attr('title') || $fragment.data('title')
     }
-
-  } else if (!/<html/i.test(data)) {
+  } else {
     obj.contents = $body
   }
 
   // Clean up any <title> tags
   if (obj.contents) {
     // Remove any parent title elements
-    obj.contents = obj.contents.not(function() { return $(this).is('title') })
+    obj.contents = obj.contents.not('title')
 
     // Then scrub any titles from their descendents
     obj.contents.find('title').remove()
@@ -656,9 +771,33 @@ function extractContainer(data, xhr, options) {
     obj.contents = obj.contents.not(obj.scripts)
   }
 
+  // If received an HTML document with <head> tag, add some head properties to the document, 
+  // also the <script> tags are important
+  if($head && $head.length) {
+     var $meta = grabMeta($head), 
+         $src  = findAll($head, 'script').remove(),
+         $js   = $src.not('[src]');
+     
+     if($js && $js.length) {
+         $src = $src.not($js); // only script tags with src attribute
+
+         // Move non-src script tags to contents, so it gets executed
+         // Warning: After appended to doc, script tags will be deleted, 
+         //          so on popstate they don't get executed again
+         //          It is not a good practice to load inline scripts via pjax this way!
+         obj.contents = $js.add(obj.contents);
+     }
+
+     if($src && $src.length) {
+         // add script tags with src from head at the begining of obj.scripts
+         obj.scripts = $src.add(obj.scripts);
+     }
+
+     if(!$.isEmptyObject($meta)) obj.meta = $meta     
+  }
+
   // Trim any whitespace off the title
   if (obj.title) obj.title = $.trim(obj.title)
-
   return obj
 }
 
@@ -688,6 +827,7 @@ function executeScriptTags(scripts) {
     document.head.appendChild(script)
   })
 }
+
 
 // Internal: History DOM caching class.
 var cacheMapping      = {}
@@ -770,7 +910,7 @@ function enable() {
   $.pjax.submit = handleSubmit
   $.pjax.reload = pjaxReload
   $.pjax.defaults = {
-    timeout: 650,
+    timeout: 3e3,
     push: true,
     replace: false,
     type: 'GET',
