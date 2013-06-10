@@ -92,7 +92,7 @@ function handleClick(event, container, options) {
   // check if anchor has data-pjax-push="[true|false]"
   // in this way push can be specified from anchor too
   if ( $(link).attr('data-pjax-push') == 'false' ) options.push = false
-  else if ( $(link).attr('data-pjax-push') == 'false' ) options.push = true
+  else if ( $(link).attr('data-pjax-push') == 'true' ) options.push = true
   
   var opts = $.extend({}, defaults, options)
   var clickEvent = $.Event('pjax:click')
