@@ -135,6 +135,11 @@ function handleSubmit(event, container, options) {
     target: form,
     fragment: null
   }
+  
+  // check if anchor has data-pjax-push="[true|false]"
+  // in this way push can be specified from anchor too
+  if ( $(form).attr('data-pjax-push') == 'false' ) options.push = false
+  else if ( $(form).attr('data-pjax-push') == 'true' ) options.push = true
 
   pjax($.extend({}, defaults, options))
 
