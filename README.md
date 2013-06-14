@@ -88,7 +88,7 @@ Via [bower](https://github.com/twitter/bower).
 $ bower install jquery-pjax
 ```
 
-Or add `jquery-pjax` to your apps `component.json`.
+Or add `jquery-pjax` to your apps `bower.json`.
 
 ``` json
   "dependencies": {
