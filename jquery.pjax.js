@@ -384,7 +384,7 @@ function onPjaxPopstate(event) {
   var state = event.state
 
   if (state && state.container) {
-    // When coming forward from a seperate history session, will get an
+    // When coming forward from a separate history session, will get an
     // initial pop with a state we are already at. Skip reloading the current
     // page.
     if (initialPop && initialURL == state.url) return
@@ -648,7 +648,7 @@ function extractContainer(data, xhr, options) {
     // Remove any parent title elements
     obj.contents = obj.contents.not(function() { return $(this).is('title') })
 
-    // Then scrub any titles from their descendents
+    // Then scrub any titles from their descendants
     obj.contents.find('title').remove()
 
     // Gather all script[src] elements
