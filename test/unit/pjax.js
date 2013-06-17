@@ -855,7 +855,7 @@ if ($.support.pjax) {
         frame.history.forward()
         setTimeout(function() { window.iframeLoad(frame) }, 1000)
       } else if (count == 6) {
-        // Should skip pjax:popstate since theres no initial pjax.state
+        // Should skip pjax:popstate since there's no initial pjax.state
         frame.$('#main').on('pjax:popstate', function(event) {
           if (count == 6) {
             ok(event.state.url.match("/hello.html"), event.state.url)
