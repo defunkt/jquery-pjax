@@ -811,7 +811,7 @@ function disable() {
 if ( $.inArray('state', $.event.props) < 0 )
   $.event.props.push('state')
 
- // Is pjax supported by this browser?
+// Is pjax supported by this browser?
 $.support.pjax =
   window.history && window.history.pushState && window.history.replaceState &&
   // pushState isn't reliable on iOS until 5.
