@@ -131,7 +131,6 @@ function handleSubmit(event, container, options) {
 // Examples
 //
 //  $(document)
-//    .on('submit', 'form', function(event) { event.preventDefault(); })
 //    .on('click', 'form :submit', function(event) {
 //      var container = $(this).closest('[data-pjax-container]')
 //      $.pjax.submitClick(event, container)
