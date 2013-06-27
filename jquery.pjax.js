@@ -227,7 +227,11 @@ function pjax(options) {
     }
   }
 
-  options.success = function(data, status, xhr) {
+  // Save user callback
+  var _success = options.success || null;
+
+  options.success = (function(){
+    return function(data, status, xhr) {
     // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
     var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
@@ -290,7 +294,13 @@ function pjax(options) {
     }
 
     fire('pjax:success', [data, status, xhr, options])
+
+    if(_success){
+      _success(data, status, xhr, options);
+    }
   }
+
+  })(_success);
 
 
   // Initialize pjax.state for the initial page load. Assume we're
