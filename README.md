@@ -228,6 +228,29 @@ $(document).on('pjax:timeout', function(event) {
 })
 ```
 
+### Options
+
+The following options might be useful to customize behavior:
+
+* `timeout` - A timeout on ajax requests
+* `type` - The HTTP method to use (defaults to GET)
+* `dataType` - Defaults to html
+* `scrollTo` - A position to scroll the page to after pjax. Defaults to 0
+* `maxCacheLength` - The number of history states to cache
+* `fragment` - Set to load only a part of the target URL's content
+
+By default, the `scrollTo` parameter causes each click to scroll to the top of the page.  This simulates normal browsing behavior.  To disable this behavior, set the `scrollTo` parameter to false.
+
+``` javascript
+$(document).pjax('a', '#pjax-container', {scrollTo: false});
+```
+
+or set a default for requests
+
+``` javascript
+$.pjax.defaults.scrollTo = false;
+```
+
 ### Server side
 
 Server configuration will vary between languages and frameworks. The following example shows how you might configure Rails.
@@ -243,6 +266,12 @@ end
 An `X-PJAX` request header is set to differentiate a pjax request from normal XHR requests. In this case, if the request is pjax, we skip the layout html and just render the inner contents of the container.
 
 Check if your favorite server framework supports pjax here: https://gist.github.com/4283721
+
+If you are not using a server framework that can detect the `X-PJAX` header (or if you are using static HTML files), use the `fragment` option to restrict what gets loaded.
+
+``` javascript
+$(document).pjax('a', '#pjax-container', {fragment: '#pjax-container'});
+```
 
 #### Layout Reloading
 
