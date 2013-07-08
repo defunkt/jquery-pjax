@@ -85,8 +85,7 @@ function handleClick(event, container, options) {
   var defaults = {
     url: link.href,
     container: $(link).attr('data-pjax'),
-    target: link,
-    fragment: null
+    target: link
   }
 
   var opts = $.extend({}, defaults, options)
@@ -127,8 +126,7 @@ function handleSubmit(event, container, options) {
     url: form.action,
     data: $(form).serializeArray(),
     container: $(form).attr('data-pjax'),
-    target: form,
-    fragment: null
+    target: form
   }
 
   pjax($.extend({}, defaults, options))
