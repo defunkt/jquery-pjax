@@ -261,6 +261,9 @@ function pjax(options) {
       window.history.replaceState(pjax.state, container.title, container.url)
     }
 
+    // Clear out any focused controls before inserting new page contents.
+    document.activeElement.blur()
+
     if (container.title) document.title = container.title
     context.html(container.contents)
 
