@@ -229,6 +229,30 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("sets hidden _pjax param on XHR form submission", function() {
+    var frame = this.frame
+    var iframe = this.iframe
+
+    iframe.src = "/form.html"
+
+    $(iframe).load(function(){
+      var form = frame.$("form")
+
+      frame.$('#form').on('pjax:success', function() {
+        var env = JSON.parse(frame.$("#env").text())
+        equal(env['rack.request.query_hash']['_pjax'], "true")
+        start()
+      })
+
+      form.submit(function(event){
+        frame.$.pjax.submit(event, form)
+        return false;
+      });
+
+      form.submit()
+    });
+  })
+
   asyncTest("preserves query string on GET request", function() {
     var frame = this.frame
 
