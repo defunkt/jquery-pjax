@@ -129,6 +129,10 @@ function handleSubmit(event, container, options) {
     target: form
   }
 
+  // serializeArray produces arrays of key/value pairs so we need to
+  // craft a special _pjax param that fits this convention
+  defaults.data.push({name: "_pjax", value: "true"})
+
   pjax($.extend({}, defaults, options))
 
   event.preventDefault()
@@ -171,7 +175,11 @@ function pjax(options) {
   // Without adding this secret parameter, some browsers will often
   // confuse the two.
   if (!options.data) options.data = {}
-  options.data._pjax = context.selector
+
+  // upstream handlers, such as handleSubmit, may set the param _pjax
+  // for us and we should respect their _pjax param since they have
+  // more context on the situation.
+  options.data._pjax = options.data._pjax || context.selector
 
   function fire(type, args) {
     var event = $.Event(type, { relatedTarget: target })
