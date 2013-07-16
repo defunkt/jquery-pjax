@@ -401,15 +401,20 @@ function onPjaxPopstate(event) {
     // page.
     if (initialPop && initialURL == state.url) return
 
-    var container = $(state.container)
+    var container, direction
+    if (pjax.state) {
+      // Since state ids always increase, we can deduce the history
+      // direction from the previous state.
+      direction = pjax.state.id < state.id ? 'forward' : 'back'
+    }
+
+    // Should use container in current state when going back
+    // as we cache its content when coming to this state
+    container = $(direction === 'back' ? pjax.state.container : state.container)
     if (container.length) {
-      var direction, contents = cacheMapping[state.id]
+      var contents = cacheMapping[state.id]
 
       if (pjax.state) {
-        // Since state ids always increase, we can deduce the history
-        // direction from the previous state.
-        direction = pjax.state.id < state.id ? 'forward' : 'back'
-
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
         cachePop(direction, pjax.state.id, container.clone().contents())
