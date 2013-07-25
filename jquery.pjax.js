@@ -401,6 +401,10 @@ function onPjaxPopstate(event) {
     // page.
     if (initialPop && initialURL == state.url) return
 
+    // If popping back to the same state, just skip.
+    // Could be clicking back from hashchange rather than a pushState.
+    if (pjax.state.id === state.id) return
+
     var container = $(state.container)
     if (container.length) {
       var direction, contents = cacheMapping[state.id]
