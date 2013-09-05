@@ -652,14 +652,14 @@ function parseHTML(html) {
 //
 // Returns an Object with url, title, and contents keys.
 function extractContainer(data, xhr, options) {
-  var obj = {}
+  var obj = {}, fullDocument = /<html/i.test(data)
 
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
   obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
 
   // Attempt to parse response html into elements
-  if (/<html/i.test(data)) {
+  if (fullDocument) {
     var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
     var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
   } else {
@@ -692,7 +692,7 @@ function extractContainer(data, xhr, options) {
         obj.title = $fragment.attr('title') || $fragment.data('title')
     }
 
-  } else if (!/<html/i.test(data)) {
+  } else if (!fullDocument) {
     obj.contents = $body
   }
 
