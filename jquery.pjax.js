@@ -1,6 +1,7 @@
 // jquery.pjax.js
 // copyright chris wanstrath
 // https://github.com/defunkt/jquery-pjax
+// this fork is: https://github.com/clipperhouse/jquery-pjax
 
 (function($){
 
@@ -254,7 +255,8 @@ function pjax(options) {
       title: container.title,
       container: context.selector,
       fragment: options.fragment,
-      timeout: options.timeout
+      timeout: options.timeout,
+      cacheContents: options.cacheContents
     }
 
     if (options.push || options.replace) {
@@ -316,7 +318,8 @@ function pjax(options) {
       title: document.title,
       container: context.selector,
       fragment: options.fragment,
-      timeout: options.timeout
+      timeout: options.timeout,
+      cacheContents: options.cacheContents
     }
     window.history.replaceState(pjax.state, document.title)
   }
@@ -407,18 +410,21 @@ function onPjaxPopstate(event) {
 
     var container = $(state.container)
     if (container.length) {
-      var direction, contents = cacheMapping[state.id]
+      var direction, contents
 
       if (pjax.state) {
         // Since state ids always increase, we can deduce the history
         // direction from the previous state.
         direction = pjax.state.id < state.id ? 'forward' : 'back'
+        if (pjax.state.cacheContents === true) {
+            contents = cacheMapping[state.id]
 
-        // Cache current container before replacement and inform the
-        // cache which direction the history shifted.
-        cachePop(direction, pjax.state.id, container.clone().contents())
+            // Cache current container before replacement and inform the
+            // cache which direction the history shifted.
+            cachePop(direction, pjax.state.id, container.clone().contents())
+        }
       }
-
+        
       var popstateEvent = $.Event('pjax:popstate', {
         state: state,
         direction: direction
@@ -432,10 +438,11 @@ function onPjaxPopstate(event) {
         push: false,
         fragment: state.fragment,
         timeout: state.timeout,
-        scrollTo: false
+        scrollTo: false,
+        cacheContents: state.cacheContents
       }
 
-      if (contents) {
+      if (contents && pjax.state.cacheContents === true) {
         container.trigger('pjax:start', [null, options])
 
         if (state.title) document.title = state.title
@@ -793,7 +800,8 @@ function enable() {
     dataType: 'html',
     scrollTo: 0,
     maxCacheLength: 20,
-    version: findVersion
+    version: findVersion,
+    cacheContents: true
   }
   $(window).on('popstate.pjax', onPjaxPopstate)
 }
