@@ -600,6 +600,7 @@ function findAll(elems, selector) {
 }
 
 function parseHTML(html) {
+  html = html.replace(/^<(head|body)/i, '<div').replace(/<\/(head|body)>$/i, '</div>')
   return $.parseHTML(html, document, true)
 }
 
