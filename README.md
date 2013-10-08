@@ -1,4 +1,4 @@
-[What is this fork about?](#fork)
+[What is this fork about?](#about-this-fork)
 
 # pjax
 
