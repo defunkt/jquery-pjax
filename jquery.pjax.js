@@ -95,6 +95,7 @@ function handleClick(event, container, options) {
   if (!clickEvent.isDefaultPrevented()) {
     pjax(opts)
     event.preventDefault()
+    $(link).trigger('pjax:clicked', [opts])
   }
 }
 
