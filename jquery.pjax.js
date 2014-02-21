@@ -125,9 +125,22 @@ function handleSubmit(event, container, options) {
   var defaults = {
     type: form.method.toUpperCase(),
     url: form.action,
-    data: $(form).serializeArray(),
     container: $(form).attr('data-pjax'),
     target: form
+  }
+
+  if (window.FormData !== undefined) {
+    defaults.data = new FormData(form);
+    defaults.processData = false;
+    defaults.contentType = false;
+  } else {
+    // Can't handle file uploads, exit
+    if ($(form).find(':file').length) {
+      return;
+    }
+
+    // Fallback to manually serializing the fields
+    defaults.data = $(form).serializeArray();
   }
 
   pjax($.extend({}, defaults, options))
