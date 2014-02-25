@@ -189,7 +189,14 @@ function pjax(options) {
       settings.timeout = 0
     }
 
+    // If $.pjax.defaults.version is a function, invoke it first.
+    // Otherwise it can be a static string.
+    var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
+      $.pjax.defaults.version() :
+      $.pjax.defaults.version
+
     xhr.setRequestHeader('X-PJAX', 'true')
+    xhr.setRequestHeader('X-PJAX-Version', currentVersion)
     xhr.setRequestHeader('X-PJAX-Container', context.selector)
 
     if (!fire('pjax:beforeSend', [xhr, settings]))
