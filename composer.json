@@ -10,6 +10,6 @@
 		"source": "https://github.com/yiisoft/jquery-pjax"
 	},
 	"require": {
-		"yiisoft/jquery": ">=1.8",
+		"yiisoft/jquery": ">=1.8"
 	}
 }
