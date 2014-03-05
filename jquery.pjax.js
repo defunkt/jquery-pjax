@@ -44,6 +44,8 @@ function fnPjax(selector, container, options) {
 // event   - "click" jQuery.Event
 // options - pjax options
 //
+// If the click event target has 'data-pjax="0"' attribute, the event is ignored, and no pjax call is made.
+//
 // Examples
 //
 //   $(document).on('click', 'a', $.pjax.click)
@@ -60,6 +62,10 @@ function handleClick(event, container, options) {
   options = optionsFor(container, options)
 
   var link = event.currentTarget
+
+  // Ignore links with data-pjax="0"
+  if ($(link).data('pjax')==0)
+    return
 
   if (link.tagName.toUpperCase() !== 'A')
     throw "$.fn.pjax or $.pjax.click requires an anchor element"
