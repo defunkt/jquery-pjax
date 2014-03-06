@@ -708,7 +708,7 @@
 			if (matchedScripts.length) return
 
 			var script = document.createElement('script')
-			script.type = $(this).attr('type')
+			script.type = $(this).attr('type') || 'text/javascript';
 			script.src = $(this).attr('src')
 			document.head.appendChild(script)
 		})
