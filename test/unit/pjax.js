@@ -1011,4 +1011,44 @@ if ($.support.pjax) {
     ok(frame.$.pjax.state.id)
     oldId = frame.$.pjax.state.id
   })
+
+  asyncTest("handles going back to pjaxed state after reloading a fragment navigation", function() {
+    var iframe = this.iframe
+    var frame = this.frame
+
+    // Get some pjax state in the history.
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+    })
+    frame.$("#main").on("pjax:complete", function() {
+      var state = frame.history.state
+      ok(frame.history.state)
+      ok(frame.$.pjax.state)
+
+      // Navigate to a fragment, which will result in a new history entry with
+      // no state object. $.pjax.state remains unchanged however.
+      iframe.src = frame.location.href + '#foo'
+      ok(!frame.history.state)
+      ok(frame.$.pjax.state)
+
+      // Reload the frame. This will clear out $.pjax.state.
+      frame.location.reload()
+      $(iframe).one("load", function() {
+        ok(!frame.history.state)
+        ok(!frame.$.pjax.state)
+
+        // Go back to #main. We'll get a popstate event with a pjax state
+        // object attached from the initial pjax navigation, even though
+        // $.pjax.state is null.
+        window.iframeLoad = function() {
+          ok(frame.history.state)
+          ok(frame.$.pjax.state)
+          equal(frame.$.pjax.state.id, state.id)
+          start()
+        }
+        frame.history.back()
+      })
+    })
+  })
 }
