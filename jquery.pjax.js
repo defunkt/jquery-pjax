@@ -231,9 +231,11 @@
 
 		options.error = function (xhr, textStatus, errorThrown) {
 			var container = extractContainer("", xhr, options)
-
-			var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
-			if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
+			// Check redirect status code
+			var redirect = (xhr.status >= 301 && xhr.status <= 303)
+			// Do not fire pjax::error in case of redirect
+			var allowed = redirect || fire('pjax:error', [xhr, textStatus, errorThrown, options])
+			if (redirect || (options.type == 'GET' && textStatus !== 'abort' && allowed)) {
 				locationReplace(container.url)
 			}
 		}
@@ -342,7 +344,7 @@
 		}
 
 		// Strip _pjax parameter from URL, if exists.
-		options.url=stripPjaxParam(options.url);
+		options.url = stripPjaxParam(options.url);
 
 		pjax.options = options
 		var xhr = pjax.xhr = $.ajax(options)
