@@ -263,7 +263,7 @@ function pjax(options) {
     }
 
     // Clear out any focused controls before inserting new page contents.
-    document.activeElement.blur()
+    document.activeElement && document.activeElement.blur()
 
     if (container.title) document.title = container.title
     context.html(container.contents)
