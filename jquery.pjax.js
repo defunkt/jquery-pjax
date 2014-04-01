@@ -693,15 +693,19 @@ function executeScriptTags(scripts) {
   var existingScripts = $('script[src]')
 
   scripts.each(function() {
-    var src = this.src
-    var matchedScripts = existingScripts.filter(function() {
+    var src = this.src,
+      $this = $(this),
+      matchedScripts = existingScripts.filter(function() {
       return this.src === src
     })
     if (matchedScripts.length) return
 
     var script = document.createElement('script')
-    script.type = $(this).attr('type')
-    script.src = $(this).attr('src')
+    script.type = $this.attr('type')
+    script.src = $this.attr('src')
+    script.async = true
+    script.defer = true
+
     document.head.appendChild(script)
   })
 }
