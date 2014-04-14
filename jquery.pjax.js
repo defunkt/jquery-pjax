@@ -547,7 +547,7 @@ function parseURL(url) {
 // Returns options Object.
 function optionsFor(container, options) {
   // Both container and options
-  if ( container && options )
+  if ( options )
     options.container = container
 
   // First argument is options Object
