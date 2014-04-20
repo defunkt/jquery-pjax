@@ -75,6 +75,7 @@ end
 ```
 
 If you'd like a more automatic solution than pjax for Rails check out [Turbolinks](https://github.com/rails/turbolinks).
+If you'd like a solution without jQuery dependency, check out [Pjax](https://github.com/MoOx/pjax), that also allow dom transition.
 
 Also check out [RailsCasts #294 : Playing with PJAX](http://railscasts.com/episodes/294-playing-with-pjax)
 
