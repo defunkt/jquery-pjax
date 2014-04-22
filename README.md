@@ -1,3 +1,5 @@
+[What is this fork about?](#about-this-fork)
+
 # pjax
 
 
@@ -314,3 +316,17 @@ $ open http://localhost:4567/
 
 [compat]: http://caniuse.com/#search=pushstate
 [gist]: https://gist.github.com/
+
+## <a id="fork"></a>About this fork
+
+I was bitten by pjax’s built-in caching mechanism, and decided that caching should be out of scope for this sort of library. The browser does robust, well-understood caching. This fork removes pjax’s (imho-undesirable) caching mechanisms.
+
+####Details
+
+pjax snapshots and stores the html contents of the `container` on navigation. When hitting the back (or forward) button, pjax will restore the snapshotted html into the container.
+
+The first problem is, bound events are not restored. I recognize that one can re-bind events on `pjax:end`, but that all depends on the those calls working on the snapshotted (not original) HTML. [Chosen](http://harvesthq.github.io/chosen/), for example, will not rebind events if it detects that it has run on the elements previously, so it simply stopped responding to mousedown after using the back button.
+
+The second issue is that pjax has no real notion of cache policy or invalidation. You know what does? The browser. So I think caching is out of scope for this library. In my case, I set max-age and it works predictably.
+
+Hope this helps, feedback welcome.
