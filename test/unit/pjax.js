@@ -1057,4 +1057,30 @@ if ($.support.pjax) {
       })
     })
   })
+
+  asyncTest("doesn't keep focus on active element", function () {
+    var frame = this.frame
+
+    frame.$("#main").one("pjax:complete", function() {
+      var input = frame.$("input")
+      ok(!input.is(":focus"))
+      input.focus()
+      ok(input.is(":focus"))
+
+      frame.$("#main").one("pjax:complete", function() {
+        ok(!input.is(":focus"))
+        start()
+      })
+
+      frame.$.pjax({
+        url: "hello.html",
+        container: "#results"
+      })
+    })
+
+    frame.$.pjax({
+      url: "inputs.html",
+      container: "#main"
+    })
+  })
 }
