@@ -147,6 +147,8 @@ function handleSubmit(event, container, options) {
 //             $(container).html(xhr.responseBody)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
+// keepFocus - Whether to keep focus of active elements. pjax removes
+//             focus from the active element by default
 //
 // Use it just like $.ajax:
 //
@@ -262,10 +264,12 @@ function pjax(options) {
       window.history.replaceState(pjax.state, container.title, container.url)
     }
 
-    // Clear out any focused controls before inserting new page contents.
-    try {
-      document.activeElement.blur()
-    } catch (e) { }
+    if (!options.keepFocus) {
+      // Clear out any focused controls before inserting new page contents.
+      try {
+        document.activeElement.blur()
+      } catch (e) { }
+    }
 
     if (container.title) document.title = container.title
     context.html(container.contents)
