@@ -82,6 +82,10 @@ function handleClick(event, container, options) {
   if (link.href === location.href + '#')
     return
 
+  // Ignore event with default prevented
+  if (event.isDefaultPrevented())
+    return
+
   var defaults = {
     url: link.href,
     container: $(link).attr('data-pjax'),
