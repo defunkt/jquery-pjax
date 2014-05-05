@@ -536,6 +536,30 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("triggers pjax:receive event from container", function() {
+    var frame = this.frame,
+        beforeContent = 'foo'
+
+    frame.$("#main")
+         .text(beforeContent)
+         .on("pjax:receive", function(event, data, status, xhr, options) {
+      ok(event)
+      ok(data)
+      equal($(event.target).text(), beforeContent)
+      equal(status, 'success')
+      equal(xhr.status, 200)
+      equal(options.url, "hello.html")
+    })
+    frame.$("#main").on("pjax:success", function(event) {
+      notEqual($(event.target).text(), beforeContent)
+      start()
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
 
   asyncTest("triggers pjax:success event from container", function() {
     var frame = this.frame

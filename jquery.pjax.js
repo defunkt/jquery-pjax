@@ -227,6 +227,7 @@ function pjax(options) {
   }
 
   options.success = function(data, status, xhr) {
+    fire('pjax:receive', [data, status, xhr, options])
     // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
     var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
