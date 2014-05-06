@@ -444,6 +444,7 @@ function onPjaxPopstate(event) {
         container.trigger('pjax:start', [null, options])
 
         if (state.title) document.title = state.title
+        container.trigger('pjax:receive', [null, options])
         container.html(contents)
         pjax.state = state
 

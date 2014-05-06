@@ -850,6 +850,33 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("popstate triggers pjax:receive event", function() {
+    var frame = this.frame,
+        originalContent = $(frame).html()
+
+    equal(frame.location.pathname, "/home.html")
+
+    frame.$('#main').on("pjax:complete", function() {
+      equal(frame.location.pathname, "/hello.html")
+      ok(frame.history.length > 1)
+
+      frame.$('#main').on('pjax:receive', function(event, data, options) {
+        ok(event)
+        equal(frame.location.pathname, "/home.html")
+        // Remember: the content hasn't yet been replaced.
+        notEqual($(event.target).html(), originalContent)
+        start()
+      })
+
+      goBack(frame, function() {})
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
   // Test is fragile
   asyncTest("no initial pjax:popstate event", function() {
     var frame = this.frame
