@@ -203,7 +203,7 @@ This pair events fire anytime a pjax request starts and finishes. This includes 
 
 * `pjax:beforeSend` - Fired before the pjax request begins. Returning false will abort the request.
 * `pjax:send` - Fired after the pjax request begins.
-* `pjax:receive` - Fired after the pjax request finishes, right before the content of the container is replaced.
+* `pjax:beforeReplace` - Fired after the pjax request finishes, right before the content of the container is replaced.
 * `pjax:complete` - Fired after the pjax request finishes.
 * `pjax:success` - Fired after the pjax request succeeds.
 * `pjax:error` - Fired after the pjax request fails. Returning false will prevent the the fallback redirect.

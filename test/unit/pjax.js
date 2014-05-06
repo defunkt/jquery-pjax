@@ -536,13 +536,13 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("triggers pjax:receive event from container", function() {
+  asyncTest("triggers pjax:beforeReplace event from container", function() {
     var frame = this.frame,
         beforeContent = 'foo'
 
     frame.$("#main")
          .text(beforeContent)
-         .on("pjax:receive", function(event, data, options) {
+         .on("pjax:beforeReplace", function(event, data, options) {
       ok(event)
       ok(data)
       equal($(event.target).text(), beforeContent)
@@ -850,7 +850,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("popstate triggers pjax:receive event", function() {
+  asyncTest("popstate triggers pjax:beforeReplace event", function() {
     var frame = this.frame,
         originalContent = $(frame).html()
 
@@ -860,7 +860,7 @@ if ($.support.pjax) {
       equal(frame.location.pathname, "/hello.html")
       ok(frame.history.length > 1)
 
-      frame.$('#main').on('pjax:receive', function(event, data, options) {
+      frame.$('#main').on('pjax:beforeReplace', function(event, data, options) {
         ok(event)
         equal(frame.location.pathname, "/home.html")
         // Remember: the content hasn't yet been replaced.
