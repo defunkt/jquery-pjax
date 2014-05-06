@@ -187,28 +187,105 @@ function applyFilters() {
 
 ### Events
 
-pjax fires a number of events regardless of how its invoked.
+All pjax events except `pjax:click` & `pjax:clicked` are fired from the pjax
+container, not the link that was clicked.
 
-All events are fired from the container, not the link was clicked.
+<table>
+<tr>
+  <th>event</th>
+  <th>cancel</th>
+  <th>arguments</th>
+  <th>notes</th>
+</tr>
+<tr>
+  <th colspan=4>event lifecycle upon following a pjaxed link</th>
+</tr>
+<tr>
+  <td><code>pjax:click</code></td>
+  <td>✔︎</td>
+  <td><code>options</code></td>
+  <td>fires from a link that got activated; cancel to prevent pjax</td>
+</tr>
+<tr>
+  <td><code>pjax:beforeSend</code></td>
+  <td>✔︎</td>
+  <td><code>xhr, options</code></td>
+  <td>can set XHR headers</td>
+</tr>
+<tr>
+  <td><code>pjax:start</code></td>
+  <td></td>
+  <td><code>xhr, options</code></td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>pjax:send</code></td>
+  <td></td>
+  <td><code>xhr, options</code></td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>pjax:clicked</code></td>
+  <td></td>
+  <td><code>options</code></td>
+  <td>fires after pjax has started from a link that got clicked</td>
+</tr>
+<tr>
+  <td><code>pjax:success</code></td>
+  <td></td>
+  <td><code>data, status, xhr, options</code></td>
+  <td>after replacing HTML content loaded from the server</td>
+</tr>
+<tr>
+  <td><code>pjax:timeout</code></td>
+  <td>✔︎</td>
+  <td><code>xhr, options</code></td>
+  <td>fires after <code>options.timeout</code>; will hard refresh unless canceled</td>
+</tr>
+<tr>
+  <td><code>pjax:error</code></td>
+  <td>✔︎</td>
+  <td><code>xhr, textStatus, error, options</code></td>
+  <td>on ajax error; will hard refresh unless canceled</td>
+</tr>
+<tr>
+  <td><code>pjax:complete</code></td>
+  <td></td>
+  <td><code>xhr, textStatus, options</code></td>
+  <td>always fires after ajax, regardless of result</td>
+</tr>
+<tr>
+  <td><code>pjax:end</code></td>
+  <td></td>
+  <td><code>xhr, options</code></td>
+  <td></td>
+</tr>
+<tr>
+  <th colspan=4>event lifecycle on browser Back/Forward navigation</th>
+</tr>
+<tr>
+  <td><code>pjax:popstate</code></td>
+  <td></td>
+  <td></td>
+  <td>event <code>direction</code> property: &quot;back&quot;/&quot;forward&quot;</td>
+</tr>
+<tr>
+  <td><code>pjax:start</code></td>
+  <td></td>
+  <td><code>null, options</code></td>
+  <td>before replacing content</td>
+</tr>
+<tr>
+  <td><code>pjax:end</code></td>
+  <td></td>
+  <td><code>null, options</code></td>
+  <td>after replacing content</td>
+</tr>
+</table>
 
-#### start and end
-
-* `pjax:start` - Fired when pjaxing begins.
-* `pjax:end` - Fired when pjaxing ends.
-* `pjax:click` - Fired when pjaxified link is clicked.
-
-This pair events fire anytime a pjax request starts and finishes. This includes pjaxing on `popstate` and when pages are loaded from cache instead of making a request.
-
-#### ajax related
-
-* `pjax:beforeSend` - Fired before the pjax request begins. Returning false will abort the request.
-* `pjax:send` - Fired after the pjax request begins.
-* `pjax:complete` - Fired after the pjax request finishes.
-* `pjax:success` - Fired after the pjax request succeeds.
-* `pjax:error` - Fired after the pjax request fails. Returning false will prevent the the fallback redirect.
-* `pjax:timeout` - Fired if after timeout is reached. Returning false will disable the fallback and will wait indefinitely until the response returns.
-
-`send` and `complete` are a good pair of events to use if you are implementing a loading indicator. They'll only be triggered if an actual request is made, not if it's loaded from cache.
+`pjax:send` & `pjax:complete` are a good pair of events to use if you are implementing a
+loading indicator. They'll only be triggered if an actual XHR request is made,
+not if the content is loaded from cache:
 
 ``` javascript
 $(document).on('pjax:send', function() {
@@ -219,7 +296,8 @@ $(document).on('pjax:complete', function() {
 })
 ```
 
-Another protip: disable the fallback timeout behavior if a spinner is being shown.
+An example of canceling a `pjax:timeout` event would be to disable the fallback
+timeout behavior if a spinner is being shown:
 
 ``` javascript
 $(document).on('pjax:timeout', function(event) {
