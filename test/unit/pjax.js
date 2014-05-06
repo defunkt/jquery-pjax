@@ -542,12 +542,10 @@ if ($.support.pjax) {
 
     frame.$("#main")
          .text(beforeContent)
-         .on("pjax:receive", function(event, data, status, xhr, options) {
+         .on("pjax:receive", function(event, data, options) {
       ok(event)
       ok(data)
       equal($(event.target).text(), beforeContent)
-      equal(status, 'success')
-      equal(xhr.status, 200)
       equal(options.url, "hello.html")
     })
     frame.$("#main").on("pjax:success", function(event) {

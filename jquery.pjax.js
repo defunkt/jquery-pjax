@@ -227,7 +227,6 @@ function pjax(options) {
   }
 
   options.success = function(data, status, xhr) {
-    fire('pjax:receive', [data, status, xhr, options])
     // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
     var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
@@ -269,6 +268,8 @@ function pjax(options) {
     } catch (e) { }
 
     if (container.title) document.title = container.title
+
+    fire('pjax:receive', [data, options])
     context.html(container.contents)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
