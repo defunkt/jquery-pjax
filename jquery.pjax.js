@@ -103,7 +103,7 @@ function handleClick(event, container, options) {
 //
 // Exported as $.pjax.submit
 //
-// event   - "click" jQuery.Event
+// event   - "submit" jQuery.Event
 // options - pjax options
 //
 // Examples
@@ -115,24 +115,85 @@ function handleClick(event, container, options) {
 //
 // Returns nothing.
 function handleSubmit(event, container, options) {
-  options = optionsFor(container, options)
+  formSubmissionHandler(event.currentTarget, null, container, options)
 
-  var form = event.currentTarget
+  event.preventDefault()
+}
+
+// Public: pjax on submitting form element handler
+//
+// Exported as $.pjax.submitClick
+//
+// event   - "click" jQuery.Event
+// options - pjax options
+// form    - target form (optional)
+//
+// Examples
+//
+//  $(document)
+//    .on('click', 'form :submit', function(event) {
+//      var container = $(this).closest('[data-pjax-container]')
+//      $.pjax.submitClick(event, container)
+//    })
+//
+// Returns nothing.
+function handleSubmitClick(event, container, options, form) {
+  if (!form) {
+    var $parents = $(event.currentTarget).parents('form')
+
+    if (!$parents.length)
+      throw "If submitting element is not contained with target form, please specify form as forth parameter"
+
+    form = $(event.currentTarget).parents('form').first()[0]
+  }
+
+  formSubmissionHandler(form, event.currentTarget, container, options)
+
+  event.preventDefault()
+}
+
+// Public: Event handler for handleSubmit & handleSubmitClick
+//
+// form      - target form
+// submitter - submitting element (nullable)
+// options   - pjax options
+//
+// Returns nothing.
+function formSubmissionHandler(form, submitter, container, options) {
+  options = optionsFor(container, options)
 
   if (form.tagName.toUpperCase() !== 'FORM')
     throw "$.pjax.submit requires a form element"
 
+  var data = $(form).serializeArray()
+
+  // $().serializeArray() does not account for the button pressed
+  // beause it is not tied to the submit, so the value of a clicked
+  // submit button must be retrieved manually.
+  if (submitter) {
+    var $button = $(submitter)
+
+    // Creating and object ot insert in the data array.
+    var buttonValue = {
+      name: $button.attr('name'),
+      value: $button.val()
+    }
+
+    // Only insert if button has a name attribute and a value.
+    if (buttonValue.name && buttonValue.value) {
+      data.push(buttonValue)
+    }
+  }
+
   var defaults = {
     type: form.method.toUpperCase(),
     url: form.action,
-    data: $(form).serializeArray(),
+    data: data,
     container: $(form).attr('data-pjax'),
     target: form
   }
 
   pjax($.extend({}, defaults, options))
-
-  event.preventDefault()
 }
 
 // Loads a URL with ajax, puts the response body inside a container,
@@ -787,6 +848,7 @@ function enable() {
   $.pjax.disable = disable
   $.pjax.click = handleClick
   $.pjax.submit = handleSubmit
+  $.pjax.submitClick = handleSubmitClick
   $.pjax.reload = pjaxReload
   $.pjax.defaults = {
     timeout: 650,
@@ -819,6 +881,7 @@ function disable() {
   $.pjax.disable = $.noop
   $.pjax.click = $.noop
   $.pjax.submit = $.noop
+  $.pjax.submitClick = $.noop
   $.pjax.reload = function() { window.location.reload() }
 
   $(window).off('popstate.pjax', onPjaxPopstate)

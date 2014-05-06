@@ -174,6 +174,18 @@ $(document).on('submit', 'form[data-pjax]', function(event) {
 })
 ```
 
+### `$.pjax.submitClick`
+
+Submits a form via pjax. Based on the same code as `$.pjax.submit`, but has the benefit of being able to record the value of the submitting element. Same warnings as `$.pjax.submit` apply.
+
+``` javascript
+$(document)
+  .on('click', 'form :submit', function(event) {
+    var container = $(this).closest('[data-pjax-container]')
+    $.pjax.submitClick(event, container)
+  })
+```
+
 ### `$.pjax`
 
 Manual pjax invocation. Used mainly when you want to start a pjax request in a handler that didn't originate from a click. If you can get access to a click `event`, consider `$.pjax.click(event)` instead.
