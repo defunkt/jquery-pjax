@@ -542,9 +542,9 @@ if ($.support.pjax) {
 
     frame.$("#main")
          .text(beforeContent)
-         .on("pjax:beforeReplace", function(event, data, options) {
+         .on("pjax:beforeReplace", function(event, contents, options) {
       ok(event)
-      ok(data)
+      ok(contents)
       equal($(event.target).text(), beforeContent)
       equal(options.url, "hello.html")
     })
@@ -860,8 +860,9 @@ if ($.support.pjax) {
       equal(frame.location.pathname, "/hello.html")
       ok(frame.history.length > 1)
 
-      frame.$('#main').on('pjax:beforeReplace', function(event, data, options) {
+      frame.$('#main').on('pjax:beforeReplace', function(event, contents, options) {
         ok(event)
+        ok(contents)
         equal(frame.location.pathname, "/home.html")
         // Remember: the content hasn't yet been replaced.
         notEqual($(event.target).html(), originalContent)
