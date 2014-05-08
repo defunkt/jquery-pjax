@@ -263,7 +263,9 @@ function pjax(options) {
     }
 
     // Clear out any focused controls before inserting new page contents.
-    document.activeElement.blur()
+    try {
+      document.activeElement.blur()
+    } catch (e) { }
 
     if (container.title) document.title = container.title
     context.html(container.contents)
@@ -404,7 +406,7 @@ function onPjaxPopstate(event) {
 
     // If popping back to the same state, just skip.
     // Could be clicking back from hashchange rather than a pushState.
-    if (pjax.state.id === state.id) return
+    if (pjax.state && pjax.state.id === state.id) return
 
     var container = $(state.container)
     if (container.length) {
