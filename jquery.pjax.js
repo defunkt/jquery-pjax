@@ -117,7 +117,8 @@ function handleClick(event, container, options) {
 function handleSubmit(event, container, options) {
   options = optionsFor(container, options)
 
-  var form = event.currentTarget
+  var form = event.currentTarget,
+    $form = $(form)
 
   if (form.tagName.toUpperCase() !== 'FORM')
     throw "$.pjax.submit requires a form element"
@@ -125,14 +126,52 @@ function handleSubmit(event, container, options) {
   var defaults = {
     type: form.method.toUpperCase(),
     url: form.action,
-    data: $(form).serializeArray(),
-    container: $(form).attr('data-pjax'),
+    data: $form.serializeArray(),
+    container: $form.attr('data-pjax'),
     target: form
   }
 
   pjax($.extend({}, defaults, options))
 
   event.preventDefault()
+}
+
+var submitClickSelectors = 'form[data-pjax] input[type=submit],\
+  form[data-pjax] button[type=submit],\
+  form[data-pjax] button:not([type])';
+
+// Private: sends value of submitting element along form post
+//
+// event   - "click" jQuery.Event
+//
+// Returns nothing.
+function handleSubmitClick(event) {
+  var $submit = $(this),
+    $form = $submit.closest('form'),
+    hiddenClass = 'pjax-submit-button-value'
+    $input = $form.find('.' + hiddenClass)
+
+  if (name = $submit.attr('name')) {
+    var defaultValue = $submit.is('input[type=submit]') ? 'Submit' : '',
+      value = $submit.val() || defaultValue
+
+    if (!$input.length) {
+      var input = document.createElement('input')
+      input.setAttribute('type', 'hidden')
+      input.setAttribute('name', name)
+      input.setAttribute('value', value)
+      input.setAttribute('class', hiddenClass)
+
+      $form.prepend(input)
+    }
+    else {
+      $input.attr('name', name)
+      $input.val(value)
+    }
+  }
+  else {
+    $input.remove()
+  }
 }
 
 // Loads a URL with ajax, puts the response body inside a container,
@@ -798,7 +837,10 @@ function enable() {
     maxCacheLength: 20,
     version: findVersion
   }
+
   $(window).on('popstate.pjax', onPjaxPopstate)
+
+  $(document).on('click', submitClickSelectors, handleSubmitClick)
 }
 
 // Disable pushState behavior.
@@ -822,6 +864,8 @@ function disable() {
   $.pjax.reload = function() { window.location.reload() }
 
   $(window).off('popstate.pjax', onPjaxPopstate)
+
+  $(document).off('click', submitClickSelectors, handleSubmitClick)
 }
 
 
