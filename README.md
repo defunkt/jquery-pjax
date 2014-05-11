@@ -306,7 +306,8 @@ $ cd jquery-pjax/
 To run the test suite locally, start up the Sinatra test application.
 
 ```
-$ ruby test/app.rb
+$ bundle install
+$ bundle exec ruby test/app.rb
 == Sinatra/1.3.2 has taken the stage on 4567 for development with backup from WEBrick
 
 $ open http://localhost:4567/
