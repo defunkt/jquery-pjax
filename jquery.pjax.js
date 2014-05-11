@@ -123,10 +123,15 @@ function handleSubmit(event, container, options) {
   if (form.tagName.toUpperCase() !== 'FORM')
     throw "$.pjax.submit requires a form element"
 
+  var data = $form.serializeArray()
+
+  if (submitButton = $form.data(submitButtonAttr))
+    data.push(submitButton)
+
   var defaults = {
     type: form.method.toUpperCase(),
     url: form.action,
-    data: $form.serializeArray(),
+    data: data,
     container: $form.attr('data-pjax'),
     target: form
   }
@@ -138,7 +143,8 @@ function handleSubmit(event, container, options) {
 
 var submitClickSelectors = 'form[data-pjax] input[type=submit],\
   form[data-pjax] button[type=submit],\
-  form[data-pjax] button:not([type])';
+  form[data-pjax] button:not([type])',
+  submitButtonAttr = 'pjax-submit-button-value'
 
 // Private: sends value of submitting element along form post
 //
@@ -147,30 +153,13 @@ var submitClickSelectors = 'form[data-pjax] input[type=submit],\
 // Returns nothing.
 function handleSubmitClick(event) {
   var $submit = $(this),
-    $form = $submit.closest('form'),
-    hiddenClass = 'pjax-submit-button-value',
-    $input = $form.find('.' + hiddenClass)
+    $form = $submit.closest('form')
 
   if (name = $submit.attr('name')) {
-    var defaultValue = $submit.is('input[type=submit]') ? 'Submit' : '',
-      value = $submit.val() || defaultValue
-
-    if (!$input.length) {
-      var input = document.createElement('input')
-      input.setAttribute('type', 'hidden')
-      input.setAttribute('name', name)
-      input.setAttribute('value', value)
-      input.setAttribute('class', hiddenClass)
-
-      $form.prepend(input)
-    }
-    else {
-      $input.attr('name', name)
-      $input.val(value)
-    }
+    $form.data(submitButtonAttr, { name: name, value: $submit.val() })
   }
   else {
-    $input.remove()
+    $form.data(submitButtonAttr, null)
   }
 }
 
