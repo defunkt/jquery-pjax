@@ -148,7 +148,7 @@ var submitClickSelectors = 'form[data-pjax] input[type=submit],\
 function handleSubmitClick(event) {
   var $submit = $(this),
     $form = $submit.closest('form'),
-    hiddenClass = 'pjax-submit-button-value'
+    hiddenClass = 'pjax-submit-button-value',
     $input = $form.find('.' + hiddenClass)
 
   if (name = $submit.attr('name')) {
