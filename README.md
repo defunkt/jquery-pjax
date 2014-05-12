@@ -310,6 +310,7 @@ $ bundle install
 $ bundle exec ruby test/app.rb
 == Sinatra/1.4.5 has taken the stage on 4567 for development with backup from WEBrick
 
+# in another tab:
 $ open http://localhost:4567/
 ```
 
