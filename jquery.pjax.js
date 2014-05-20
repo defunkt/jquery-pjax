@@ -284,8 +284,6 @@ function pjax(options) {
       autofocusEl.focus();
     }
 
-    executeScriptTags(container.scripts)
-
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
       $(window).scrollTop(options.scrollTo)
@@ -309,6 +307,10 @@ function pjax(options) {
     }
 
     fire('pjax:success', [data, status, xhr, options])
+
+    executeScriptTags(container.scripts, function() {
+      fire('pjax:load', [xhr, options])
+    })
   }
 
 
@@ -693,10 +695,11 @@ function extractContainer(data, xhr, options) {
 // scripts - jQuery object of script Elements
 //
 // Returns nothing.
-function executeScriptTags(scripts) {
-  if (!scripts) return
+function executeScriptTags(scripts, callback) {
+  if (!scripts) return callback()
 
   var existingScripts = $('script[src]')
+  pendingScripts = 0
 
   scripts.each(function() {
     var src = this.src
@@ -708,8 +711,20 @@ function executeScriptTags(scripts) {
     var script = document.createElement('script')
     script.type = $(this).attr('type')
     script.src = $(this).attr('src')
+    
+    //NOTE: IE 6~8 uses 'onreadystatechange' but PJAX is disabled on those IE versions right?!
+    script.onload = script.onerror = function() {
+      pendingScripts--
+      if(pendingScripts == 0) {
+        callback()
+      }
+    }
+
     document.head.appendChild(script)
+    pendingScripts++
   })
+
+  if(pendingScripts == 0) callback()
 }
 
 // Internal: History DOM caching class.
