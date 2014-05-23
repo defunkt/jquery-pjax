@@ -231,6 +231,12 @@ container, not the link that was clicked.
   <td>fires after pjax has started from a link that got clicked</td>
 </tr>
 <tr>
+  <td><code>pjax:beforeReplace</code></td>
+  <td></td>
+  <td><code>contents, options</code></td>
+  <td>before replacing HTML with content loaded from the server</td>
+</tr>
+<tr>
   <td><code>pjax:success</code></td>
   <td></td>
   <td><code>data, status, xhr, options</code></td>
@@ -274,6 +280,12 @@ container, not the link that was clicked.
   <td></td>
   <td><code>null, options</code></td>
   <td>before replacing content</td>
+</tr>
+<tr>
+  <td><code>pjax:beforeReplace</code></td>
+  <td></td>
+  <td><code>contents, options</code></td>
+  <td>right before replacing HTML with content from cache</td>
 </tr>
 <tr>
   <td><code>pjax:end</code></td>
