@@ -104,7 +104,7 @@ pjax can be downloaded directly into your app's public directory - just be sure 
 curl -O https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
 ```
 
-**WARNING** Do not hotlink the raw script url. GitHub is not a CDN.
+**WARNING** Do not hotlink the raw script url. GitHub is not a CDN, use a [CDN][cdnjs] instead.
 
 ## Dependencies
 
@@ -405,4 +405,5 @@ $ open http://localhost:4567/
 ```
 
 [compat]: http://caniuse.com/#search=pushstate
+[cdnjs]: http://cdnjs.com/libraries/jquery.pjax
 [gist]: https://gist.github.com/
