@@ -419,5 +419,4 @@ $ open http://localhost:4567/
 ```
 
 [compat]: http://caniuse.com/#search=pushstate
-[cdnjs]: http://cdnjs.com/libraries/jquery.pjax
 [gist]: https://gist.github.com/
