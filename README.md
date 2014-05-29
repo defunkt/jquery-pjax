@@ -117,7 +117,7 @@ If you wish to use a CDN, please take a look at the ones below.
 #### jsdelivr.com
 
 ```
-<script src="//cdn.jsdelivr.net/jquery.pjax/1.8.2/jquery.pjax.min.js"></script>
+<script src="//cdn.jsdelivr.net/jquery.pjax/1.8/jquery.pjax.min.js"></script>
 ```
 
 ## Dependencies
