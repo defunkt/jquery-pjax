@@ -253,16 +253,15 @@ function pjax(options) {
       return
     }
 
-    pjax.state = {
-      id: options.id || uniqueId(),
-      url: container.url,
-      title: container.title,
-      container: context.selector,
-      fragment: options.fragment,
-      timeout: options.timeout
-    }
-
     if (options.push || options.replace) {
+      pjax.state = {
+        id: options.id || uniqueId(),
+        url: container.url,
+        title: container.title,
+        container: context.selector,
+        fragment: options.fragment,
+        timeout: options.timeout
+      }
       window.history.replaceState(pjax.state, container.title, container.url)
     }
 
@@ -318,7 +317,7 @@ function pjax(options) {
   // using the container and options of the link we're loading for the
   // back button to the initial page. This ensures good back button
   // behavior.
-  if (!pjax.state) {
+  if ((options.push || options.replace) && !pjax.state) {
     pjax.state = {
       id: uniqueId(),
       url: window.location.href,
