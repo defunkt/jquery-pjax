@@ -252,7 +252,6 @@ function pjax(options) {
       locationReplace(container.url)
       return
     }
-
     if (options.push || options.replace) {
       pjax.state = {
         id: options.id || uniqueId(),
@@ -438,6 +437,7 @@ function onPjaxPopstate(event) {
         url: state.url,
         container: container,
         push: false,
+        replace: true,
         fragment: state.fragment,
         timeout: state.timeout,
         scrollTo: false
