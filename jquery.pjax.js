@@ -432,7 +432,7 @@ function onPjaxPopstate(event) {
         state: state,
         direction: direction
       })
-      container.trigger(popstateEvent)
+      container.trigger(popstateEvent, contents)
 
       var options = {
         id: state.id,
