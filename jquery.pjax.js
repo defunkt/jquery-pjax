@@ -450,6 +450,12 @@ function onPjaxPopstate(event) {
         if (state.title) document.title = state.title
         container.trigger('pjax:beforeReplace', [contents, options])
         container.html(contents)
+
+        scripts = findAll(contents, 'script')
+        scripts.each(function() {
+          eval(this.innerText)
+        })
+
         pjax.state = state
 
         container.trigger('pjax:end', [null, options])
