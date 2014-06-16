@@ -7,6 +7,8 @@
   },
   "ignore": [
     ".travis.yml",
+    "Gemfile",
+    "Gemfile.lock",
     "test/"
   ]
 }
