@@ -159,6 +159,8 @@ function handleSubmit(event, container, options) {
 //
 // Returns whatever $.ajax returns.
 function pjax(options) {
+  var previousState = pjax.state;
+
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
   if ($.isFunction(options.url)) {
@@ -178,8 +180,10 @@ function pjax(options) {
   if (!options.data) options.data = {}
   options.data._pjax = context.selector
 
-  function fire(type, args) {
-    var event = $.Event(type, { relatedTarget: target })
+  function fire(type, args, props) {
+    if (!props) props = {}
+    props.relatedTarget = target
+    var event = $.Event(type, props)
     context.trigger(event, args)
     return !event.isDefaultPrevented()
   }
@@ -253,8 +257,6 @@ function pjax(options) {
       return
     }
 
-    var previousState = pjax.state;
-
     pjax.state = {
       id: options.id || uniqueId(),
       url: container.url,
@@ -275,7 +277,10 @@ function pjax(options) {
 
     if (container.title) document.title = container.title
 
-    fire('pjax:beforeReplace', [container.contents, options, previousState])
+    fire('pjax:beforeReplace', [container.contents, options], {
+      state: pjax.state,
+      previousState: previousState
+    })
     context.html(container.contents)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
@@ -404,6 +409,7 @@ if ('state' in window.history) {
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
 function onPjaxPopstate(event) {
+  var previousState = pjax.state;
   var state = event.state
 
   if (state && state.container) {
@@ -449,10 +455,13 @@ function onPjaxPopstate(event) {
       if (contents) {
         container.trigger('pjax:start', [null, options])
 
-        var previousState = pjax.state;
         pjax.state = state
         if (state.title) document.title = state.title
-        container.trigger('pjax:beforeReplace', [contents, options, previousState])
+        var beforeReplaceEvent = $.Event('pjax:beforeReplace', {
+          state: state,
+          previousState: previousState
+        })
+        container.trigger(beforeReplaceEvent, [contents, options])
         container.html(contents)
 
         container.trigger('pjax:end', [null, options])

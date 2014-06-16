@@ -542,12 +542,14 @@ if ($.support.pjax) {
 
     frame.$("#main")
          .text(beforeContent)
-         .on("pjax:beforeReplace", function(event, contents, options, previousState) {
+         .on("pjax:beforeReplace", function(event, contents, options) {
       ok(event)
       ok(contents)
       equal($(event.target).text(), beforeContent)
       equal(options.url, "hello.html")
-      ok(previousState.url.match("/home.html"))
+
+      ok(event.state.url.match("/hello.html"))
+      ok(event.previousState.url.match("/home.html"))
       ok(frame.$.pjax.state.url.match("/hello.html"))
     })
     frame.$("#main").on("pjax:success", function(event) {
@@ -862,15 +864,18 @@ if ($.support.pjax) {
       equal(frame.location.pathname, "/hello.html")
       ok(frame.history.length > 1)
 
-      frame.$('#main').on('pjax:beforeReplace', function(event, contents, options, previousState) {
+      frame.$('#main').on('pjax:beforeReplace', function(event, contents, options) {
         ok(event)
         ok(contents)
         equal(frame.location.pathname, "/home.html")
         ok(options.url.match("/home.html"))
-        ok(previousState.url.match("/hello.html"))
-        ok(frame.$.pjax.state.url.match("/home.html"))
         // Remember: the content hasn't yet been replaced.
         notEqual($(event.target).html(), originalContent)
+
+        ok(event.state.url.match("/home.html"))
+        ok(event.previousState.url.match("/hello.html"))
+        ok(frame.$.pjax.state.url.match("/home.html"))
+
         start()
       })
 
