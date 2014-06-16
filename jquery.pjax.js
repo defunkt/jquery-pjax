@@ -253,6 +253,8 @@ function pjax(options) {
       return
     }
 
+    var previousState = pjax.state;
+
     pjax.state = {
       id: options.id || uniqueId(),
       url: container.url,
@@ -273,7 +275,7 @@ function pjax(options) {
 
     if (container.title) document.title = container.title
 
-    fire('pjax:beforeReplace', [container.contents, options])
+    fire('pjax:beforeReplace', [container.contents, options, previousState])
     context.html(container.contents)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
@@ -447,9 +449,10 @@ function onPjaxPopstate(event) {
       if (contents) {
         container.trigger('pjax:start', [null, options])
 
+        var previousState = pjax.state;
         pjax.state = state
         if (state.title) document.title = state.title
-        container.trigger('pjax:beforeReplace', [contents, options])
+        container.trigger('pjax:beforeReplace', [contents, options, previousState])
         container.html(contents)
 
         container.trigger('pjax:end', [null, options])
