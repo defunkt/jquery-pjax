@@ -547,6 +547,7 @@ if ($.support.pjax) {
       ok(contents)
       equal($(event.target).text(), beforeContent)
       equal(options.url, "hello.html")
+      ok(frame.$.pjax.state.url.match("/hello.html"))
     })
     frame.$("#main").on("pjax:success", function(event) {
       notEqual($(event.target).text(), beforeContent)
@@ -866,6 +867,7 @@ if ($.support.pjax) {
         equal(frame.location.pathname, "/home.html")
         // Remember: the content hasn't yet been replaced.
         notEqual($(event.target).html(), originalContent)
+        ok(frame.$.pjax.state.url.match("/home.html"))
         start()
       })
 

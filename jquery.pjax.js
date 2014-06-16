@@ -447,10 +447,10 @@ function onPjaxPopstate(event) {
       if (contents) {
         container.trigger('pjax:start', [null, options])
 
+        pjax.state = state
         if (state.title) document.title = state.title
         container.trigger('pjax:beforeReplace', [contents, options])
         container.html(contents)
-        pjax.state = state
 
         container.trigger('pjax:end', [null, options])
       } else {
