@@ -159,8 +159,6 @@ function handleSubmit(event, container, options) {
 //
 // Returns whatever $.ajax returns.
 function pjax(options) {
-  var previousState = pjax.state;
-
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
   if ($.isFunction(options.url)) {
@@ -235,6 +233,8 @@ function pjax(options) {
   }
 
   options.success = function(data, status, xhr) {
+    var previousState = pjax.state;
+
     // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
     var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
