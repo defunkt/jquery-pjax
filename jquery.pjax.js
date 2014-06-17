@@ -178,8 +178,10 @@ function pjax(options) {
   if (!options.data) options.data = {}
   options.data._pjax = context.selector
 
-  function fire(type, args) {
-    var event = $.Event(type, { relatedTarget: target })
+  function fire(type, args, props) {
+    if (!props) props = {}
+    props.relatedTarget = target
+    var event = $.Event(type, props)
     context.trigger(event, args)
     return !event.isDefaultPrevented()
   }
@@ -231,6 +233,8 @@ function pjax(options) {
   }
 
   options.success = function(data, status, xhr) {
+    var previousState = pjax.state;
+
     // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
     var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
@@ -273,7 +277,10 @@ function pjax(options) {
 
     if (container.title) document.title = container.title
 
-    fire('pjax:beforeReplace', [container.contents, options])
+    fire('pjax:beforeReplace', [container.contents, options], {
+      state: pjax.state,
+      previousState: previousState
+    })
     context.html(container.contents)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
@@ -402,6 +409,7 @@ if ('state' in window.history) {
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
 function onPjaxPopstate(event) {
+  var previousState = pjax.state;
   var state = event.state
 
   if (state && state.container) {
@@ -447,10 +455,14 @@ function onPjaxPopstate(event) {
       if (contents) {
         container.trigger('pjax:start', [null, options])
 
-        if (state.title) document.title = state.title
-        container.trigger('pjax:beforeReplace', [contents, options])
-        container.html(contents)
         pjax.state = state
+        if (state.title) document.title = state.title
+        var beforeReplaceEvent = $.Event('pjax:beforeReplace', {
+          state: state,
+          previousState: previousState
+        })
+        container.trigger(beforeReplaceEvent, [contents, options])
+        container.html(contents)
 
         container.trigger('pjax:end', [null, options])
       } else {
