@@ -296,8 +296,12 @@ function pjax(options) {
     executeScriptTags(container.scripts)
 
     // Scroll to top by default
-    if (typeof options.scrollTo === 'number')
+    if (typeof options.scrollTo === 'number') {
       $(window).scrollTop(options.scrollTo)
+    } else if (typeof options.scrollTo === 'function') { // if scrollTo is a function just call it
+      options.scrollTo()
+    }
+      
 
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
