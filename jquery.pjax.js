@@ -241,15 +241,7 @@ function pjax(options) {
   pjax.options = options
   var xhr = pjax.xhr = $.ajax(options)
 
-  xhr.always(function(dataOrJQXHR, textStatus) {
-    if (timeoutTimer)
-      clearTimeout(timeoutTimer)
-
-    fire('pjax:complete', [xhr, textStatus, options])
-    fire('pjax:end', [xhr, options])
-  })
-
-  .fail(function(xhr, textStatus, errorThrown) {
+  xhr.fail(function(xhr, textStatus, errorThrown) {
 
     // Ignore the error if the request was cancelled
     if (textStatus === "canceled")
@@ -349,6 +341,14 @@ function pjax(options) {
     }
 
     fire('pjax:success', [data, status, xhr, options])
+  })
+
+  .always(function(dataOrJQXHR, textStatus) {
+    if (timeoutTimer)
+      clearTimeout(timeoutTimer)
+
+    fire('pjax:complete', [xhr, textStatus, options])
+    fire('pjax:end', [xhr, options])
   });
 
   if (xhr.readyState > 0) {
