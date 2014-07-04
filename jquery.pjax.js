@@ -243,7 +243,7 @@ function pjax(options) {
 
   xhr.fail(function(xhr, textStatus, errorThrown) {
 
-    // Ignore the error if the request was cancelled
+    // Ignore the failure if the request was cancelled
     if (textStatus === "canceled")
       return;
 
