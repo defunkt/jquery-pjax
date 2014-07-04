@@ -250,7 +250,11 @@ function pjax(options) {
   })
 
   .fail(function(xhr, textStatus, errorThrown) {
-    debugger;
+
+    // Ignore the error if the request was cancelled
+    if (textStatus === "canceled")
+      return;
+
     var container = extractContainer("", xhr, options)
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
