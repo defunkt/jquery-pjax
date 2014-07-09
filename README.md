@@ -334,6 +334,18 @@ An `X-PJAX` request header is set to differentiate a pjax request from normal XH
 
 Check if your favorite server framework supports pjax here: https://gist.github.com/4283721
 
+### Server side JS variables
+
+Sometimes you might need to send some data from server along with HTML contents. This can be done by sending `X-PJAX-Vars` response header which contains JSON encoded values. These values are saved with state as $.pjax.state.vars. You can access them with `options.vars`, no matter whether it is a fresh request of popstate. 
+
+``` ruby
+require 'json'
+if request.headers['X-PJAX']
+  my_vars = {:user => "in"}
+  response.headers['X-PJAX-Vars'] = JSON.generate(my_vars)
+end
+```
+
 #### Layout Reloading
 
 Layouts can be forced to do a hard reload assets or html changes.
@@ -353,6 +365,30 @@ end
 ```
 
 Deploying a deploy, bumping the version constant to force clients to do a full reload the next request getting the new layout and assets.
+
+### Client redirect
+
+Using a `Location: url` header would redirect just the pjax request to a new location and load contents from there.
+Instead use `X-PJAX-Location` response header to instruct pjax to make a full page redirect.
+
+``` ruby
+require 'json'
+if request.headers['X-PJAX']
+  response.headers['X-PJAX-Location'] = "https://some.new.location"
+else
+  response.headers['Location'] = "https://some.new.location"
+end
+```
+
+You can handle the redirect with `options.redirect_handler(new_location, options, xhr)` method (for ex. display a message and a loader).
+
+### `<title>`, `<meta>` and `<link>` tags
+
+HTML response could also inclulde some meta information of the requested page. This meta can be sent with the contents, enclosed in `<head>` tag, as in a common HTML document.
+
+`<link rel="stylesheet" />` is ignored. Load all your stylesheets at page load or dynamically using JS.
+
+`<meta class="pjax" />` and `<link class="pjax" />` tags are automatically removed at pjax request. This is intended to mark metas that belong to on specific page only.
 
 ### Legacy API
 
