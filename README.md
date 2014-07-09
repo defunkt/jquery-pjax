@@ -368,7 +368,7 @@ Check if your favorite server framework supports pjax here: https://gist.github.
 
 ### Server side JS variables
 
-Sometimes you might need to send some data from server along with HTML contents. This can be done by sending `X-PJAX-Vars` response header which contains JSON encoded values. These values are saved with state as $.pjax.state.vars. You can access them with `options.vars`, no matter whether it is a fresh request of popstate. 
+Sometimes you might need to send some data from server along with HTML contents. This can be done by sending `X-PJAX-Vars` response header which contains JSON encoded values. These values are saved with state as $.pjax.state.vars. You can access them with `options.vars`, no matter whether it is a fresh request or popstate. 
 
 ``` ruby
 require 'json'
@@ -412,7 +412,7 @@ else
 end
 ```
 
-You can handle the redirect with `options.redirect_handler(new_location, options, xhr)` method (for ex. display a message and a loader).
+You can handle the redirect with `options.redirect_handler(new_location, options, xhr)` method (for ex. to display a message and a loader).
 
 ### `<title>`, `<meta>` and `<link>` tags
 
