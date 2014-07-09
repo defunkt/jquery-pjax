@@ -1,12 +1,14 @@
 {
-  "name": "pjax",
-  "version": "1.6.1",
+  "name": "jquery-pjax",
+  "version": "1.9.2",
   "main": "./jquery.pjax.js",
   "dependencies": {
     "jquery": ">=1.8"
   },
   "ignore": [
     ".travis.yml",
+    "Gemfile",
+    "Gemfile.lock",
     "test/"
   ]
 }

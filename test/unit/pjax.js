@@ -536,6 +536,32 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("triggers pjax:beforeReplace event from container", function() {
+    var frame = this.frame,
+        beforeContent = 'foo'
+
+    frame.$("#main")
+         .text(beforeContent)
+         .on("pjax:beforeReplace", function(event, contents, options) {
+      ok(event)
+      ok(contents)
+      equal($(event.target).text(), beforeContent)
+      equal(options.url, "hello.html")
+
+      ok(event.state.url.match("/hello.html"))
+      ok(event.previousState.url.match("/home.html"))
+      ok(frame.$.pjax.state.url.match("/hello.html"))
+    })
+    frame.$("#main").on("pjax:success", function(event) {
+      notEqual($(event.target).text(), beforeContent)
+      start()
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
 
   asyncTest("triggers pjax:success event from container", function() {
     var frame = this.frame
@@ -828,6 +854,40 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("popstate triggers pjax:beforeReplace event", function() {
+    var frame = this.frame,
+        originalContent = $(frame).html()
+
+    equal(frame.location.pathname, "/home.html")
+
+    frame.$('#main').on("pjax:complete", function() {
+      equal(frame.location.pathname, "/hello.html")
+      ok(frame.history.length > 1)
+
+      frame.$('#main').on('pjax:beforeReplace', function(event, contents, options) {
+        ok(event)
+        ok(contents)
+        equal(frame.location.pathname, "/home.html")
+        ok(options.url.match("/home.html"))
+        // Remember: the content hasn't yet been replaced.
+        notEqual($(event.target).html(), originalContent)
+
+        ok(event.state.url.match("/home.html"))
+        ok(event.previousState.url.match("/hello.html"))
+        ok(frame.$.pjax.state.url.match("/home.html"))
+
+        start()
+      })
+
+      goBack(frame, function() {})
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
   // Test is fragile
   asyncTest("no initial pjax:popstate event", function() {
     var frame = this.frame
@@ -855,7 +915,7 @@ if ($.support.pjax) {
         frame.history.forward()
         setTimeout(function() { window.iframeLoad(frame) }, 1000)
       } else if (count == 6) {
-        // Should skip pjax:popstate since theres no initial pjax.state
+        // Should skip pjax:popstate since there's no initial pjax.state
         frame.$('#main').on('pjax:popstate', function(event) {
           if (count == 6) {
             ok(event.state.url.match("/hello.html"), event.state.url)
@@ -1010,5 +1070,51 @@ if ($.support.pjax) {
 
     ok(frame.$.pjax.state.id)
     oldId = frame.$.pjax.state.id
+  })
+
+  asyncTest("handles going back to pjaxed state after reloading a fragment navigation", function() {
+    var iframe = this.iframe
+    var frame = this.frame
+    var supportsHistoryState = 'state' in window.history
+
+    // Get some pjax state in the history.
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main",
+    })
+    frame.$("#main").on("pjax:complete", function() {
+      var state = frame.history.state
+      ok(frame.$.pjax.state)
+      if (supportsHistoryState)
+        ok(frame.history.state)
+
+      // Navigate to a fragment, which will result in a new history entry with
+      // no state object. $.pjax.state remains unchanged however.
+      iframe.src = frame.location.href + '#foo'
+      ok(frame.$.pjax.state)
+      if (supportsHistoryState)
+        ok(!frame.history.state)
+
+      // Reload the frame. This will clear out $.pjax.state.
+      frame.location.reload()
+      $(iframe).one("load", function() {
+        ok(!frame.$.pjax.state)
+        if (supportsHistoryState)
+          ok(!frame.history.state)
+
+        // Go back to #main. We'll get a popstate event with a pjax state
+        // object attached from the initial pjax navigation, even though
+        // $.pjax.state is null.
+        window.iframeLoad = function() {
+          ok(frame.$.pjax.state)
+          if (supportsHistoryState) {
+            ok(frame.history.state)
+            equal(frame.$.pjax.state.id, state.id)
+          }
+          start()
+        }
+        frame.history.back()
+      })
+    })
   })
 }

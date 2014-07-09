@@ -60,9 +60,9 @@ $(document).pjax('a', '#pjax-container')
 
 Now when someone in a pjax-compatible browser clicks "next page" the content of `#pjax-container` will be replaced with the body of `/page/2`.
 
-Magic! Almost. You still need to configure you server to look for pjax requests then send back pjax-specific content.
+Magic! Almost. You still need to configure your server to look for pjax requests and send back pjax-specific content.
 
-The pjax ajax request sends an `X-PJAX` header so in this example (and in most cases) we return a page without a layout to any requests with that header.
+The pjax ajax request sends an `X-PJAX` header so in this example (and in most cases) we want to return just the content of the page without any layout for any requests with that header.
 
 Here's what it might look like in Rails:
 
@@ -88,7 +88,7 @@ Via [bower](https://github.com/twitter/bower).
 $ bower install jquery-pjax
 ```
 
-Or add `jquery-pjax` to your apps `component.json`.
+Or add `jquery-pjax` to your apps `bower.json`.
 
 ``` json
   "dependencies": {
@@ -187,28 +187,117 @@ function applyFilters() {
 
 ### Events
 
-pjax fires a number of events regardless of how its invoked.
+All pjax events except `pjax:click` & `pjax:clicked` are fired from the pjax
+container, not the link that was clicked.
 
-All events are fired from the container, not the link was clicked.
+<table>
+<tr>
+  <th>event</th>
+  <th>cancel</th>
+  <th>arguments</th>
+  <th>notes</th>
+</tr>
+<tr>
+  <th colspan=4>event lifecycle upon following a pjaxed link</th>
+</tr>
+<tr>
+  <td><code>pjax:click</code></td>
+  <td>✔︎</td>
+  <td><code>options</code></td>
+  <td>fires from a link that got activated; cancel to prevent pjax</td>
+</tr>
+<tr>
+  <td><code>pjax:beforeSend</code></td>
+  <td>✔︎</td>
+  <td><code>xhr, options</code></td>
+  <td>can set XHR headers</td>
+</tr>
+<tr>
+  <td><code>pjax:start</code></td>
+  <td></td>
+  <td><code>xhr, options</code></td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>pjax:send</code></td>
+  <td></td>
+  <td><code>xhr, options</code></td>
+  <td></td>
+</tr>
+<tr>
+  <td><code>pjax:clicked</code></td>
+  <td></td>
+  <td><code>options</code></td>
+  <td>fires after pjax has started from a link that got clicked</td>
+</tr>
+<tr>
+  <td><code>pjax:beforeReplace</code></td>
+  <td></td>
+  <td><code>contents, options</code></td>
+  <td>before replacing HTML with content loaded from the server</td>
+</tr>
+<tr>
+  <td><code>pjax:success</code></td>
+  <td></td>
+  <td><code>data, status, xhr, options</code></td>
+  <td>after replacing HTML content loaded from the server</td>
+</tr>
+<tr>
+  <td><code>pjax:timeout</code></td>
+  <td>✔︎</td>
+  <td><code>xhr, options</code></td>
+  <td>fires after <code>options.timeout</code>; will hard refresh unless canceled</td>
+</tr>
+<tr>
+  <td><code>pjax:error</code></td>
+  <td>✔︎</td>
+  <td><code>xhr, textStatus, error, options</code></td>
+  <td>on ajax error; will hard refresh unless canceled</td>
+</tr>
+<tr>
+  <td><code>pjax:complete</code></td>
+  <td></td>
+  <td><code>xhr, textStatus, options</code></td>
+  <td>always fires after ajax, regardless of result</td>
+</tr>
+<tr>
+  <td><code>pjax:end</code></td>
+  <td></td>
+  <td><code>xhr, options</code></td>
+  <td></td>
+</tr>
+<tr>
+  <th colspan=4>event lifecycle on browser Back/Forward navigation</th>
+</tr>
+<tr>
+  <td><code>pjax:popstate</code></td>
+  <td></td>
+  <td></td>
+  <td>event <code>direction</code> property: &quot;back&quot;/&quot;forward&quot;</td>
+</tr>
+<tr>
+  <td><code>pjax:start</code></td>
+  <td></td>
+  <td><code>null, options</code></td>
+  <td>before replacing content</td>
+</tr>
+<tr>
+  <td><code>pjax:beforeReplace</code></td>
+  <td></td>
+  <td><code>contents, options</code></td>
+  <td>right before replacing HTML with content from cache</td>
+</tr>
+<tr>
+  <td><code>pjax:end</code></td>
+  <td></td>
+  <td><code>null, options</code></td>
+  <td>after replacing content</td>
+</tr>
+</table>
 
-#### start and end
-
-* `pjax:start` - Fired when pjaxing begins.
-* `pjax:end` - Fired when pjaxing ends.
-* `pjax:click` - Fired when pjaxified link is clicked.
-
-This pair events fire anytime a pjax request starts and finishes. This includes pjaxing on `popstate` and when pages are loaded from cache instead of making a request.
-
-#### ajax related
-
-* `pjax:beforeSend` - Fired before the pjax request begins. Returning false will abort the request.
-* `pjax:send` - Fired after the pjax request begins.
-* `pjax:complete` - Fired after the pjax request finishes.
-* `pjax:success` - Fired after the pjax request succeeds.
-* `pjax:error` - Fired after the pjax request fails. Returning false will prevent the the fallback redirect.
-* `pjax:timeout` - Fired if after timeout is reached. Returning false will disable the fallback and will wait indefinitely until the response returns.
-
-`send` and `complete` are a good pair of events to use if you are implementing a loading indicator. They'll only be triggered if an actual request is made, not if it's loaded from cache.
+`pjax:send` & `pjax:complete` are a good pair of events to use if you are implementing a
+loading indicator. They'll only be triggered if an actual XHR request is made,
+not if the content is loaded from cache:
 
 ``` javascript
 $(document).on('pjax:send', function() {
@@ -219,7 +308,8 @@ $(document).on('pjax:complete', function() {
 })
 ```
 
-Another protip: disable the fallback timeout behavior if a spinner is being shown.
+An example of canceling a `pjax:timeout` event would be to disable the fallback
+timeout behavior if a spinner is being shown:
 
 ``` javascript
 $(document).on('pjax:timeout', function(event) {
@@ -306,9 +396,11 @@ $ cd jquery-pjax/
 To run the test suite locally, start up the Sinatra test application.
 
 ```
-$ ruby test/app.rb
-== Sinatra/1.3.2 has taken the stage on 4567 for development with backup from WEBrick
+$ bundle install
+$ bundle exec ruby test/app.rb
+== Sinatra/1.4.5 has taken the stage on 4567 for development with backup from WEBrick
 
+# in another tab:
 $ open http://localhost:4567/
 ```
 
