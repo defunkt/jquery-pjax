@@ -604,7 +604,7 @@ function findContainerFor(container) {
   } else if ( container.attr('id') ) {
     return $('#' + container.attr('id'))
   } else {
-    throw "cant get selector for pjax container!"
+    throw "can't get selector for pjax container!"
   }
 }
 
