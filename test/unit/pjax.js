@@ -941,121 +941,126 @@ if ($.support.pjax) {
     window.iframeLoad()
   })
 
-  asyncTest("navigation through history obeys maxCacheLength", function() {
+  asyncTest("hitting the back button obeys maxCacheLength", function() {
     var frame = this.frame
     var count = 0
+    var didHitServer
 
     // Reduce the maxCacheLength for this spec to make it easier to test.
-    frame.$.pjax.defaults.maxCacheLength = 2
+    frame.$.pjax.defaults.maxCacheLength = 1
 
-    // We can determine whether a navigation event was fulfilled by the cache
-    // or the server by checking whether pjax:beforeSend fired before pjax:end.
-    var navigationWasCached
-
+    // This event will fire only when we request a page from the server, so we
+    // can use it to detect a cache miss.
     frame.$("#main").on("pjax:beforeSend", function() {
-      navigationWasCached = false
+      didHitServer = true
     })
 
     frame.$("#main").on("pjax:end", function() {
       count++
 
-      // First, navigate three times.
+      // First, navigate twice.
       if (count == 1) {
-        equal(frame.location.pathname, "/hello.html")
-        navigationWasCached = true
         frame.$.pjax({url: "env.html", container: "#main"})
       } else if (count == 2) {
-        equal(frame.location.pathname, "/env.html")
-        equal(navigationWasCached, false)
-        navigationWasCached = true
         frame.$.pjax({url: "hello.html", container: "#main"})
       } else if (count == 3) {
-        equal(frame.location.pathname, "/hello.html")
-        equal(navigationWasCached, false)
-        navigationWasCached = true
-        frame.$.pjax({url: "env.html", container: "#main"})
+        // There should now be one item in the back cache.
+        didHitServer = false
+        frame.history.back()
       } else if (count == 4) {
-        equal(frame.location.pathname, "/env.html")
-        equal(navigationWasCached, false)
-        // The cache should now have two items in it, so hitting the back
-        // button three times should pull the first two pages from cache and
-        // the third from the server.
-        navigationWasCached = true
+        equal(frame.location.pathname, "/env.html", "Went backward")
+        equal(didHitServer, false, "Hit cache")
         frame.history.back()
       } else if (count == 5) {
-        equal(frame.location.pathname, "/hello.html")
-        equal(navigationWasCached, true)
-        frame.history.back()
-      } else if (count == 6) {
-        equal(frame.location.pathname, "/env.html")
-        equal(navigationWasCached, true)
-        frame.history.back()
-      } else if (count == 7) {
-        equal(frame.location.pathname, "/hello.html")
-        equal(navigationWasCached, false)
-        // The cache should still have two items in it, both in the forward
-        // cache. If we hit forward three times, the first two should come from
-        // cache and the third from the server.
-        navigationWasCached = true
-        frame.history.forward()
-      } else if (count == 8) {
-        equal(frame.location.pathname, "/env.html")
-        equal(navigationWasCached, true)
-        frame.history.forward()
-      } else if (count == 9) {
-        equal(frame.location.pathname, "/hello.html")
-        equal(navigationWasCached, true)
-        frame.history.forward()
-      } else if (count == 10) {
-        equal(frame.location.pathname, "/env.html")
-        equal(navigationWasCached, false)
+        equal(frame.location.pathname, "/hello.html", "Went backward")
+        equal(didHitServer, true, "Hit server")
         start()
       }
     })
 
-    equal(frame.location.pathname, "/home.html")
+    frame.$.pjax({url: "hello.html", container: "#main"})
+  })
+
+  asyncTest("hitting the forward button obeys maxCacheLength", function() {
+    var frame = this.frame
+    var count = 0
+    var didHitServer
+
+    // Reduce the maxCacheLength for this spec to make it easier to test.
+    frame.$.pjax.defaults.maxCacheLength = 1
+
+    // This event will fire only when we request a page from the server, so we
+    // can use it to detect a cache miss.
+    frame.$("#main").on("pjax:beforeSend", function() {
+      didHitServer = true
+    })
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+
+      if (count == 1) {
+        frame.$.pjax({url: "env.html", container: "#main"})
+      } else if (count == 2) {
+        frame.$.pjax({url: "hello.html", container: "#main"})
+      } else if (count == 3) {
+        frame.history.back()
+      } else if (count == 4) {
+        frame.history.back()
+      } else if (count == 5) {
+        // There should now be one item in the forward cache.
+        didHitServer = false
+        frame.history.forward()
+      } else if (count == 6) {
+        equal(frame.location.pathname, "/env.html", "Went forward")
+        equal(didHitServer, false, "Hit cache")
+        frame.history.forward()
+      } else if (count == 7) {
+        equal(frame.location.pathname, "/hello.html", "Went forward")
+        equal(didHitServer, true, "Hit server")
+        start()
+      }
+    })
+
     frame.$.pjax({url: "hello.html", container: "#main"})
   })
 
   asyncTest("setting maxCacheLength to 0 disables caching", function() {
     var frame = this.frame
     var count = 0
+    var didHitServer
 
+    // Set maxCacheLength to 0 to disable caching completely.
     frame.$.pjax.defaults.maxCacheLength = 0
 
-    // We can determine whether a navigation event was fulfilled by the cache
-    // or the server by checking whether pjax:beforeSend fired before pjax:end.
-    var navigationWasCached
-
+    // This event will fire only when we request a page from the server, so we
+    // can use it to detect a cache miss.
     frame.$("#main").on("pjax:beforeSend", function() {
-      navigationWasCached = false
+      didHitServer = true
     })
 
     frame.$("#main").on("pjax:end", function() {
       count++
 
       if (count == 1) {
-        equal(frame.location.pathname, "/hello.html")
-        navigationWasCached = true
+        didHitServer = false
         frame.$.pjax({url: "env.html", container: "#main"})
       } else if (count == 2) {
-        equal(frame.location.pathname, "/env.html")
-        equal(navigationWasCached, false)
-        navigationWasCached = true
+        equal(frame.location.pathname, "/env.html", "Navigated to a new page")
+        equal(didHitServer, true, "Hit server")
+        didHitServer = false
         frame.history.back()
       } else if (count == 3) {
-        equal(frame.location.pathname, "/hello.html")
-        equal(navigationWasCached, false)
-        navigationWasCached = true
+        equal(frame.location.pathname, "/hello.html", "Went backward")
+        equal(didHitServer, true, "Hit server")
+        didHitServer = false
         frame.history.forward()
       } else if (count == 4) {
-        equal(frame.location.pathname, "/env.html")
-        equal(navigationWasCached, false)
+        equal(frame.location.pathname, "/env.html", "Went forward")
+        equal(didHitServer, true, "Hit server")
         start()
       }
     })
 
-    equal(frame.location.pathname, "/home.html")
     frame.$.pjax({url: "hello.html", container: "#main"})
   })
 
