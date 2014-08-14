@@ -187,6 +187,12 @@ function pjax(options) {
   }
 
   var timeoutTimer
+  
+  if(typeof options.beforeSend === 'function'){
+	if(!options.beforeSend()) {
+		return false;
+	}
+  };
 
   options.beforeSend = function(xhr, settings) {
     // No timeout for non-GET requests
