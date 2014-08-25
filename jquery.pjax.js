@@ -277,10 +277,13 @@ function pjax(options) {
 
     if (container.title) document.title = container.title
 
-    fire('pjax:beforeReplace', [container.contents, options], {
+    if(!fire('pjax:beforeReplace', [container.contents, options], {
       state: pjax.state,
       previousState: previousState
-    })
+    })){
+      return false;
+    }
+    
     context.html(container.contents)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
