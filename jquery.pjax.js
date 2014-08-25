@@ -280,9 +280,8 @@ function pjax(options) {
     if(!fire('pjax:beforeReplace', [container.contents, options], {
       state: pjax.state,
       previousState: previousState
-    })){
-      return false;
-    }
+    }))
+      return false
     
     context.html(container.contents)
 
