@@ -22,6 +22,7 @@
 //             (default: current jquery context)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
+//   history - Work with window.history. Defaults to true
 //
 // For convenience the second parameter can be either the container or
 // the options object.
@@ -30,7 +31,7 @@
 	function fnPjax(selector, container, options) {
 		var context = this
 		return this.on('click.pjax', selector, function (event) {
-			var opts = $.extend({}, optionsFor(container, options))
+			var opts = $.extend({history: true}, optionsFor(container, options))
 			if (!opts.container)
 				opts.container = $(this).attr('data-pjax') || context
 			handleClick(event, opts)
@@ -272,7 +273,7 @@
 				timeout: options.timeout
 			}
 
-			if (options.push || options.replace) {
+			if (options.history && (options.push || options.replace)) {
 				window.history.replaceState(pjax.state, container.title, container.url)
 			}
 
@@ -310,7 +311,7 @@
 				url.hash = hash
 
 				pjax.state.url = url.href
-				window.history.replaceState(pjax.state, container.title, url.href)
+				if(options.history) window.history.replaceState(pjax.state, container.title, url.href)
 
 				var target = $(url.hash)
 				if (target.length) $(window).scrollTop(target.offset().top)
@@ -333,7 +334,7 @@
 				fragment: options.fragment,
 				timeout: options.timeout
 			}
-			window.history.replaceState(pjax.state, document.title)
+			if(options.history) window.history.replaceState(pjax.state, document.title)
 		}
 
 		// Cancel the current request if we're already pjaxing
@@ -350,7 +351,7 @@
 		var xhr = pjax.xhr = $.ajax(options)
 
 		if (xhr.readyState > 0) {
-			if (options.push && !options.replace) {
+			if (options.history && (options.push && !options.replace)) {
 				// Cache current container element before replacing it
 				cachePush(pjax.state.id, context.clone().contents())
 
@@ -385,6 +386,7 @@
 //
 // Returns nothing.
 	function locationReplace(url) {
+		if(!pjax.options.history) return;
 		window.history.replaceState(null, "", "#")
 		window.location.replace(url)
 	}
