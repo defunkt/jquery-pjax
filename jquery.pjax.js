@@ -219,8 +219,6 @@ function pjax(options) {
       clearTimeout(timeoutTimer)
 
     fire('pjax:complete', [xhr, textStatus, options])
-    if (options.onComplete) options.onComplete(xhr, textStatus, options)
-
     fire('pjax:end', [xhr, options])
   }
 
@@ -228,7 +226,6 @@ function pjax(options) {
     var container = extractContainer("", xhr, options)
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
-    if (options.onError) options.onError(xhr, textStatus, errorThrown, options)
     if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
       locationReplace(container.url)
     }
@@ -320,7 +317,6 @@ function pjax(options) {
     }
 
     fire('pjax:success', [data, status, xhr, options])
-    if (options.onSuccess) options.onSuccess(data, status, xhr, options)
   }
 
 
