@@ -97,9 +97,10 @@ function handleClick(event, container, options) {
   $(link).trigger(clickEvent, [opts])
 
   if (!clickEvent.isDefaultPrevented()) {
-    pjax(opts)
+    var xhr = pjax(opts)
     event.preventDefault()
     $(link).trigger('pjax:clicked', [opts])
+    return xhr
   }
 }
 
@@ -134,9 +135,10 @@ function handleSubmit(event, container, options) {
     target: form
   }
 
-  pjax($.extend({}, defaults, options))
+  var xhr = pjax($.extend({}, defaults, options))
 
   event.preventDefault()
+  return xhr
 }
 
 // Loads a URL with ajax, puts the response body inside a container,
