@@ -219,6 +219,7 @@ function pjax(options) {
       clearTimeout(timeoutTimer)
 
     fire('pjax:complete', [xhr, textStatus, options])
+
     fire('pjax:end', [xhr, options])
   }
 
