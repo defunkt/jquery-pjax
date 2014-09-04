@@ -563,6 +563,29 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("change context node in pjax:beforeReplace event handler", function() {
+    var frame = this.frame,
+        targetContent = 'foo',
+        changedTarget = frame.$('ul > li:first')
+        changedTargetOriginalContent = changedTarget.text()
+
+    frame.$("#main")
+         .text(targetContent)
+         .on("pjax:beforeReplace", function(event, contents, options) {
+      options.context = changedTarget;
+    })
+    frame.$("#main").on("pjax:success", function(event) {
+      notEqual(changedTarget.text(), changedTargetOriginalContent)
+      equal($(event.target).text(), targetContent)
+      start()
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
   asyncTest("triggers pjax:success event from container", function() {
     var frame = this.frame
 
