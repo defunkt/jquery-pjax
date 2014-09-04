@@ -110,6 +110,15 @@ curl -O https://raw.githubusercontent.com/defunkt/jquery-pjax/master/jquery.pjax
 
 Requires jQuery 1.8.x or higher.
 
+## Configuration
+    $.pjax.defaults.timeout = 650;           // Time in ms before the response is canceled and the user is sent to the URL provided
+    $.pjax.defaults.push = true;             // Whether to pushState the URL. Defaults to true.
+    $.pjax.defaults.replace = false;         // Replace the current URL in the history
+    $.pjax.defaults.type = 'GET';            // HTTP GET/POST/? method
+    $.pjax.defaults.scrollTo = 0;            // Scroll to this location in the document
+    $.pjax.defaults.maxCacheLength = 20;     // Trim the history to this number of entries
+
+
 ## Compatibility
 
 pjax only works with [browsers that support the `history.pushState` API][compat]. When the API isn't supported pjax goes into fallback mode: `$.fn.pjax` calls will be a no-op and `$.pjax` will hard load the given url. This mode targets the browser requirements of the jQuery version being used.
