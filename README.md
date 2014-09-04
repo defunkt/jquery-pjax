@@ -101,7 +101,7 @@ Or add `jquery-pjax` to your apps `bower.json`.
 pjax can be downloaded directly into your app's public directory - just be sure you've loaded jQuery first.
 
 ```
-curl -O https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
+curl -O https://raw.githubusercontent.com/defunkt/jquery-pjax/master/jquery.pjax.js
 ```
 
 **WARNING** Do not hotlink the raw script url. GitHub is not a CDN.
@@ -109,6 +109,15 @@ curl -O https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
 ## Dependencies
 
 Requires jQuery 1.8.x or higher.
+
+## Configuration
+    $.pjax.defaults.timeout = 650;           // Time in ms before the response is canceled and the user is sent to the URL provided
+    $.pjax.defaults.push = true;             // Whether to pushState the URL. Defaults to true.
+    $.pjax.defaults.replace = false;         // Replace the current URL in the history
+    $.pjax.defaults.type = 'GET';            // HTTP GET/POST/? method
+    $.pjax.defaults.scrollTo = 0;            // Scroll to this location in the document
+    $.pjax.defaults.maxCacheLength = 20;     // Trim the history to this number of entries
+
 
 ## Compatibility
 
