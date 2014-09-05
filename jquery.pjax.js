@@ -23,6 +23,7 @@
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
 //   history - Work with window.history. Defaults to true
+//   cache   - Whether to cache pages HTML. Defaults to true
 //
 // For convenience the second parameter can be either the container or
 // the options object.
@@ -741,6 +742,7 @@
 //
 // Returns nothing.
 	function cachePush(id, value) {
+		if(!pjax.options.cache) return;
 		cacheMapping[id] = value
 		cacheBackStack.push(id)
 
@@ -764,6 +766,7 @@
 //
 // Returns nothing.
 	function cachePop(direction, id, value) {
+        if(!pjax.options.cache) return;
 		var pushStack, popStack
 		cacheMapping[id] = value
 
@@ -809,6 +812,7 @@
 		$.pjax.reload = pjaxReload
 		$.pjax.defaults = {
 			history: true,
+			cache: true,
 			timeout: 650,
 			push: true,
 			replace: false,
