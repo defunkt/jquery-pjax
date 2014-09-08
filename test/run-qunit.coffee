@@ -47,8 +47,6 @@ page.open phantom.args[0], ->
 
       return
 
-    if result?
-      exited = true
-      phantom.exit result
+    
 
   , 100
