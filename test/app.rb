@@ -83,6 +83,11 @@ get '/boom.html' do
   erb :boom, :layout => !pjax?
 end
 
+get '/boom_sans_pjax.html' do
+  status 500
+  erb :boom_sans_pjax, :layout => false
+end
+
 get '/:page.html' do
   erb :"#{params[:page]}", :layout => !pjax?
 end

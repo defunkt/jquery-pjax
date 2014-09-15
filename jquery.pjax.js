@@ -383,7 +383,7 @@ function pjaxReload(container, options) {
 //
 // Returns nothing.
 function locationReplace(url) {
-  window.history.replaceState(null, "", "#")
+  window.history.replaceState(null, "", pjax.state.url)
   window.location.replace(url)
 }
 
