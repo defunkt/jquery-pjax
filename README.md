@@ -200,7 +200,7 @@ $(document).on('submit', 'form[data-pjax]', function(event) {
 
 ### `$.pjax.reload`
 
-Reloads current page with pjax
+Reloads the given container with pjax
 
 ``` javascript
 $.pjax.reload('#pjax-container', options)
