@@ -198,6 +198,14 @@ $(document).on('submit', 'form[data-pjax]', function(event) {
 })
 ```
 
+### `$.pjax.reload`
+
+Reloads current page with pjax
+
+``` javascript
+$.pjax.reload('#pjax-container', options)
+```
+
 ### `$.pjax`
 
 Manual pjax invocation. Used mainly when you want to start a pjax request in a handler that didn't originate from a click. If you can get access to a click `event`, consider `$.pjax.click(event)` instead.
