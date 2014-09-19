@@ -200,7 +200,7 @@ $(document).on('submit', 'form[data-pjax]', function(event) {
 
 ### `$.pjax.reload`
 
-Reloads the given container with pjax
+Initiates a request for the current URL to the server using pjax mechanism and replaces the container with the response. Does not add a browser history entry.
 
 ``` javascript
 $.pjax.reload('#pjax-container', options)
