@@ -198,6 +198,14 @@ $(document).on('submit', 'form[data-pjax]', function(event) {
 })
 ```
 
+### `$.pjax.reload`
+
+Initiates a request for the current URL to the server using pjax mechanism and replaces the container with the response. Does not add a browser history entry.
+
+``` javascript
+$.pjax.reload('#pjax-container', options)
+```
+
 ### `$.pjax`
 
 Manual pjax invocation. Used mainly when you want to start a pjax request in a handler that didn't originate from a click. If you can get access to a click `event`, consider `$.pjax.click(event)` instead.
