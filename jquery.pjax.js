@@ -744,14 +744,11 @@ function cachePush(id, value) {
   cacheMapping[id] = value
   cacheBackStack.push(id)
 
-  // Remove all entires in forward history stack after pushing
-  // a new page.
-  while (cacheForwardStack.length)
-    delete cacheMapping[cacheForwardStack.shift()]
+  // Remove all entries in forward history stack after pushing a new page.
+  trimCacheStack(cacheForwardStack, 0)
 
   // Trim back history stack to max cache length.
-  while (cacheBackStack.length > pjax.defaults.maxCacheLength)
-    delete cacheMapping[cacheBackStack.shift()]
+  trimCacheStack(cacheBackStack, pjax.defaults.maxCacheLength)
 }
 
 // Shifts cache from directional history cache. Should be
@@ -778,6 +775,21 @@ function cachePop(direction, id, value) {
   pushStack.push(id)
   if (id = popStack.pop())
     delete cacheMapping[id]
+
+  // Trim whichever stack we just pushed to to max cache length.
+  trimCacheStack(pushStack, pjax.defaults.maxCacheLength)
+}
+
+// Trim a cache stack (either cacheBackStack or cacheForwardStack) to be no
+// longer than the specified length, deleting cached DOM elements as necessary.
+//
+// stack  - Array of state IDs
+// length - Maximum length to trim to
+//
+// Returns nothing.
+function trimCacheStack(stack, length) {
+  while (stack.length > length)
+    delete cacheMapping[stack.shift()]
 }
 
 // Public: Find version identifier for the initial page load.
