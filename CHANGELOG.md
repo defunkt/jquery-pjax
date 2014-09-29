@@ -1,6 +1,8 @@
 Yii Framework 2 Change Log
 ==========================
 
+- Feature #11: add new option "cache" (macklay)
+
 2.0.0 beta under development
 ----------------------------
 - Bug #9: Fixed missing history option in default settings (tonydspaniard)

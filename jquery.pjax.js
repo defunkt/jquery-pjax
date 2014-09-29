@@ -742,7 +742,9 @@
 //
 // Returns nothing.
 	function cachePush(id, value) {
-		if(!pjax.options.cache) return;
+		if(!pjax.options.cache) {
+			return;
+		}
 		cacheMapping[id] = value
 		cacheBackStack.push(id)
 
@@ -766,7 +768,9 @@
 //
 // Returns nothing.
 	function cachePop(direction, id, value) {
-        if(!pjax.options.cache) return;
+		if(!pjax.options.cache) {
+			return;
+		}
 		var pushStack, popStack
 		cacheMapping[id] = value
 
