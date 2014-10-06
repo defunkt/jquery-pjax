@@ -123,7 +123,7 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.evaledScriptLoaded = function() {
-      equal(true, frame.evaledSrcScript)
+      equal(2, frame.evaledSrcScriptNum)
       equal(true, frame.evaledInlineScript)
       start()
     }
