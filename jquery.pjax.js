@@ -1,6 +1,8 @@
-// jquery.pjax.js
-// copyright chris wanstrath
-// https://github.com/defunkt/jquery-pjax
+/*!
+ * jquery.pjax.js
+ * copyright chris wanstrath
+ * https://github.com/defunkt/jquery-pjax
+ */
 
 (function($){
 
