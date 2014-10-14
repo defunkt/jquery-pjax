@@ -368,7 +368,7 @@ Check if your favorite server framework supports pjax here: https://gist.github.
 
 #### Layout Reloading
 
-Layouts can be forced to do a hard reload assets or html changes.
+Layouts can be forced to do a hard reload when assets or html changes.
 
 First set the initial layout version in your header with a custom meta tag.
 
