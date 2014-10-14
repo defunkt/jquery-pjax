@@ -28,7 +28,7 @@ end
 
 
 get '/' do
-  erb :qunit
+  erb :qunit, :layout => false
 end
 
 get '/jquery.pjax.js' do
@@ -85,4 +85,8 @@ end
 
 get '/:page.html' do
   erb :"#{params[:page]}", :layout => !pjax?
+end
+
+post '/form_post.html' do
+  erb :form_post, :layout => !pjax?
 end

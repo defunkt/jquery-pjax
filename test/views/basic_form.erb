@@ -1,0 +1,18 @@
+<%= title 'Form' %>
+
+<form action="/form_post.html" method="post" data-pjax>
+	<input name="test" type="text" />
+	<input name="test1" type="text" />
+	<input name="submit" type="submit" value="submit value" />
+</form>
+
+<script type="text/javascript">
+	$("#main")
+		.pjax("a")
+			.on('submit', 'form[data-pjax]', function(evt) {
+			  $.pjax
+			    .submit(evt, $("#main"));
+			})
+
+	window.parent.iframeLoad(window)
+</script>
