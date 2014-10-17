@@ -283,7 +283,7 @@ function pjax(options) {
       state: pjax.state,
       previousState: previousState
     })
-    context.html(container.contents)
+    executeScriptTags(context, container)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
     // This behavior is incorrect. So if theres no current focus, autofocus
@@ -294,8 +294,6 @@ function pjax(options) {
     if (autofocusEl && document.activeElement !== autofocusEl) {
       autofocusEl.focus();
     }
-
-    executeScriptTags(container.scripts)
 
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
@@ -710,24 +708,29 @@ function extractContainer(data, xhr, options) {
 // scripts - jQuery object of script Elements
 //
 // Returns nothing.
-function executeScriptTags(scripts) {
+function executeScriptTags(context, container) {
+  var scripts = container.scripts;
   if (!scripts) return
 
   var existingScripts = $('script[src]')
 
+  var newScripts = 0;
   scripts.each(function() {
     var src = this.src
     var matchedScripts = existingScripts.filter(function() {
       return this.src === src
     })
     if (matchedScripts.length) return
+    newScripts++;
 
     var script = document.createElement('script')
     var type = $(this).attr('type')
     if (type) script.type = type
     script.src = $(this).attr('src')
+    script.onload = function() {newScripts--; if(!newScripts) context.html(container.contents)}
     document.head.appendChild(script)
   })
+  if(!newScripts) context.html(container.contents)
 }
 
 // Internal: History DOM caching class.
