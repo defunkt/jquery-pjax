@@ -129,7 +129,7 @@ function handleSubmit(event, container, options) {
     target: form
   }
 
-  if (defaults.type === 'POST' && window.FormData !== undefined) {
+  if (defaults.type !== 'GET' && window.FormData !== undefined) {
     defaults.data = new FormData(form);
     defaults.processData = false;
     defaults.contentType = false;
