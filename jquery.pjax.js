@@ -398,8 +398,12 @@ function pjaxReload(container, options) {
 //
 // Returns nothing.
 function locationReplace(url) {
-  window.history.replaceState(null, "", "#")
-  window.location.replace(url)
+  window.history.back()
+  setTimeout(function() {
+    window.history.replaceState(null, "", "#")
+    window.location.assign(url)
+  }, 0)
+
 }
 
 

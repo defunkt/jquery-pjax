@@ -78,6 +78,15 @@ post '/timeout.html' do
   end
 end
 
+get '/referer_timeout.html' do
+  if pjax?
+    sleep 1
+    erb :referer, :layout => false
+  else
+    erb :referer
+  end
+end
+
 get '/boom.html' do
   status 500
   erb :boom, :layout => !pjax?

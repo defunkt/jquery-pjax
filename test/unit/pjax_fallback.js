@@ -99,6 +99,21 @@ asyncTest("sends correct HTTP referer"+s, function() {
   })
 })
 
+asyncTest("sends correct HTTP referer after failed request"+s, function() {
+  var frame = this.frame
+
+  $('iframe')[0].onload = function() {
+    var referer = frame.document.getElementById("referer").textContent
+    equal(referer.substr(-10), "/home.html")
+    start()
+  }
+
+  frame.$.pjax({
+    url: "/referer_timeout.html",
+    container: "#main"
+  })
+})
+
 asyncTest("adds entry to browser history"+s, function() {
   var frame = this.frame
   var count = 0
