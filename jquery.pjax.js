@@ -225,7 +225,8 @@ function pjax(options) {
     xhr.setRequestHeader('X-PJAX', 'true');
     xhr.setRequestHeader('X-PJAX-Container', context.selector); // Don't waste bandwidth with two headers, one is enough
 
-    if (!fire('pjax:beforeSend', [xhr, settings, options]))
+
+33333333333
       return false;
 
     if (settings.timeout > 0) {
@@ -566,8 +567,8 @@ function onPjaxPopstate(event) {
         });
         container.trigger(beforeReplaceEvent, [contents, options]);
         if (state.title) document.title = state.title;
-        container.html(contents);
         addHeadMeta(state.meta);
+        container.html(contents);
 
         container.trigger('pjax:end', [null, options])
       } else {
@@ -1025,9 +1026,11 @@ function cachePop(direction, id, value) {
 //
 // Returns nothing.
 function trimCacheStack(stack, length) {
+  length = Math.max(0, length); // length should never be negative
   while (stack.length > length)
     delete cacheMapping[stack.shift()]
 }
+
 
 // Public: Find version identifier for the initial page load.
 //
