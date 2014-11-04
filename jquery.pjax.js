@@ -244,7 +244,8 @@ function pjax(options) {
     xhr.setRequestHeader('X-PJAX', 'true');
     xhr.setRequestHeader('X-PJAX-Container', context.selector); // Don't waste bandwidth with two headers, one is enough
 
-    if (!fire('pjax:beforeSend', [xhr, settings, options]))
+
+33333333333
       return false;
 
     if (settings.timeout > 0) {
@@ -559,8 +560,8 @@ function onPjaxPopstate(event) {
         });
         container.trigger(beforeReplaceEvent, [contents, options]);
         if (state.title) document.title = state.title;
-        container.html(contents);
         addHeadMeta(state.meta);
+        container.html(contents);
 
         container.trigger('pjax:end', [null, options])
       } else {
@@ -950,7 +951,8 @@ function executeScriptTags(scripts) {
     if (matchedScripts.length) return
 
     var script = document.createElement('script')
-    script.type = $(this).attr('type')
+    var type = $(this).attr('type')
+    if (type) script.type = type
     script.src = $(this).attr('src')
     document.head.appendChild(script)
   })
@@ -973,15 +975,11 @@ function cachePush(id, value) {
   cacheMapping[id] = value
   cacheBackStack.push(id)
 
-  // Remove all entires in forward history stack after pushing
-  // a new page.
-  while (cacheForwardStack.length)
-    delete cacheMapping[cacheForwardStack.shift()]
+  // Remove all entries in forward history stack after pushing a new page.
+  trimCacheStack(cacheForwardStack, 0);
 
   // Trim back history stack to max cache length.
-  var mcl = Math.max(0, pjax.defaults.maxCacheLength);
-  while (cacheBackStack.length > mcl)
-    delete cacheMapping[cacheBackStack.shift()]
+  trimCacheStack(cacheBackStack, pjax.defaults.maxCacheLength);
 }
 
 // Shifts cache from directional history cache. Should be
@@ -1008,7 +1006,24 @@ function cachePop(direction, id, value) {
   pushStack.push(id)
   if (id = popStack.pop())
     delete cacheMapping[id]
+    
+  // Trim whichever stack we just pushed to to max cache length.
+  trimCacheStack(pushStack, pjax.defaults.maxCacheLength);
 }
+
+// Trim a cache stack (either cacheBackStack or cacheForwardStack) to be no
+// longer than the specified length, deleting cached DOM elements as necessary.
+//
+// stack  - Array of state IDs
+// length - Maximum length to trim to
+//
+// Returns nothing.
+function trimCacheStack(stack, length) {
+  length = Math.max(0, length); // length should never be negative
+  while (stack.length > length)
+    delete cacheMapping[stack.shift()]
+}
+
 
 // Public: Find version identifier for the initial page load.
 //
@@ -1083,7 +1098,7 @@ if ( $.inArray('state', $.event.props) < 0 )
 $.support.pjax =
   window.history && window.history.pushState && window.history.replaceState &&
   // pushState isn't reliable on iOS until 5.
-  !navigator.userAgent.match(/((iPod|iPhone|iPad).+\bOS\s+[1-4]|WebApps\/.+CFNetwork)/)
+  !navigator.userAgent.match(/((iPod|iPhone|iPad).+\bOS\s+[1-4]\D|WebApps\/.+CFNetwork)/)
 
 $.support.pjax ? enable() : disable()
 
