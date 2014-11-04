@@ -303,32 +303,6 @@ function pjax(options) {
       previousState: previousState
     })
 
-    // Clear out any focused controls before inserting new page contents.
-    try {
-      document.activeElement.blur()
-    } catch (e) { }
-
-    if (container.title) document.title = container.title
-
-    fire('pjax:beforeReplace', [container.contents, options], {
-      state: pjax.state,
-      previousState: previousState
-    })
-    context.html(container.contents)
-
-
-    // FF bug: Won't autofocus fields that are inserted via JS.
-    // This behavior is incorrect. So if theres no current focus, autofocus
-    // the last field.
-    //
-    // http://www.w3.org/html/wg/drafts/html/master/forms.html
-    var autofocusEl = context.find('input[autofocus], textarea[autofocus]').last()[0]
-    if (autofocusEl && document.activeElement !== autofocusEl) {
-      autofocusEl.focus();
-    }
-
-    executeScriptTags(container.scripts)
-
     // Document properties:
     if (container.title) document.title = container.title;
     addHeadMeta(container.meta);
@@ -983,20 +957,6 @@ function trimCacheStack(stack, length) {
   while (stack.length > length)
     delete cacheMapping[stack.shift()]
 }
-
-// Trim a cache stack (either cacheBackStack or cacheForwardStack) to be no
-// longer than the specified length, deleting cached DOM elements as necessary.
-//
-// stack  - Array of state IDs
-// length - Maximum length to trim to
-//
-// Returns nothing.
-function trimCacheStack(stack, length) {
-  length = Math.max(0, length); // length should never be negative
-  while (stack.length > length)
-    delete cacheMapping[stack.shift()]
-}
-
 
 // Public: Find version identifier for the initial page load.
 //
