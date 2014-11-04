@@ -61,14 +61,25 @@ function fnPjax(selector, container, options) {
 function handleClick(event, container, options) {
   options = optionsFor(container, options)
 
-  var link = event.currentTarget
+  var target = event.currentTarget, 
+      $t = $(target), 
+      link;
 
-  if (link.tagName.toUpperCase() !== 'A')
-    throw "$.fn.pjax or $.pjax.click requires an anchor element"
-
+  if ( $.nodeName(target, 'A') ) {
+    link = target
+  } else {
+    link = $t.attr('data-href');
+    if(!link) throw "$.fn.pjax or $.pjax.click requires an anchor element or an element with data-href attribute"
+    link = parseURL(link)
+  }
+  
   // Middle click, cmd click, and ctrl click should open
   // links in a new tab as normal.
   if ( event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey )
+    return
+
+  // onclick event could stop link from oppening
+  if( event.isDefaultPrevented() )
     return
 
   // Ignore cross origin links
@@ -96,7 +107,7 @@ function handleClick(event, container, options) {
 
   var opts = $.extend({}, defaults, options)
   var clickEvent = $.Event('pjax:click')
-  $(link).trigger(clickEvent, [opts])
+  $t.trigger(clickEvent, [opts])
 
   if (!clickEvent.isDefaultPrevented()) {
     pjax(opts)
@@ -186,6 +197,9 @@ function pjax(options) {
 
   var context = options.context = findContainerFor(options.container)
 
+  // Store query start time. On complete use this value to calculate query time
+  var qstart ;
+
   // We want the browser to maintain two separate internal caches: one
   // for pjax'd partial page loads and one for normal page loads.
   // Without adding this secret parameter, some browsers will often
@@ -233,16 +247,18 @@ function pjax(options) {
     if (timeoutTimer)
       clearTimeout(timeoutTimer)
 
+    options.request_time = $.now() - qstart;
+
     fire('pjax:complete', [xhr, textStatus, options])
 
     fire('pjax:end', [xhr, options])
   }
 
   options.error = function(xhr, textStatus, errorThrown) {
-    var container = extractContainer("", xhr, options)
-
-    var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
-    if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
+    var container = extractContainer("", xhr, options),
+        allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options]);
+        
+    if (allowed && options.type == 'GET' && textStatus !== 'abort') {
       locationReplace(container.url)
     }
   }
@@ -252,9 +268,8 @@ function pjax(options) {
 
     // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
-    var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
-      $.pjax.defaults.version() :
-      $.pjax.defaults.version
+    if(typeof currentVersion === 'function') currentVersion = currentVersion();
+
 
     var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
 
@@ -271,7 +286,12 @@ function pjax(options) {
       locationReplace(container.url)
       return
     }
-
+    
+    // If the layout version is loaded only via PJAX requests, save it for next PJAX request
+    if (latestVersion && !currentVersion) {
+       $.pjax.defaults.version = latestVersion
+    }
+    
     pjax.state = {
       id       : options.id || uniqueId(),
       url      : container.url,
@@ -369,7 +389,10 @@ function pjax(options) {
 
       window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
     }
-
+    
+    // Register query start time
+    qstart = $.now()
+    
     fire('pjax:start', [xhr, options])
     fire('pjax:send', [xhr, options])
   }
@@ -835,7 +858,7 @@ function enable() {
   $.pjax.submit = handleSubmit
   $.pjax.reload = pjaxReload
   $.pjax.defaults = {
-    timeout: 650,
+    timeout: 3e3,
     push: true,
     replace: false,
     type: 'GET',
