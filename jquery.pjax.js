@@ -4,7 +4,7 @@
  * https://github.com/defunkt/jquery-pjax
  */
 
-;(function ($) {
+(function($){
 
 // When called on a container with a selector, fetches the href with
 // ajax into the container or with the data-pjax attribute on the link
@@ -32,12 +32,10 @@
 function fnPjax(selector, container, options) {
   var context = this
   return this.on('click.pjax', selector, function(event) {
-    options = $.extend({}, optionsFor(container, options))
-
-    if (!options.container)
-      options.container = $(this).attr('data-pjax') || context
-
-    handleClick(event, options)
+    var opts = $.extend({}, optionsFor(container, options))
+    if (!opts.container)
+      opts.container = $(this).attr('data-pjax') || context
+    handleClick(event, opts)
   })
 }
 
@@ -61,51 +59,44 @@ function fnPjax(selector, container, options) {
 //
 // Returns nothing.
 function handleClick(event, container, options) {
+  options = optionsFor(container, options)
 
-    var target = event.currentTarget
-    ,   $t = $(target)
-    ,   link
-    ,   link_src
-    ;
-    // If options contains url, don't read it from anchor
-    if(options && 'url' in options) {
-        link_src = 2; // URL from options
-        link = parseURL(options.url);
-    }
-    else
-    if ( $.nodeName(target, 'A') ) {
-        link_src = 0; // URL from a[href]
-        link = target;
-    }
-    else {
-        link_src = 1; // URL from [data-href]
-        link = $t.attr('data-href');
-        if(!link) throw '$.fn.pjax or $.pjax.click requires an anchor element or an element with data-href attribute';
-    }
-    if(link_src) {
-        link = parseURL(link);
-    }
+  var link = event.currentTarget
 
-    // Middle click, cmd click, and ctrl click should open
-    // links in a new tab as normal.
-    if ( event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey )
-        return;
+  if (link.tagName.toUpperCase() !== 'A')
+    throw "$.fn.pjax or $.pjax.click requires an anchor element"
+
+  // Middle click, cmd click, and ctrl click should open
+  // links in a new tab as normal.
+  if ( event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey )
+    return
+
+  // Ignore cross origin links
+  if ( location.protocol !== link.protocol || location.hostname !== link.hostname )
+    return
+
+  // Ignore anchors on the same page
+  if (link.hash && link.href.replace(link.hash, '') ===
+       location.href.replace(location.hash, ''))
+    return
+
+  // Ignore empty anchor "foo.html#"
+  if (link.href === location.href + '#')
+    return
 
   // Ignore event with default prevented
   if (event.isDefaultPrevented())
     return
 
   var defaults = {
-    url      : link.href,
-    container: $t.attr('data-pjax'),
-    target   : target,
-    fragment : null
+    url: link.href,
+    container: $(link).attr('data-pjax'),
+    target: link
   }
 
-    var chk_link = function () {
-        // if(link.protocol == 'javascript:') {
-            // throw '$.fn.pjax or $.pjax.click requires a valid URL address. "' + link.href + '" is not valid';
-        // }
+  var opts = $.extend({}, defaults, options)
+  var clickEvent = $.Event('pjax:click')
+  $(link).trigger(clickEvent, [opts])
 
   if (!clickEvent.isDefaultPrevented()) {
     pjax(opts)
@@ -130,12 +121,12 @@ function handleClick(event, container, options) {
 //
 // Returns nothing.
 function handleSubmit(event, container, options) {
-  options = optionsFor(container, options);
+  options = optionsFor(container, options)
 
-  var form = event.currentTarget;
+  var form = event.currentTarget
 
   if (form.tagName.toUpperCase() !== 'FORM')
-    throw "$.pjax.submit requires a form element";
+    throw "$.pjax.submit requires a form element"
 
   var defaults = {
     type: form.method.toUpperCase(),
@@ -158,9 +149,9 @@ function handleSubmit(event, container, options) {
     defaults.data = $(form).serializeArray();
   }
 
-  pjax($.extend({}, defaults, options));
+  pjax($.extend({}, defaults, options))
 
-  event.preventDefault();
+  event.preventDefault()
 }
 
 // Loads a URL with ajax, puts the response body inside a container,
@@ -183,20 +174,17 @@ function handleSubmit(event, container, options) {
 //
 // Returns whatever $.ajax returns.
 function pjax(options) {
-  options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options);
+  options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
   if ($.isFunction(options.url)) {
-    options.url = options.url();
+    options.url = options.url()
   }
 
-  var target = options.target;
+  var target = options.target
 
-  var hash = parseURL(options.url).hash;
+  var hash = parseURL(options.url).hash
 
-  var context = options.context = findContainerFor(options.container);
-
-  // Store query start time. On complete use this value to calculate query time
-  var qstart ;
+  var context = options.context = findContainerFor(options.container)
 
   // We want the browser to maintain two separate internal caches: one
   // for pjax'd partial page loads and one for normal page loads.
@@ -219,15 +207,14 @@ function pjax(options) {
     // No timeout for non-GET requests
     // Its not safe to request the resource again with a fallback method.
     if (settings.type !== 'GET') {
-       settings.timeout = 0
+      settings.timeout = 0
     }
 
-    xhr.setRequestHeader('X-PJAX', 'true');
-    xhr.setRequestHeader('X-PJAX-Container', context.selector); // Don't waste bandwidth with two headers, one is enough
+    xhr.setRequestHeader('X-PJAX', 'true')
+    xhr.setRequestHeader('X-PJAX-Container', context.selector)
 
-
-33333333333
-      return false;
+    if (!fire('pjax:beforeSend', [xhr, settings, options]))
+      return false
 
     if (settings.timeout > 0) {
       timeoutTimer = setTimeout(function() {
@@ -244,33 +231,32 @@ function pjax(options) {
 
   options.complete = function(xhr, textStatus) {
     if (timeoutTimer)
-      clearTimeout(timeoutTimer);
+      clearTimeout(timeoutTimer)
 
-    options.request_time = $.now() - qstart;
+    fire('pjax:complete', [xhr, textStatus, options])
 
-    fire('pjax:complete', [xhr, textStatus, options]);
-
-    fire('pjax:end', [xhr, options]);
+    fire('pjax:end', [xhr, options])
   }
 
   options.error = function(xhr, textStatus, errorThrown) {
-    var container = extractContainer("", xhr, options),
-        allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options]);
+    var container = extractContainer("", xhr, options)
 
-    if (allowed && options.type == 'GET' && textStatus !== 'abort') {
+    var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
+    if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
       locationReplace(container.url)
     }
   }
 
   options.success = function(data, status, xhr) {
-    var currentVersion = options.version,
-        previousState = pjax.state;
+    var previousState = pjax.state;
 
-    // If currentVersion is a function, invoke it first.
+    // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
-    if(typeof currentVersion === 'function') currentVersion = currentVersion();
+    var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
+      $.pjax.defaults.version() :
+      $.pjax.defaults.version
 
-    var latestVersion = xhr.getResponseHeader('X-PJAX-Version');
+    var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
 
     var container = extractContainer(data, xhr, options)
 
@@ -280,11 +266,8 @@ function pjax(options) {
       return
     }
 
-    // If the new response is missing a body and variables, hard load the page
-    // Note: If the body is missing and there are variables, there should be
-    //       an event handler to handle the response, otherwise nothing will
-    //       happen.
-    if (!container.contents && !container.vars) {
+    // If the new response is missing a body, hard load the page
+    if (!container.contents) {
       locationReplace(container.url)
       return
     }
@@ -296,28 +279,26 @@ function pjax(options) {
     }
 
     pjax.state = {
-        id       : options.id || uniqueId(),
-        url      : container.url,
-        title    : container.title,
-        vars     : container.vars,
-        meta     : container.meta,
-        container: context.selector,
-        fragment : options.fragment,
-        timeout  : options.timeout
+      id: options.id || uniqueId(),
+      url: container.url,
+      title: container.title,
+      vars     : container.vars,
+      meta     : container.meta,
+      container: context.selector,
+      fragment: options.fragment,
+      timeout: options.timeout
     }
 
     if (options.push || options.replace) {
-        window.history.replaceState(pjax.state, container.title, container.url)
-    }
-    if(container.contents) {
-    // Clear out any focused controls before inserting new page contents.
-        var ae = document.activeElement;
-        if(ae) try{ ae.blur(); } catch(e) {}
+      window.history.replaceState(pjax.state, container.title, container.url)
     }
 
-    // Fire pjax:beforeReplace before any change to the document is applied
-    // through container event handler can access new contents, title, meta and scripts
-    fire('pjax:beforeReplace', [container.contents, options, container], {
+    // Clear out any focused controls before inserting new page contents.
+    try {
+      document.activeElement.blur()
+    } catch (e) { }
+
+    fire('pjax:beforeReplace', [container.contents, options], {
       state: pjax.state,
       previousState: previousState
     })
@@ -353,50 +334,25 @@ function pjax(options) {
     addHeadMeta(container.meta);
 
     // Document contents:
-    if(container.contents) {
-        context.html(container.contents);
+    context.html(container.contents)
 
-        // FF bug: Won't autofocus fields that are inserted via JS.
-        // This behavior is incorrect. So if theres no current focus, autofocus
-        // the last field.
-        //
-        // http://www.w3.org/html/wg/drafts/html/master/forms.html
-        var autofocusEl = context.find('[autofocus]:input:last')[0];
-        if (autofocusEl && document.activeElement !== autofocusEl) {
-          autofocusEl.focus();
-        }
+    // FF bug: Won't autofocus fields that are inserted via JS.
+    // This behavior is incorrect. So if theres no current focus, autofocus
+    // the last field.
+    //
+    // http://www.w3.org/html/wg/drafts/html/master/forms.html
+    var autofocusEl = context.find('[autofocus]:input:last')[0];
+    if (autofocusEl && document.activeElement !== autofocusEl) {
+      autofocusEl.focus();
     }
 
     // Document actions:
     executeScriptTags(container.scripts) // Executed only on load, not at popstate
 
+
     // Scroll to top by default
-    if (typeof options.scrollTo === 'number') {
-        // One might like to animate the scroll
-        // $('html,body').animate({scrollTop:options.scrollTo}, 400, 'swing');
-        $(window).scrollTop(options.scrollTo);
-    }
-    // If the container is out of view, bring it in viewport
-    else {
-        setTimeout(function () {
-            var o = context.offset()
-            ,   w = $(window)
-            ,   wt = w.scrollTop()
-            ,   wl = w.scrollLeft()
-            ,   s = {}
-            ,   t
-            ;
-            if(o.top < wt) {
-                s.scrollTop = o.top;
-                t = true
-            }
-            if(o.left < wl) {
-                s.scrollLeft = o.left;
-                t = true
-            }
-            t && $('html,body').animate(s, 200, 'swing');
-        }, 10);
-    }
+    if (typeof options.scrollTo === 'number')
+      $(window).scrollTop(options.scrollTo)
 
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
@@ -426,13 +382,13 @@ function pjax(options) {
   // behavior.
   if (!pjax.state) {
     pjax.state = {
-      id       : uniqueId(),
-      url      : window.location.href,
-      title    : document.title,
-      meta     : grabMeta('head'),
+      id: uniqueId(),
+      url: window.location.href,
+      title: document.title,
+      meta: grabMeta('head'),
       container: context.selector,
-      fragment : options.fragment,
-      timeout  : options.timeout
+      fragment: options.fragment,
+      timeout: options.timeout
     }
     window.history.replaceState(pjax.state, document.title)
   }
@@ -449,15 +405,11 @@ function pjax(options) {
 
   if (xhr.readyState > 0) {
     if (options.push && !options.replace) {
-      if(options.pushCache || !'pushCache' in options) {
-          // Cache current container element before replacing it
-          cachePush(pjax.state.id, context.clone().contents())
-      }
+      // Cache current container element before replacing it
+      cachePush(pjax.state.id, context.clone().contents())
+
       window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
     }
-
-    // Register query start time
-    qstart = $.now()
 
     fire('pjax:start', [xhr, options])
     fire('pjax:send', [xhr, options])
@@ -555,20 +507,20 @@ function onPjaxPopstate(event) {
         fragment: state.fragment,
         timeout: state.timeout,
         scrollTo: false
-      } ;
+      }
 
       if (contents) {
         container.trigger('pjax:start', [null, options])
 
-        pjax.state = state;
+        pjax.state = state
         var beforeReplaceEvent = $.Event('pjax:beforeReplace', {
           state: state,
           previousState: previousState
-        });
-        container.trigger(beforeReplaceEvent, [contents, options]);
+        })
+        container.trigger(beforeReplaceEvent, [contents, options])
         if (state.title) document.title = state.title;
         addHeadMeta(state.meta);
-        container.html(contents);
+        container.html(contents)
 
         container.trigger('pjax:end', [null, options])
       } else {
@@ -810,7 +762,7 @@ function addHeadMeta(meta,head) {
 //
 // Returns an Object with url, title, and contents keys.
 function extractContainer(data, xhr, options) {
-    var obj = {}
+  var obj = {}
     ,   isHtml
     ,   $head
     ,   $body
@@ -820,7 +772,7 @@ function extractContainer(data, xhr, options) {
 
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
-    obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl);
+  obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
 
     // Parse Variables sent from server in headers
     vars = xhr.getResponseHeader('X-PJAX-Vars') || xhr.getResponseHeader('X-Vars');
@@ -860,7 +812,8 @@ function extractContainer(data, xhr, options) {
   }
 
   // If response data is empty, return fast
-  if ($body.length === 0) return obj;
+  if ($body.length === 0)
+    return obj
 
   // If there's a <title> tag in the header, use it as
   // the page's title. (header might be missing)
@@ -946,7 +899,7 @@ function extractContainer(data, xhr, options) {
 //
 // Returns nothing.
 function executeScriptTags(scripts) {
-    if (!scripts) return;
+  if (!scripts) return
 
   var existingScripts = $('script[src]')
 
@@ -1031,13 +984,26 @@ function trimCacheStack(stack, length) {
     delete cacheMapping[stack.shift()]
 }
 
+// Trim a cache stack (either cacheBackStack or cacheForwardStack) to be no
+// longer than the specified length, deleting cached DOM elements as necessary.
+//
+// stack  - Array of state IDs
+// length - Maximum length to trim to
+//
+// Returns nothing.
+function trimCacheStack(stack, length) {
+  length = Math.max(0, length); // length should never be negative
+  while (stack.length > length)
+    delete cacheMapping[stack.shift()]
+}
+
 
 // Public: Find version identifier for the initial page load.
 //
 // Returns String version or undefined.
 function findVersion() {
   return $('meta').filter(function() {
-        var name = $(this).attr('http-equiv');
+    var name = $(this).attr('http-equiv')
     return name && name.toUpperCase() === 'X-PJAX-VERSION'
   }).attr('content')
 }
@@ -1052,22 +1018,22 @@ function findVersion() {
 //
 // Returns nothing.
 function enable() {
-  $.fn.pjax = fnPjax ;
-  $.pjax    = pjax   ;
-  $.pjax.enable   = $.noop       ;
-  $.pjax.disable  = disable      ;
-  $.pjax.click    = handleClick  ;
-  $.pjax.submit   = handleSubmit ;
-  $.pjax.reload   = pjaxReload   ;
+  $.fn.pjax = fnPjax
+  $.pjax = pjax
+  $.pjax.enable = $.noop
+  $.pjax.disable = disable
+  $.pjax.click = handleClick
+  $.pjax.submit = handleSubmit
+  $.pjax.reload = pjaxReload
   $.pjax.defaults = {
-    timeout       : 650,
-    push          : true,
-    replace       : false,
-    type          : 'GET',
-    dataType      : 'html',
-    scrollTo      : 0,
+    timeout: 650,
+    push: true,
+    replace: false,
+    type: 'GET',
+    dataType: 'html',
+    scrollTo: 0,
     maxCacheLength: 20,
-    version       : findVersion
+    version: findVersion
   }
   $(window).on('popstate.pjax', onPjaxPopstate)
 }
@@ -1084,13 +1050,13 @@ function enable() {
 //
 // Returns nothing.
 function disable() {
-  $.fn.pjax = function() { return this } ;
-  $.pjax    = fallbackPjax ;
-  $.pjax.enable  = enable  ;
-  $.pjax.disable = $.noop  ;
-  $.pjax.click   = $.noop  ;
-  $.pjax.submit  = $.noop  ;
-  $.pjax.reload  = function() { window.location.reload() } ;
+  $.fn.pjax = function() { return this }
+  $.pjax = fallbackPjax
+  $.pjax.enable = enable
+  $.pjax.disable = $.noop
+  $.pjax.click = $.noop
+  $.pjax.submit = $.noop
+  $.pjax.reload = function() { window.location.reload() }
 
   $(window).off('popstate.pjax', onPjaxPopstate)
 }
