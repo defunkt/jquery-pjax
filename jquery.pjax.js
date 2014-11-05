@@ -815,14 +815,14 @@ function extractContainer(data, xhr, options) {
       if (!obj.title)
         obj.title = $fragment.attr('title') || $fragment.data('title')
     }
-  } else {
+  } else if(!isHtml) {
     obj.contents = $body
   }
 
   // Clean up any <title> tags
   if (obj.contents) {
     // Remove any parent title elements
-    obj.contents = obj.contents.not('title')
+    obj.contents = obj.contents.not(function() { return $.nodeName(this, 'title') })
 
     // Then scrub any titles from their descendants
     obj.contents.find('title').remove()
@@ -841,7 +841,7 @@ function extractContainer(data, xhr, options) {
      ;
 
      if($js && $js.length) {
-         $src = $src.not($js); // only script tags with src attribute
+         $src = $src.not($js); // $src contains only script tags with src attribute
 
          // Move non-src script tags to contents, so it gets executed
          // Warning: After appended to doc, script tags will be deleted,
@@ -855,7 +855,7 @@ function extractContainer(data, xhr, options) {
          obj.scripts = $src.add(obj.scripts);
      }
 
-     if(!$.isEmptyObject($meta)) obj.meta = $meta
+     if(!$.isEmptyObject($meta)) obj.meta = $meta;
   }
 
   // Trim any whitespace off the title
