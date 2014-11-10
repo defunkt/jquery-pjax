@@ -1,6 +1,8 @@
-// jquery.pjax.js
-// copyright chris wanstrath
-// https://github.com/defunkt/jquery-pjax
+/*!
+ * Copyright 2012, Chris Wanstrath
+ * Released under the MIT License
+ * https://github.com/defunkt/jquery-pjax
+ */
 
 (function($){
 
@@ -129,9 +131,22 @@ function handleSubmit(event, container, options) {
   var defaults = {
     type: form.method.toUpperCase(),
     url: form.action,
-    data: $(form).serializeArray(),
     container: $(form).attr('data-pjax'),
     target: form
+  }
+
+  if (defaults.type !== 'GET' && window.FormData !== undefined) {
+    defaults.data = new FormData(form);
+    defaults.processData = false;
+    defaults.contentType = false;
+  } else {
+    // Can't handle file uploads, exit
+    if ($(form).find(':file').length) {
+      return;
+    }
+
+    // Fallback to manually serializing the fields
+    defaults.data = $(form).serializeArray();
   }
 
   pjax($.extend({}, defaults, options))
@@ -723,7 +738,8 @@ function executeScriptTags(scripts) {
     if (matchedScripts.length) return
 
     var script = document.createElement('script')
-    script.type = $(this).attr('type')
+    var type = $(this).attr('type')
+    if (type) script.type = type
     script.src = $(this).attr('src')
     document.head.appendChild(script)
   })
@@ -746,14 +762,11 @@ function cachePush(id, value) {
   cacheMapping[id] = value
   cacheBackStack.push(id)
 
-  // Remove all entires in forward history stack after pushing
-  // a new page.
-  while (cacheForwardStack.length)
-    delete cacheMapping[cacheForwardStack.shift()]
+  // Remove all entries in forward history stack after pushing a new page.
+  trimCacheStack(cacheForwardStack, 0)
 
   // Trim back history stack to max cache length.
-  while (cacheBackStack.length > pjax.defaults.maxCacheLength)
-    delete cacheMapping[cacheBackStack.shift()]
+  trimCacheStack(cacheBackStack, pjax.defaults.maxCacheLength)
 }
 
 // Shifts cache from directional history cache. Should be
@@ -780,6 +793,21 @@ function cachePop(direction, id, value) {
   pushStack.push(id)
   if (id = popStack.pop())
     delete cacheMapping[id]
+
+  // Trim whichever stack we just pushed to to max cache length.
+  trimCacheStack(pushStack, pjax.defaults.maxCacheLength)
+}
+
+// Trim a cache stack (either cacheBackStack or cacheForwardStack) to be no
+// longer than the specified length, deleting cached DOM elements as necessary.
+//
+// stack  - Array of state IDs
+// length - Maximum length to trim to
+//
+// Returns nothing.
+function trimCacheStack(stack, length) {
+  while (stack.length > length)
+    delete cacheMapping[stack.shift()]
 }
 
 // Public: Find version identifier for the initial page load.
@@ -855,7 +883,7 @@ if ( $.inArray('state', $.event.props) < 0 )
 $.support.pjax =
   window.history && window.history.pushState && window.history.replaceState &&
   // pushState isn't reliable on iOS until 5.
-  !navigator.userAgent.match(/((iPod|iPhone|iPad).+\bOS\s+[1-4]|WebApps\/.+CFNetwork)/)
+  !navigator.userAgent.match(/((iPod|iPhone|iPad).+\bOS\s+[1-4]\D|WebApps\/.+CFNetwork)/)
 
 $.support.pjax ? enable() : disable()
 

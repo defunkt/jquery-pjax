@@ -101,7 +101,7 @@ Or add `jquery-pjax` to your apps `bower.json`.
 pjax can be downloaded directly into your app's public directory - just be sure you've loaded jQuery first.
 
 ```
-curl -O https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
+curl -LO https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
 ```
 
 **WARNING** Do not hotlink the raw script url. GitHub is not a CDN.
@@ -136,16 +136,40 @@ Or try this selector that matches any `<a data-pjax href=>` links inside a `<div
 $(document).pjax('[data-pjax] a, a[data-pjax]', '#pjax-container')
 ```
 
-When invoking `$.fn.pjax` there are a few different argument styles you can use:
+#### Arguments
 
-1. `$(document).pjax(delegation selector, options object)`
-2. `$(document).pjax(delegation selector, container selector, options object)`
+The synopsis for the `$.fn.pjax` function is:
 
-In other words:
+``` javascript
+$(document).pjax(selector, [container], options)
+```
 
-1. The first argument must always be a `String` selector used for delegation.
-2. The second argument can either be a `String` container selector or an options object.
-3. If there are three arguments the second must be the `String` container selector and the third must be the options object.
+1. `selector` is a string to be used for click [event delegation][$.fn.on].
+2. `container` is a string selector that uniquely identifies the pjax container.
+3. `options` is an object with keys described below.
+
+##### pjax options
+
+key | default | description
+----|---------|------------
+`timeout` | 650 | ajax timeout in milliseconds after which a full refresh is forced
+`push` | true | use [pushState][] to add a browser history entry upon navigation
+`replace` | false | replace URL without adding browser history entry
+`maxCacheLength` | 20 | maximum cache size for previous container contents
+`version` | | a string or function returning the current pjax version
+`scrollTo` | 0 | vertical position to scroll to after navigation
+`type` | `"GET"` | see [$.ajax][]
+`dataType` | `"html"` | see [$.ajax][]
+`container` | | CSS selector for the element where content should be replaced
+`url` | link.href | a string or function that returns the URL for the ajax request
+`target` | link | eventually the `relatedTarget` value for [pjax events](#events)
+`fragment` | `"body"` | CSS selector for the fragment to extract from ajax response
+
+You can change the defaults globally by writing to the `$.pjax.defaults` object:
+
+``` javascript
+$.pjax.defaults.timeout = 1200
+```
 
 ### `$.pjax.click`
 
@@ -172,6 +196,14 @@ Submits a form via pjax. This function is experimental but GitHub uses it on [Gi
 $(document).on('submit', 'form[data-pjax]', function(event) {
   $.pjax.submit(event, '#pjax-container')
 })
+```
+
+### `$.pjax.reload`
+
+Initiates a request for the current URL to the server using pjax mechanism and replaces the container with the response. Does not add a browser history entry.
+
+``` javascript
+$.pjax.reload('#pjax-container', options)
 ```
 
 ### `$.pjax`
@@ -336,7 +368,7 @@ Check if your favorite server framework supports pjax here: https://gist.github.
 
 #### Layout Reloading
 
-Layouts can be forced to do a hard reload assets or html changes.
+Layouts can be forced to do a hard reload when assets or html changes.
 
 First set the initial layout version in your header with a custom meta tag.
 
@@ -406,3 +438,6 @@ $ open http://localhost:4567/
 
 [compat]: http://caniuse.com/#search=pushstate
 [gist]: https://gist.github.com/
+[$.fn.on]: http://api.jquery.com/on/
+[$.ajax]: http://api.jquery.com/jQuery.ajax/
+[pushState]: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries

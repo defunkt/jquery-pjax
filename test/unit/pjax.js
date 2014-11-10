@@ -123,7 +123,7 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.evaledScriptLoaded = function() {
-      equal(true, frame.evaledSrcScript)
+      equal(2, frame.evaledSrcScriptNum)
       equal(true, frame.evaledInlineScript)
       start()
     }
@@ -891,7 +891,7 @@ if ($.support.pjax) {
   // Test is fragile
   asyncTest("no initial pjax:popstate event", function() {
     var frame = this.frame
-    var count = 0;
+    var count = 0
 
     window.iframeLoad = function() {
       count++
@@ -939,6 +939,129 @@ if ($.support.pjax) {
     }
 
     window.iframeLoad()
+  })
+
+  asyncTest("hitting the back button obeys maxCacheLength", function() {
+    var frame = this.frame
+    var count = 0
+    var didHitServer
+
+    // Reduce the maxCacheLength for this spec to make it easier to test.
+    frame.$.pjax.defaults.maxCacheLength = 1
+
+    // This event will fire only when we request a page from the server, so we
+    // can use it to detect a cache miss.
+    frame.$("#main").on("pjax:beforeSend", function() {
+      didHitServer = true
+    })
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+
+      // First, navigate twice.
+      if (count == 1) {
+        frame.$.pjax({url: "env.html", container: "#main"})
+      } else if (count == 2) {
+        frame.$.pjax({url: "hello.html", container: "#main"})
+      } else if (count == 3) {
+        // There should now be one item in the back cache.
+        didHitServer = false
+        frame.history.back()
+      } else if (count == 4) {
+        equal(frame.location.pathname, "/env.html", "Went backward")
+        equal(didHitServer, false, "Hit cache")
+        frame.history.back()
+      } else if (count == 5) {
+        equal(frame.location.pathname, "/hello.html", "Went backward")
+        equal(didHitServer, true, "Hit server")
+        start()
+      }
+    })
+
+    frame.$.pjax({url: "hello.html", container: "#main"})
+  })
+
+  asyncTest("hitting the forward button obeys maxCacheLength", function() {
+    var frame = this.frame
+    var count = 0
+    var didHitServer
+
+    // Reduce the maxCacheLength for this spec to make it easier to test.
+    frame.$.pjax.defaults.maxCacheLength = 1
+
+    // This event will fire only when we request a page from the server, so we
+    // can use it to detect a cache miss.
+    frame.$("#main").on("pjax:beforeSend", function() {
+      didHitServer = true
+    })
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+
+      if (count == 1) {
+        frame.$.pjax({url: "env.html", container: "#main"})
+      } else if (count == 2) {
+        frame.$.pjax({url: "hello.html", container: "#main"})
+      } else if (count == 3) {
+        frame.history.back()
+      } else if (count == 4) {
+        frame.history.back()
+      } else if (count == 5) {
+        // There should now be one item in the forward cache.
+        didHitServer = false
+        frame.history.forward()
+      } else if (count == 6) {
+        equal(frame.location.pathname, "/env.html", "Went forward")
+        equal(didHitServer, false, "Hit cache")
+        frame.history.forward()
+      } else if (count == 7) {
+        equal(frame.location.pathname, "/hello.html", "Went forward")
+        equal(didHitServer, true, "Hit server")
+        start()
+      }
+    })
+
+    frame.$.pjax({url: "hello.html", container: "#main"})
+  })
+
+  asyncTest("setting maxCacheLength to 0 disables caching", function() {
+    var frame = this.frame
+    var count = 0
+    var didHitServer
+
+    // Set maxCacheLength to 0 to disable caching completely.
+    frame.$.pjax.defaults.maxCacheLength = 0
+
+    // This event will fire only when we request a page from the server, so we
+    // can use it to detect a cache miss.
+    frame.$("#main").on("pjax:beforeSend", function() {
+      didHitServer = true
+    })
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+
+      if (count == 1) {
+        didHitServer = false
+        frame.$.pjax({url: "env.html", container: "#main"})
+      } else if (count == 2) {
+        equal(frame.location.pathname, "/env.html", "Navigated to a new page")
+        equal(didHitServer, true, "Hit server")
+        didHitServer = false
+        frame.history.back()
+      } else if (count == 3) {
+        equal(frame.location.pathname, "/hello.html", "Went backward")
+        equal(didHitServer, true, "Hit server")
+        didHitServer = false
+        frame.history.forward()
+      } else if (count == 4) {
+        equal(frame.location.pathname, "/env.html", "Went forward")
+        equal(didHitServer, true, "Hit server")
+        start()
+      }
+    })
+
+    frame.$.pjax({url: "hello.html", container: "#main"})
   })
 
   asyncTest("popstate preserves GET data", function() {
