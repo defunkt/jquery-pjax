@@ -292,13 +292,13 @@ function pjax(options) {
 
     if (container.title) document.title = container.title
 
-    var replacementHandler = fire('pjax:beforeReplace', [container.contents, options], {
+    fire('pjax:beforeReplace', [container.contents, options], {
       state: pjax.state,
       previousState: previousState
     })
 		
-		if(typeof replacementHandler === "function")
-			replacementHandler(container.contents, options)
+		if(typeof options.replacementHandler === "function")
+			options.replacementHandler(container.contents, options)
 		else
 			context.html(container.contents)
 		
