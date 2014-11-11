@@ -298,7 +298,7 @@ function pjax(options) {
     })
 		
 		if(typeof options.replacementHandler === "function")
-			options.replacementHandler(container.contents, options)
+			options.replacementHandler(context, container.contents, options)
 		else
 			context.html(container.contents)
 		
