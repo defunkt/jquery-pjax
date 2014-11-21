@@ -2,15 +2,8 @@ language: ruby
 rvm:
   - 1.9.3
 
-install: gem install sinatra
-
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - ruby ./test/app.rb 2>/dev/null &
-  - sleep 2
-
-script: phantomjs ./test/run-qunit.coffee "http://localhost:4567/"
+install: script/bootstrap
+script: script/test
 
 notifications:
   email: false

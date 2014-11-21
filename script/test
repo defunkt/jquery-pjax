@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+
+port=4567
+script/server &>/dev/null &
+pid=$!
+
+trap "kill $pid" EXIT INT
+
+while ! lsof -i :$port >/dev/null; do
+  sleep .05
+done
+
+phantomjs ./test/run-qunit.coffee "http://localhost:$port/"
