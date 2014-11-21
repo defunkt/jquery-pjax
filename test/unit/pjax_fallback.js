@@ -116,7 +116,6 @@ asyncTest("adds entry to browser history"+s, function() {
       frame.history.back()
     } else if (count == 2) {
       equal(frame.location.pathname, "/home.html")
-      frame.history.forward()
       start()
     }
   }
