@@ -1240,4 +1240,29 @@ if ($.support.pjax) {
       })
     })
   })
+
+  asyncTest("handles going back to page after loading an error page", function() {
+    var frame = this.frame
+    var iframe = this.iframe
+
+    equal(frame.location.pathname, "/home.html")
+    equal(frame.document.title, "Home")
+
+    $(iframe).one("load", function() {
+
+      window.iframeLoad = function() {
+        equal(frame.location.pathname, "/home.html")
+        equal(frame.document.title, "Home")
+
+        start()
+      }
+
+      frame.history.back()
+    })
+
+    frame.$.pjax({
+      url: "boom_sans_pjax.html",
+      container: "#main"
+    })
+  })
 }
