@@ -9,6 +9,7 @@
     ".travis.yml",
     "Gemfile",
     "Gemfile.lock",
+    "vendor/",
     "test/"
   ]
 }

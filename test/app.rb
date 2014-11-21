@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'json'
 
-set :public_folder, settings.root
+set :public_folder, File.dirname(settings.root)
 enable :static
 
 helpers do
@@ -29,14 +29,6 @@ end
 
 get '/' do
   erb :qunit
-end
-
-get '/jquery.pjax.js' do
-  send_file "#{settings.root}/../jquery.pjax.js"
-end
-
-get '/test/:file' do
-  send_file "#{settings.root}/../test/#{params[:file]}"
 end
 
 get '/env.html' do
