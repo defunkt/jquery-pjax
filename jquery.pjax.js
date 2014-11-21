@@ -191,7 +191,11 @@ function pjax(options) {
   // Without adding this secret parameter, some browsers will often
   // confuse the two.
   if (!options.data) options.data = {}
-  options.data._pjax = context.selector
+  if ($.isArray(options.data)) {
+    options.data.push({name: '_pjax', value: context.selector})
+  } else {
+    options.data._pjax = context.selector
+  }
 
   function fire(type, args, props) {
     if (!props) props = {}
