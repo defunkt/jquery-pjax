@@ -357,4 +357,22 @@ asyncTest("POST with data string"+s, function() {
   })
 })
 
+asyncTest("handle form submit"+s, function() {
+  var frame = this.frame
+
+  frame.$(frame.document).on("submit", "form", function(event) {
+    frame.$.pjax.submit(event, "#main")
+  })
+
+  this.loaded = function() {
+    var env = JSON.parse(frame.$("#env").text())
+    var expected = {foo: "1", bar: "2"}
+    if (!disabled) expected._pjax = "#main"
+    deepEqual(env['rack.request.query_hash'], expected)
+    start()
+  }
+
+  frame.$("form").submit()
+})
+
 })
