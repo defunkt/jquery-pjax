@@ -75,13 +75,8 @@ function handleClick(event, container, options) {
   if ( location.protocol !== link.protocol || location.hostname !== link.hostname )
     return
 
-  // Ignore anchors on the same page
-  if (link.hash && link.href.replace(link.hash, '') ===
-       location.href.replace(location.hash, ''))
-    return
-
-  // Ignore empty anchor "foo.html#"
-  if (link.href === location.href + '#')
+  // Ignore case when a hash is being tacked on the current URL
+  if ( link.href.indexOf('#') > -1 && stripHash(link) == stripHash(location) )
     return
 
   // Ignore event with default prevented
@@ -566,6 +561,16 @@ function parseURL(url) {
   var a = document.createElement('a')
   a.href = url
   return a
+}
+
+// Internal: Return the `href` component of given URL object with the hash
+// portion removed.
+//
+// location - Location or HTMLAnchorElement
+//
+// Returns String
+function stripHash(location) {
+  return location.href.replace(/#.*/, '')
 }
 
 // Internal: Build options Object for arguments.
