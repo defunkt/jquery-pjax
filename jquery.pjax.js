@@ -75,13 +75,8 @@ function handleClick(event, container, options) {
   if ( location.protocol !== link.protocol || location.hostname !== link.hostname )
     return
 
-  // Ignore anchors on the same page
-  if (link.hash && link.href.replace(link.hash, '') ===
-       location.href.replace(location.hash, ''))
-    return
-
-  // Ignore empty anchor "foo.html#"
-  if (link.href === location.href + '#')
+  // Ignore case when a hash is being tacked on the current URL
+  if ( link.href.indexOf('#') > -1 && stripHash(link) == stripHash(location) )
     return
 
   // Ignore event with default prevented
@@ -191,7 +186,11 @@ function pjax(options) {
   // Without adding this secret parameter, some browsers will often
   // confuse the two.
   if (!options.data) options.data = {}
-  options.data._pjax = context.selector
+  if ($.isArray(options.data)) {
+    options.data.push({name: '_pjax', value: context.selector})
+  } else {
+    options.data._pjax = context.selector
+  }
 
   function fire(type, args, props) {
     if (!props) props = {}
@@ -402,7 +401,7 @@ function pjaxReload(container, options) {
 //
 // Returns nothing.
 function locationReplace(url) {
-  window.history.replaceState(null, "", "#")
+  window.history.replaceState(null, "", pjax.state.url)
   window.location.replace(url)
 }
 
@@ -568,6 +567,16 @@ function parseURL(url) {
   return a
 }
 
+// Internal: Return the `href` component of given URL object with the hash
+// portion removed.
+//
+// location - Location or HTMLAnchorElement
+//
+// Returns String
+function stripHash(location) {
+  return location.href.replace(/#.*/, '')
+}
+
 // Internal: Build options Object for arguments.
 //
 // For convenience the first parameter can be either the container or
@@ -656,14 +665,14 @@ function parseHTML(html) {
 //
 // Returns an Object with url, title, and contents keys.
 function extractContainer(data, xhr, options) {
-  var obj = {}
+  var obj = {}, fullDocument = /<html/i.test(data)
 
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
   obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
 
   // Attempt to parse response html into elements
-  if (/<html/i.test(data)) {
+  if (fullDocument) {
     var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
     var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
   } else {
@@ -688,7 +697,7 @@ function extractContainer(data, xhr, options) {
     }
 
     if ($fragment.length) {
-      obj.contents = $fragment.contents()
+      obj.contents = options.fragment === 'body' ? $fragment : $fragment.contents()
 
       // If there's no title, look for data-title and title attributes
       // on the fragment
@@ -696,7 +705,7 @@ function extractContainer(data, xhr, options) {
         obj.title = $fragment.attr('title') || $fragment.data('title')
     }
 
-  } else if (!/<html/i.test(data)) {
+  } else if (!fullDocument) {
     obj.contents = $body
   }
 

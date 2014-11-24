@@ -116,7 +116,6 @@ asyncTest("adds entry to browser history"+s, function() {
       frame.history.back()
     } else if (count == 2) {
       equal(frame.location.pathname, "/home.html")
-      frame.history.forward()
       start()
     }
   }
@@ -356,6 +355,24 @@ asyncTest("POST with data string"+s, function() {
     data: "foo=bar",
     container: "#main"
   })
+})
+
+asyncTest("handle form submit"+s, function() {
+  var frame = this.frame
+
+  frame.$(frame.document).on("submit", "form", function(event) {
+    frame.$.pjax.submit(event, "#main")
+  })
+
+  this.loaded = function() {
+    var env = JSON.parse(frame.$("#env").text())
+    var expected = {foo: "1", bar: "2"}
+    if (!disabled) expected._pjax = "#main"
+    deepEqual(env['rack.request.query_hash'], expected)
+    start()
+  }
+
+  frame.$("form").submit()
 })
 
 })

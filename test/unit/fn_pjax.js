@@ -180,13 +180,34 @@ if ($.support.pjax) {
   })
 
   asyncTest("ignores same page anchors", function() {
-    var frame = this.frame
+    var event, frame = this.frame
 
     frame.$("#main").pjax("a")
 
-    var event = frame.$.Event('click')
+    event = frame.$.Event('click')
     frame.$("a[href='#main']").trigger(event)
-    notEqual(event.result, false)
+    equal(event.isDefaultPrevented(), false)
+
+    event = frame.$.Event('click')
+    frame.$("a[href='#']").trigger(event)
+    equal(event.isDefaultPrevented(), false)
+
+    start()
+  })
+
+  asyncTest("ignores same page anchors from URL that has hash", function() {
+    var event, frame = this.frame
+
+    frame.window.location = "#foo"
+    frame.$("#main").pjax("a")
+
+    event = frame.$.Event('click')
+    frame.$("a[href='#main']").trigger(event)
+    equal(event.isDefaultPrevented(), false)
+
+    event = frame.$.Event('click')
+    frame.$("a[href='#']").trigger(event)
+    equal(event.isDefaultPrevented(), false)
 
     start()
   })

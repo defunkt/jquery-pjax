@@ -215,7 +215,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("sets hidden _pjax param on XHR GET request", function() {
+  asyncTest("sets hidden _pjax param on XHR GET request", 1, function() {
     var frame = this.frame
 
     frame.$('#main').on('pjax:success', function() {
@@ -225,6 +225,43 @@ if ($.support.pjax) {
     })
     frame.$.pjax({
       url: "env.html",
+      data: undefined,
+      container: "#main"
+    })
+  })
+
+  asyncTest("sets hidden _pjax param if array data is supplied", 1, function() {
+    var frame = this.frame
+
+    frame.$('#main').on('pjax:success', function() {
+      var env = JSON.parse(frame.$("#env").text())
+      deepEqual(env['rack.request.query_hash'], {
+        _pjax: '#main',
+        foo: 'bar'
+      })
+      start()
+    })
+    frame.$.pjax({
+      url: "env.html",
+      data: [{ name: "foo", value: "bar" }],
+      container: "#main"
+    })
+  })
+
+  asyncTest("sets hidden _pjax param if object data is supplied", 1, function() {
+    var frame = this.frame
+
+    frame.$('#main').on('pjax:success', function() {
+      var env = JSON.parse(frame.$("#env").text())
+      deepEqual(env['rack.request.query_hash'], {
+        _pjax: '#main',
+        foo: 'bar'
+      })
+      start()
+    })
+    frame.$.pjax({
+      url: "env.html",
+      data: { foo: "bar" },
       container: "#main"
     })
   })
@@ -314,7 +351,7 @@ if ($.support.pjax) {
 
     frame.$('body').on('pjax:success', function(event, data) {
       equal(typeof data, 'string')
-      equal(frame.$("body > p").html().trim(), "Hello!")
+      equal(frame.$("body > #main > p").html().trim(), "Hello!")
       equal(frame.document.title, "Hello")
       start()
     })
@@ -1238,6 +1275,31 @@ if ($.support.pjax) {
         }
         frame.history.back()
       })
+    })
+  })
+
+  asyncTest("handles going back to page after loading an error page", function() {
+    var frame = this.frame
+    var iframe = this.iframe
+
+    equal(frame.location.pathname, "/home.html")
+    equal(frame.document.title, "Home")
+
+    $(iframe).one("load", function() {
+
+      window.iframeLoad = function() {
+        equal(frame.location.pathname, "/home.html")
+        equal(frame.document.title, "Home")
+
+        start()
+      }
+
+      frame.history.back()
+    })
+
+    frame.$.pjax({
+      url: "boom_sans_pjax.html",
+      container: "#main"
     })
   })
 }
