@@ -194,7 +194,7 @@ function pjax(options) {
 
   function fire(type, args, props) {
     if (!props) props = {}
-    props.relatedTarget = target
+    props.relatedTarget = targetextractContainer
     var event = $.Event(type, props)
     context.trigger(event, args)
     return !event.isDefaultPrevented()
@@ -295,6 +295,7 @@ function pjax(options) {
       state: pjax.state,
       previousState: previousState
     })
+    executeScriptTags(container.scripts)
     context.html(container.contents)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
@@ -306,8 +307,6 @@ function pjax(options) {
     if (autofocusEl && document.activeElement !== autofocusEl) {
       autofocusEl.focus();
     }
-
-    executeScriptTags(container.scripts)
 
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
