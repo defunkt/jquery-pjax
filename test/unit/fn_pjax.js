@@ -27,6 +27,28 @@ if ($.support.pjax) {
     frame.$("a[href='/dinosaurs.html']").click()
   })
 
+  asyncTest("pushes new url right after sending request", function() {
+    var frame = this.frame
+
+    frame.$("#main").pjax("a").on("pjax:send", function() {
+      equal(frame.location.pathname, "/dinosaurs.html")
+      start()
+    })
+
+    frame.$("a[href='/dinosaurs.html']").click()
+  })
+
+  asyncTest("preserves current url", function() {
+    var frame = this.frame
+
+    frame.$("#main").pjax("a", {preserveURL: true}).on("pjax:send", function() {
+      equal(frame.location.pathname, "/home.html")
+      start()
+    })
+
+    frame.$("a[href='/dinosaurs.html']").click()
+  })
+
   asyncTest("replaces container html from response data", function() {
     var frame = this.frame
 

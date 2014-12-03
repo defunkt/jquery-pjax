@@ -30,6 +30,33 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("pushes new url right after sending request", function() {
+    var frame = this.frame
+
+    frame.$('#main').on('pjax:send', function() {
+      equal(frame.location.pathname, "/env.html")
+      start()
+    })
+    frame.$.pjax({
+      url: "env.html",
+      container: "#main"
+    })
+  })
+
+  asyncTest("preserves current url", function() {
+    var frame = this.frame
+
+    frame.$('#main').on('pjax:send', function() {
+      equal(frame.location.pathname, "/home.html")
+      start()
+    })
+    frame.$.pjax({
+      url: "env.html",
+      container: "#main",
+      preserveURL: true
+    })
+  })
+
   asyncTest("replaces container html from response data", function() {
     var frame = this.frame
 

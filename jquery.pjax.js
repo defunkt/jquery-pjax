@@ -19,11 +19,12 @@
 // pjax specific options:
 //
 //
-// container - Where to stick the response body. Usually a String selector.
-//             $(container).html(xhr.responseBody)
-//             (default: current jquery context)
-//      push - Whether to pushState the URL. Defaults to true (of course).
-//   replace - Want to use replaceState instead? That's cool.
+//   container - Where to stick the response body. Usually a String selector.
+//               $(container).html(xhr.responseBody)
+//               (default: current jquery context)
+//        push - Whether to pushState the URL. Defaults to true (of course).
+//     replace - Want to use replaceState instead? That's cool.
+// preserveURL - Whether to preserve ULR until response comes.
 //
 // For convenience the second parameter can be either the container or
 // the options object.
@@ -157,10 +158,11 @@ function handleSubmit(event, container, options) {
 //
 // Accepts these extra keys:
 //
-// container - Where to stick the response body.
-//             $(container).html(xhr.responseBody)
-//      push - Whether to pushState the URL. Defaults to true (of course).
-//   replace - Want to use replaceState instead? That's cool.
+//   container - Where to stick the response body.
+//               $(container).html(xhr.responseBody)
+//        push - Whether to pushState the URL. Defaults to true (of course).
+//     replace - Want to use replaceState instead? That's cool.
+// preserveURL - Whether to preserve ULR until response comes.
 //
 // Use it just like $.ajax:
 //
@@ -366,7 +368,8 @@ function pjax(options) {
       // Cache current container element before replacing it
       cachePush(pjax.state.id, context.clone().contents())
 
-      window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
+      var url = options.preserveURL ? undefined : stripPjaxParam(options.requestUrl)
+      window.history.pushState(null, "", url)
     }
 
     fire('pjax:start', [xhr, options])
