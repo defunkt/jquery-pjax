@@ -327,8 +327,8 @@ function pjax(options) {
       pjax.state.url = url.href
       window.history.replaceState(pjax.state, container.title, url.href)
 
-      var target = $(url.hash)
-      if (target.length) $(window).scrollTop(target.offset().top)
+      var target = document.getElementById(url.hash.slice(1))
+      if (target) $(window).scrollTop($(target).offset().top)
     }
 
     fire('pjax:success', [data, status, xhr, options])
