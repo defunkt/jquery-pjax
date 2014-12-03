@@ -759,10 +759,10 @@ function extractContainer(data, xhr, options) {
         }
         xhr.vars = obj.vars;
     }
-    
-    // "Location" header redirects AJAX request only and get contents from 
+
+    // "Location" header redirects AJAX request only and get contents from
     // potentially undesired location (ex. user logged out gets redirected to
-    // login page). As a substitute of "Location" header, here is "X-PJAX-Location" 
+    // login page). As a substitute of "Location" header, here is "X-PJAX-Location"
     // header, which does the same thing as "Location" would at page load.
     var x_location = xhr.getResponseHeader('X-PJAX-Location') || xhr.getResponseHeader('X-Location');
     if(x_location) {
@@ -785,13 +785,13 @@ function extractContainer(data, xhr, options) {
     $body = $html = $(parseHTML(data))
   }
 
+  // If there's a <title> tag in the head, use it as
+  // the page's title. (header might be missing)
+  obj.title = findAll($head && $head.length ? $head : $body, 'title').last().text()
+
   // If response data is empty, return fast
   if ($body.length === 0)
     return obj
-
-  // If there's a <title> tag in the header, use it as
-  // the page's title. (header might be missing)
-  obj.title = findAll($head && $head.length ? $head : $body, 'title').last().text()
 
   // Response could contain important data for JS, so save it
   options.html = $html
@@ -815,7 +815,7 @@ function extractContainer(data, xhr, options) {
       if (!obj.title)
         obj.title = $fragment.attr('title') || $fragment.data('title')
     }
-  } else if(!isHtml) {
+  } else /* if(isHtml) */ {
     obj.contents = $body
   }
 
