@@ -1,8 +1,10 @@
-// jquery.pjax.js
-// copyright chris wanstrath
-// https://github.com/defunkt/jquery-pjax
+/*!
+ * Copyright 2012, Chris Wanstrath
+ * Released under the MIT License
+ * https://github.com/defunkt/jquery-pjax
+ */
 
-(function ($) {
+(function($){
 
 // When called on a container with a selector, fetches the href with
 // ajax into the container or with the data-pjax attribute on the link
@@ -31,8 +33,8 @@
 // Returns the jQuery object
 	function fnPjax(selector, container, options) {
 		var context = this
-		return this.on('click.pjax', selector, function (event) {
-			var opts = $.extend({history: true}, optionsFor(container, options))
+  return this.on('click.pjax', selector, function(event) {
+    var opts = $.extend({history: true}, optionsFor(container, options))
 			if (!opts.container)
 				opts.container = $(this).attr('data-pjax') || context
 			handleClick(event, opts)
@@ -74,20 +76,19 @@
 
 		// Middle click, cmd click, and ctrl click should open
 		// links in a new tab as normal.
-		if (event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+  if ( event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey )
 			return
 
 		// Ignore cross origin links
-		if (location.protocol !== link.protocol || location.hostname !== link.hostname)
+  if ( location.protocol !== link.protocol || location.hostname !== link.hostname )
 			return
 
-		// Ignore anchors on the same page
-		if (link.hash && link.href.replace(link.hash, '') ===
-			location.href.replace(location.hash, ''))
-			return
+  // Ignore case when a hash is being tacked on the current URL
+  if ( link.href.indexOf('#') > -1 && stripHash(link) == stripHash(location) )
+    		return
 
-		// Ignore empty anchor "foo.html#"
-		if (link.href === location.href + '#')
+		// Ignore event with default prevented
+		if (event.isDefaultPrevented())
 			return
 
 		var defaults = {
@@ -130,15 +131,28 @@
 		if (form.tagName.toUpperCase() !== 'FORM')
 			throw "$.pjax.submit requires a form element"
 
-		var defaults = {
-			type: form.method.toUpperCase(),
-			url: form.action,
-			data: $(form).serializeArray(),
-			container: $(form).attr('data-pjax'),
-			target: form
-		}
+  var defaults = {
+    type: form.method.toUpperCase(),
+    url: form.action,
+    container: $(form).attr('data-pjax'),
+    target: form
+  }
 
-		pjax($.extend({}, defaults, options))
+  if (defaults.type !== 'GET' && window.FormData !== undefined) {
+    defaults.data = new FormData(form);
+    defaults.processData = false;
+    defaults.contentType = false;
+  } else {
+    // Can't handle file uploads, exit
+    if ($(form).find(':file').length) {
+      return;
+    }
+
+    // Fallback to manually serializing the fields
+    defaults.data = $(form).serializeArray();
+  }
+
+  pjax($.extend({}, defaults, options))
 
 		event.preventDefault()
 	}
@@ -162,209 +176,218 @@
 //   console.log( xhr.readyState )
 //
 // Returns whatever $.ajax returns.
-	function pjax(options) {
-		options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
+function pjax(options) {
+  options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
-		if ($.isFunction(options.url)) {
-			options.url = options.url()
-		}
+  if ($.isFunction(options.url)) {
+    options.url = options.url()
+  }
 
-		var target = options.target
+  var target = options.target
 
-		var hash = parseURL(options.url).hash
+  var hash = parseURL(options.url).hash
 
-		var context = options.context = findContainerFor(options.container)
+  var context = options.context = findContainerFor(options.container)
 
-		// We want the browser to maintain two separate internal caches: one
-		// for pjax'd partial page loads and one for normal page loads.
-		// Without adding this secret parameter, some browsers will often
-		// confuse the two.
-		if (!options.data)
-			options.data = {}
+  // We want the browser to maintain two separate internal caches: one
+  // for pjax'd partial page loads and one for normal page loads.
+  // Without adding this secret parameter, some browsers will often
+  // confuse the two.
+  if (!options.data) options.data = {}
+  if ($.isArray(options.data)) {
+    options.data.push({name: '_pjax', value: context.selector})
+  } else {
+    options.data._pjax = context.selector
+  }
 
-		// serializeArray (used in handleSubmit) produces arrays of key/value pairs
-		if ($.isArray(options.data))
-			options.data.push({ name: '_pjax', value: context.selector })
-		else
-			options.data._pjax = context.selector
+  function fire(type, args, props) {
+    if (!props) props = {}
+    props.relatedTarget = target
+    var event = $.Event(type, props)
+    context.trigger(event, args)
+    return !event.isDefaultPrevented()
+  }
 
-		function fire(type, args) {
-			var event = $.Event(type, { relatedTarget: target })
-			context.trigger(event, args)
-			return !event.isDefaultPrevented()
-		}
+  var timeoutTimer
 
-		var timeoutTimer
+  options.beforeSend = function(xhr, settings) {
+    // No timeout for non-GET requests
+    // Its not safe to request the resource again with a fallback method.
+    if (settings.type !== 'GET') {
+      settings.timeout = 0
+    }
 
-		options.beforeSend = function (xhr, settings) {
-			// No timeout for non-GET requests
-			// Its not safe to request the resource again with a fallback method.
-			if (settings.type !== 'GET') {
-				settings.timeout = 0
-			}
+    xhr.setRequestHeader('X-PJAX', 'true')
+    xhr.setRequestHeader('X-PJAX-Container', context.selector)
 
-			xhr.setRequestHeader('X-PJAX', 'true')
-			xhr.setRequestHeader('X-PJAX-Container', context.selector)
+    if (!fire('pjax:beforeSend', [xhr, settings]))
+      return false
 
-			if (!fire('pjax:beforeSend', [xhr, settings]))
-				return false
+    if (settings.timeout > 0) {
+      timeoutTimer = setTimeout(function() {
+        if (fire('pjax:timeout', [xhr, options]))
+          xhr.abort('timeout')
+      }, settings.timeout)
 
-			if (settings.timeout > 0) {
-				timeoutTimer = setTimeout(function () {
-					if (fire('pjax:timeout', [xhr, options]))
-						xhr.abort('timeout')
-				}, settings.timeout)
+      // Clear timeout setting so jquerys internal timeout isn't invoked
+      settings.timeout = 0
+    }
 
-				// Clear timeout setting so jquerys internal timeout isn't invoked
-				settings.timeout = 0
-			}
+    options.requestUrl = parseURL(settings.url).href
+  }
 
-			options.requestUrl = parseURL(settings.url).href
-		}
+  options.complete = function(xhr, textStatus) {
+    if (timeoutTimer)
+      clearTimeout(timeoutTimer)
 
-		options.complete = function (xhr, textStatus) {
-			if (timeoutTimer)
-				clearTimeout(timeoutTimer)
+    fire('pjax:complete', [xhr, textStatus, options])
 
-			fire('pjax:complete', [xhr, textStatus, options])
+    fire('pjax:end', [xhr, options])
+  }
 
-			fire('pjax:end', [xhr, options])
-		}
+  options.error = function(xhr, textStatus, errorThrown) {
+    var container = extractContainer("", xhr, options)
+    // Check redirect status code
+	var redirect = (xhr.status >= 301 && xhr.status <= 303)
+	// Do not fire pjax::error in case of redirect
+    var allowed = redirect || fire('pjax:error', [xhr, textStatus, errorThrown, options])
+    if (redirect || options.type == 'GET' && textStatus !== 'abort' && allowed) {
+      locationReplace(container.url)
+    }
+  }
 
-		options.error = function (xhr, textStatus, errorThrown) {
-			var container = extractContainer("", xhr, options)
-			// Check redirect status code
-			var redirect = (xhr.status >= 301 && xhr.status <= 303)
-			// Do not fire pjax::error in case of redirect
-			var allowed = redirect || fire('pjax:error', [xhr, textStatus, errorThrown, options])
-			if (redirect || (options.type == 'GET' && textStatus !== 'abort' && allowed)) {
-				locationReplace(container.url)
-			}
-		}
+  options.success = function(data, status, xhr) {
+    var previousState = pjax.state;
 
-		options.success = function (data, status, xhr) {
-			// If $.pjax.defaults.version is a function, invoke it first.
-			// Otherwise it can be a static string.
-			var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
-				$.pjax.defaults.version() :
-				$.pjax.defaults.version
+    // If $.pjax.defaults.version is a function, invoke it first.
+    // Otherwise it can be a static string.
+    var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
+      $.pjax.defaults.version() :
+      $.pjax.defaults.version
 
-			var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
+    var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
 
-			var container = extractContainer(data, xhr, options)
+    var container = extractContainer(data, xhr, options)
 
-			// If there is a layout version mismatch, hard load the new url
-			if (currentVersion && latestVersion && currentVersion !== latestVersion) {
-				locationReplace(container.url)
-				return
-			}
+    // If there is a layout version mismatch, hard load the new url
+    if (currentVersion && latestVersion && currentVersion !== latestVersion) {
+      locationReplace(container.url)
+      return
+    }
 
-			// If the new response is missing a body, hard load the page
-			if (!container.contents) {
-				locationReplace(container.url)
-				return
-			}
+    // If the new response is missing a body, hard load the page
+    if (!container.contents) {
+      locationReplace(container.url)
+      return
+    }
 
-			pjax.state = {
-				id: options.id || uniqueId(),
-				url: container.url,
-				title: container.title,
-				container: context.selector,
-				fragment: options.fragment,
-				timeout: options.timeout
-			}
+    pjax.state = {
+      id: options.id || uniqueId(),
+      url: container.url,
+      title: container.title,
+      container: context.selector,
+      fragment: options.fragment,
+      timeout: options.timeout
+    }
 
-			if (options.history && (options.push || options.replace)) {
-				window.history.replaceState(pjax.state, container.title, container.url)
-			}
+    if (options.history && (options.push || options.replace)) {
+      window.history.replaceState(pjax.state, container.title, container.url)
+    }
 
-			// Clear out any focused controls before inserting new page contents.
-			document.activeElement.blur()
+    // Clear out any focused controls before inserting new page contents.
+    try {
+      document.activeElement.blur()
+    } catch (e) { }
 
-			if (container.title) document.title = container.title
-			context.html(container.contents)
+    if (container.title) document.title = container.title
 
-			// FF bug: Won't autofocus fields that are inserted via JS.
-			// This behavior is incorrect. So if theres no current focus, autofocus
-			// the last field.
-			//
-			// http://www.w3.org/html/wg/drafts/html/master/forms.html
-			var autofocusEl = context.find('input[autofocus], textarea[autofocus]').last()[0]
-			if (autofocusEl && document.activeElement !== autofocusEl) {
-				autofocusEl.focus();
-			}
+    fire('pjax:beforeReplace', [container.contents, options], {
+      state: pjax.state,
+      previousState: previousState
+    })
+    context.html(container.contents)
 
-			executeScriptTags(container.scripts)
+    // FF bug: Won't autofocus fields that are inserted via JS.
+    // This behavior is incorrect. So if theres no current focus, autofocus
+    // the last field.
+    //
+    // http://www.w3.org/html/wg/drafts/html/master/forms.html
+    var autofocusEl = context.find('input[autofocus], textarea[autofocus]').last()[0]
+    if (autofocusEl && document.activeElement !== autofocusEl) {
+      autofocusEl.focus();
+    }
 
-			// Scroll to top by default
-			if (typeof options.scrollTo === 'number')
-				$(window).scrollTop(options.scrollTo)
+    executeScriptTags(container.scripts)
 
-			// If the URL has a hash in it, make sure the browser
-			// knows to navigate to the hash.
-			if (hash !== '') {
-				// Avoid using simple hash set here. Will add another history
-				// entry. Replace the url with replaceState and scroll to target
-				// by hand.
-				//
-				//   window.location.hash = hash
-				var url = parseURL(container.url)
-				url.hash = hash
+    // Scroll to top by default
+    if (typeof options.scrollTo === 'number')
+      $(window).scrollTop(options.scrollTo)
 
-				pjax.state.url = url.href
-				if(options.history) window.history.replaceState(pjax.state, container.title, url.href)
+    // If the URL has a hash in it, make sure the browser
+    // knows to navigate to the hash.
+    if ( hash !== '' ) {
+      // Avoid using simple hash set here. Will add another history
+      // entry. Replace the url with replaceState and scroll to target
+      // by hand.
+      //
+      //   window.location.hash = hash
+      var url = parseURL(container.url)
+      url.hash = hash
 
-				var target = $(url.hash)
-				if (target.length) $(window).scrollTop(target.offset().top)
-			}
+      pjax.state.url = url.href
+      if(options.history) window.history.replaceState(pjax.state, container.title, url.href)
 
-			fire('pjax:success', [data, status, xhr, options])
-		}
+      var target = document.getElementById(url.hash.slice(1))
+      if (target) $(window).scrollTop($(target).offset().top)
+    }
+
+    fire('pjax:success', [data, status, xhr, options])
+  }
 
 
-		// Initialize pjax.state for the initial page load. Assume we're
-		// using the container and options of the link we're loading for the
-		// back button to the initial page. This ensures good back button
-		// behavior.
-		if (!pjax.state) {
-			pjax.state = {
-				id: uniqueId(),
-				url: window.location.href,
-				title: document.title,
-				container: context.selector,
-				fragment: options.fragment,
-				timeout: options.timeout
-			}
-			if(options.history) window.history.replaceState(pjax.state, document.title)
-		}
+  // Initialize pjax.state for the initial page load. Assume we're
+  // using the container and options of the link we're loading for the
+  // back button to the initial page. This ensures good back button
+  // behavior.
+  if (!pjax.state) {
+    pjax.state = {
+      id: uniqueId(),
+      url: window.location.href,
+      title: document.title,
+      container: context.selector,
+      fragment: options.fragment,
+      timeout: options.timeout
+    }
+    window.history.replaceState(pjax.state, document.title)
+  }
 
-		// Cancel the current request if we're already pjaxing
-		var xhr = pjax.xhr
-		if (xhr && xhr.readyState < 4) {
-			xhr.onreadystatechange = $.noop
-			xhr.abort()
-		}
+  // Cancel the current request if we're already pjaxing
+  var xhr = pjax.xhr
+  if ( xhr && xhr.readyState < 4) {
+    xhr.onreadystatechange = $.noop
+    xhr.abort()
+  }
 
 		// Strip _pjax parameter from URL, if exists.
 		options.url = stripPjaxParam(options.url);
 
-		pjax.options = options
-		var xhr = pjax.xhr = $.ajax(options)
+  pjax.options = options
+  var xhr = pjax.xhr = $.ajax(options)
 
-		if (xhr.readyState > 0) {
-			if (options.history && (options.push && !options.replace)) {
-				// Cache current container element before replacing it
-				cachePush(pjax.state.id, context.clone().contents())
+  if (xhr.readyState > 0) {
+    if (options.history && (options.push && !options.replace)) {
+      // Cache current container element before replacing it
+      cachePush(pjax.state.id, context.clone().contents())
 
-				window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
-			}
+      window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
+    }
 
-			fire('pjax:start', [xhr, options])
-			fire('pjax:send', [xhr, options])
-		}
+    fire('pjax:start', [xhr, options])
+    fire('pjax:send', [xhr, options])
+  }
 
-		return pjax.xhr
-	}
+  return pjax.xhr
+}
 
 // Public: Reload current page with pjax.
 //
@@ -386,11 +409,11 @@
 //   https://bugs.webkit.org/show_bug.cgi?id=93506
 //
 // Returns nothing.
-	function locationReplace(url) {
-		if(!pjax.options.history) return;
-		window.history.replaceState(null, "", "#")
-		window.location.replace(url)
-	}
+function locationReplace(url) {
+  if(!pjax.options.history) return;
+  window.history.replaceState(null, "", pjax.state.url)
+  window.location.replace(url)
+}
 
 
 	var initialPop = true
@@ -413,70 +436,76 @@
 //
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
-	function onPjaxPopstate(event) {
-		var state = event.state
+function onPjaxPopstate(event) {
+  var previousState = pjax.state;
+  var state = event.state
 
-		if (state && state.container) {
-			// When coming forward from a separate history session, will get an
-			// initial pop with a state we are already at. Skip reloading the current
-			// page.
-			if (initialPop && initialURL == state.url) return
+  if (state && state.container) {
+    // When coming forward from a separate history session, will get an
+    // initial pop with a state we are already at. Skip reloading the current
+    // page.
+    if (initialPop && initialURL == state.url) return
 
-			// If popping back to the same state, just skip.
-			// Could be clicking back from hashchange rather than a pushState.
-			if (pjax.state.id === state.id) return
+    // If popping back to the same state, just skip.
+    // Could be clicking back from hashchange rather than a pushState.
+    if (pjax.state && pjax.state.id === state.id) return
 
-			var container = $(state.container)
-			if (container.length) {
-				var direction, contents = cacheMapping[state.id]
+    var container = $(state.container)
+    if (container.length) {
+      var direction, contents = cacheMapping[state.id]
 
-				if (pjax.state) {
-					// Since state ids always increase, we can deduce the history
-					// direction from the previous state.
-					direction = pjax.state.id < state.id ? 'forward' : 'back'
+      if (pjax.state) {
+        // Since state ids always increase, we can deduce the history
+        // direction from the previous state.
+        direction = pjax.state.id < state.id ? 'forward' : 'back'
 
-					// Cache current container before replacement and inform the
-					// cache which direction the history shifted.
-					cachePop(direction, pjax.state.id, container.clone().contents())
-				}
+        // Cache current container before replacement and inform the
+        // cache which direction the history shifted.
+        cachePop(direction, pjax.state.id, container.clone().contents())
+      }
 
-				var popstateEvent = $.Event('pjax:popstate', {
-					state: state,
-					direction: direction
-				})
-				container.trigger(popstateEvent)
+      var popstateEvent = $.Event('pjax:popstate', {
+        state: state,
+        direction: direction
+      })
+      container.trigger(popstateEvent)
 
-				var options = {
-					id: state.id,
-					url: state.url,
-					container: container,
-					push: false,
-					fragment: state.fragment,
-					timeout: state.timeout,
-					scrollTo: false
-				}
+      var options = {
+        id: state.id,
+        url: state.url,
+        container: container,
+        push: false,
+        fragment: state.fragment,
+        timeout: state.timeout,
+        scrollTo: false
+      }
 
-				if (contents) {
-					container.trigger('pjax:start', [null, options])
+      if (contents) {
+        container.trigger('pjax:start', [null, options])
 
-					if (state.title) document.title = state.title
-					container.html(contents)
-					pjax.state = state
+        pjax.state = state
+        if (state.title) document.title = state.title
+        var beforeReplaceEvent = $.Event('pjax:beforeReplace', {
+          state: state,
+          previousState: previousState
+        })
+        container.trigger(beforeReplaceEvent, [contents, options])
+        container.html(contents)
 
-					container.trigger('pjax:end', [null, options])
-				} else {
-					pjax(options)
-				}
+        container.trigger('pjax:end', [null, options])
+      } else {
+        pjax(options)
+      }
 
-				// Force reflow/relayout before the browser tries to restore the
-				// scroll position.
-				container[0].offsetHeight
-			} else {
-				locationReplace(location.href)
-			}
-		}
-		initialPop = false
-	}
+      // Force reflow/relayout before the browser tries to restore the
+      // scroll position.
+      container[0].offsetHeight
+    } else {
+      locationReplace(location.href)
+    }
+  }
+  initialPop = false
+}
 
 // Fallback version of main pjax function for browsers that don't
 // support pushState.
@@ -502,7 +531,7 @@
 
 		var data = options.data
 		if (typeof data === 'string') {
-			$.each(data.split('&'), function (index, value) {
+    $.each(data.split('&'), function(index, value) {
 				var pair = value.split('=')
 				form.append($('<input>', {type: 'hidden', name: pair[0], value: pair[1]}))
 			})
@@ -548,6 +577,16 @@
 		return a
 	}
 
+// Internal: Return the `href` component of given URL object with the hash
+// portion removed.
+//
+// location - Location or HTMLAnchorElement
+//
+// Returns String
+function stripHash(location) {
+  return location.href.replace(/#.*/, '')
+}
+
 // Internal: Build options Object for arguments.
 //
 // For convenience the first parameter can be either the container or
@@ -567,11 +606,11 @@
 // Returns options Object.
 	function optionsFor(container, options) {
 		// Both container and options
-		if (container && options)
+  if ( container && options )
 			options.container = container
 
 		// First argument is options Object
-		else if ($.isPlainObject(container))
+  else if ( $.isPlainObject(container) )
 			options = container
 
 		// Only container
@@ -600,7 +639,7 @@
 			throw "no pjax container for " + container.selector
 		} else if (container.selector !== '' && container.context === document) {
 			return container
-		} else if (container.attr('id')) {
+  } else if ( container.attr('id') ) {
 			return $('#' + container.attr('id'))
 		} else {
 			throw "cant get selector for pjax container!"
@@ -635,71 +674,69 @@
 // options - pjax options Object
 //
 // Returns an Object with url, title, and contents keys.
-	function extractContainer(data, xhr, options) {
-		var obj = {}
+function extractContainer(data, xhr, options) {
+  var obj = {}, fullDocument = /<html/i.test(data)
 
-		// Prefer X-PJAX-URL header if it was set, otherwise fallback to
-		// using the original requested url.
-		obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
+  // Prefer X-PJAX-URL header if it was set, otherwise fallback to
+  // using the original requested url.
+  obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
 
-		// Attempt to parse response html into elements
-		if (/<html/i.test(data)) {
-			var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
-			var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
-		} else {
-			var $head = $body = $(parseHTML(data))
-		}
+  // Attempt to parse response html into elements
+  if (fullDocument) {
+    var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
+    var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
+  } else {
+    var $head = $body = $(parseHTML(data))
+  }
 
-		// If response data is empty, return fast
-		if ($body.length === 0)
-			return obj
+  // If response data is empty, return fast
+  if ($body.length === 0)
+    return obj
 
-		// If there's a <title> tag in the header, use it as
-		// the page's title.
-		obj.title = findAll($head, 'title').last().text()
+  // If there's a <title> tag in the header, use it as
+  // the page's title.
+  obj.title = findAll($head, 'title').last().text()
 
-		if (options.fragment) {
-			// If they specified a fragment, look for it in the response
-			// and pull it out.
-			if (options.fragment === 'body') {
-				var $fragment = $body
-			} else {
-				var $fragment = findAll($body, options.fragment).first()
-			}
+  if (options.fragment) {
+    // If they specified a fragment, look for it in the response
+    // and pull it out.
+    if (options.fragment === 'body') {
+      var $fragment = $body
+    } else {
+      var $fragment = findAll($body, options.fragment).first()
+    }
 
-			if ($fragment.length) {
-				obj.contents = $fragment.contents()
+    if ($fragment.length) {
+      obj.contents = options.fragment === 'body' ? $fragment : $fragment.contents()
 
-				// If there's no title, look for data-title and title attributes
-				// on the fragment
-				if (!obj.title)
-					obj.title = $fragment.attr('title') || $fragment.data('title')
-			}
+      // If there's no title, look for data-title and title attributes
+      // on the fragment
+      if (!obj.title)
+        obj.title = $fragment.attr('title') || $fragment.data('title')
+    }
 
-		} else if (!/<html/i.test(data)) {
-			obj.contents = $body
-		}
+  } else if (!fullDocument) {
+    obj.contents = $body
+  }
 
-		// Clean up any <title> tags
-		if (obj.contents) {
-			// Remove any parent title elements
-			obj.contents = obj.contents.not(function () {
-				return $(this).is('title')
-			})
+  // Clean up any <title> tags
+  if (obj.contents) {
+    // Remove any parent title elements
+    obj.contents = obj.contents.not(function() { return $(this).is('title') })
 
-			// Then scrub any titles from their descendants
-			obj.contents.find('title').remove()
+    // Then scrub any titles from their descendants
+    obj.contents.find('title').remove()
 
-			// Gather all script[src] elements
-			obj.scripts = findAll(obj.contents, 'script[src]').remove()
-			obj.contents = obj.contents.not(obj.scripts)
-		}
+    // Gather all script[src] elements
+    obj.scripts = findAll(obj.contents, 'script[src]').remove()
+    obj.contents = obj.contents.not(obj.scripts)
+  }
 
-		// Trim any whitespace off the title
-		if (obj.title) obj.title = $.trim(obj.title)
+  // Trim any whitespace off the title
+  if (obj.title) obj.title = $.trim(obj.title)
 
-		return obj
-	}
+  return obj
+}
 
 // Load an execute scripts using standard script request.
 //
@@ -721,12 +758,13 @@
 			})
 			if (matchedScripts.length) return
 
-			var script = document.createElement('script')
-			script.type = $(this).attr('type') || 'text/javascript';
-			script.src = $(this).attr('src')
-			document.head.appendChild(script)
-		})
-	}
+    var script = document.createElement('script')
+    var type = $(this).attr('type')
+    if (type) script.type = type
+    script.src = $(this).attr('src')
+    document.head.appendChild(script)
+  })
+}
 
 // Internal: History DOM caching class.
 	var cacheMapping = {}
@@ -741,22 +779,19 @@
 // value - DOM Element to cache
 //
 // Returns nothing.
-	function cachePush(id, value) {
+function cachePush(id, value) {
 		if(!pjax.options.cache) {
 			return;
 		}
-		cacheMapping[id] = value
-		cacheBackStack.push(id)
+  cacheMapping[id] = value
+  cacheBackStack.push(id)
 
-		// Remove all entires in forward history stack after pushing
-		// a new page.
-		while (cacheForwardStack.length)
-			delete cacheMapping[cacheForwardStack.shift()]
+  // Remove all entries in forward history stack after pushing a new page.
+  trimCacheStack(cacheForwardStack, 0)
 
-		// Trim back history stack to max cache length.
-		while (cacheBackStack.length > pjax.defaults.maxCacheLength)
-			delete cacheMapping[cacheBackStack.shift()]
-	}
+  // Trim back history stack to max cache length.
+  trimCacheStack(cacheBackStack, pjax.defaults.maxCacheLength)
+}
 
 // Shifts cache from directional history cache. Should be
 // called on `popstate` with the previous state id and container
@@ -767,25 +802,40 @@
 // value     - DOM Element to cache
 //
 // Returns nothing.
-	function cachePop(direction, id, value) {
+function cachePop(direction, id, value) {
 		if(!pjax.options.cache) {
 			return;
 		}
-		var pushStack, popStack
-		cacheMapping[id] = value
+  var pushStack, popStack
+  cacheMapping[id] = value
 
-		if (direction === 'forward') {
-			pushStack = cacheBackStack
-			popStack = cacheForwardStack
-		} else {
-			pushStack = cacheForwardStack
-			popStack = cacheBackStack
-		}
+  if (direction === 'forward') {
+    pushStack = cacheBackStack
+    popStack  = cacheForwardStack
+  } else {
+    pushStack = cacheForwardStack
+    popStack  = cacheBackStack
+  }
 
-		pushStack.push(id)
-		if (id = popStack.pop())
-			delete cacheMapping[id]
-	}
+  pushStack.push(id)
+  if (id = popStack.pop())
+    delete cacheMapping[id]
+
+  // Trim whichever stack we just pushed to to max cache length.
+  trimCacheStack(pushStack, pjax.defaults.maxCacheLength)
+}
+
+// Trim a cache stack (either cacheBackStack or cacheForwardStack) to be no
+// longer than the specified length, deleting cached DOM elements as necessary.
+//
+// stack  - Array of state IDs
+// length - Maximum length to trim to
+//
+// Returns nothing.
+function trimCacheStack(stack, length) {
+  while (stack.length > length)
+    delete cacheMapping[stack.shift()]
+}
 
 // Public: Find version identifier for the initial page load.
 //
@@ -863,10 +913,10 @@
 		$.event.props.push('state')
 
 // Is pjax supported by this browser?
-	$.support.pjax =
-		window.history && window.history.pushState && window.history.replaceState &&
-			// pushState isn't reliable on iOS until 5.
-			!navigator.userAgent.match(/((iPod|iPhone|iPad).+\bOS\s+[1-4]|WebApps\/.+CFNetwork)/)
+$.support.pjax =
+  window.history && window.history.pushState && window.history.replaceState &&
+  // pushState isn't reliable on iOS until 5.
+  !navigator.userAgent.match(/((iPod|iPhone|iPad).+\bOS\s+[1-4]\D|WebApps\/.+CFNetwork)/)
 
 	$.support.pjax ? enable() : disable()
 
