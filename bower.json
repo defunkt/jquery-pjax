@@ -1,7 +1,8 @@
 {
-  "name": "jquery-pjax",
-  "version": "1.9.4",
+  "name": "yii2-pjax",
+  "version": "2.0.2",
   "main": "./jquery.pjax.js",
+  "license": "MIT",
   "dependencies": {
     "jquery": ">=1.8"
   },
