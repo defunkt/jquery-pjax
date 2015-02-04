@@ -307,8 +307,6 @@ function pjax(options) {
       autofocusEl.focus();
     }
 
-    executeScriptTags(container.scripts)
-
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
       $(window).scrollTop(options.scrollTo)
@@ -714,7 +712,7 @@ function extractContainer(data, xhr, options) {
     obj.contents.find('title').remove()
 
     // Gather all script[src] elements
-    obj.scripts = findAll(obj.contents, 'script[src]').remove()
+    obj.scripts = findAll(obj.contents, 'script[src]')
     obj.contents = obj.contents.not(obj.scripts)
   }
 
