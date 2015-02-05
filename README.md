@@ -418,6 +418,14 @@ $(document).on('click', 'a[data-pjax]', function(event) {
 
 **NOTE** The new api gives you control over the delegated element container. `$.fn.live` always bound to `document`. This is what you still want to do most of the time.
 
+### Script tags
+
+All script tags with attribute `src` will be move to head, for the reason once CSP enabled, internal `eval` will be disabled. If you don't want the script tags moved, add an attribute context with value `inline`:
+
+``` html
+<script type="text/javascript" src="test.js" context="inline"></script>
+```
+
 ## Contributing
 
 ```
