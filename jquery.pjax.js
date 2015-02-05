@@ -290,6 +290,8 @@ function pjax(options) {
     } catch (e) { }
 
     if (container.title) document.title = container.title
+    
+    executeScriptTags(container.scripts)
 
     fire('pjax:beforeReplace', [container.contents, options], {
       state: pjax.state,
@@ -306,8 +308,6 @@ function pjax(options) {
     if (autofocusEl && document.activeElement !== autofocusEl) {
       autofocusEl.focus();
     }
-
-    executeScriptTags(container.scripts)
 
     // Scroll to top by default
     if (typeof options.scrollTo === 'number')
