@@ -318,11 +318,13 @@ asyncTest("GET with data array"+s, function() {
 
   this.loaded = function() {
     equal(frame.location.pathname, "/env.html")
-    equal(frame.location.search, "?foo=bar")
+    equal(frame.location.search, "?foo%5B%5D=bar&foo%5B%5D=baz")
 
     var env = JSON.parse(frame.$("#env").text())
     equal(env['REQUEST_METHOD'], "GET")
-    equal(env['rack.request.query_hash']['foo'], 'bar')
+    var expected = {'foo': ['bar', 'baz']};
+    if (!disabled) expected._pjax = "#main"
+    deepEqual(env['rack.request.query_hash'], expected)
 
     start()
   }
@@ -330,7 +332,7 @@ asyncTest("GET with data array"+s, function() {
   frame.$.pjax({
     type: 'GET',
     url: "env.html",
-    data: [{name: "foo", value: "bar"}],
+    data: [{name: "foo[]", value: "bar"}, {name: "foo[]", value: "baz"}],
     container: "#main"
   })
 })
@@ -344,7 +346,9 @@ asyncTest("POST with data array"+s, function() {
 
     var env = JSON.parse(frame.$("#env").text())
     equal(env['REQUEST_METHOD'], "POST")
-    equal(env['rack.request.form_hash']['foo'], 'bar')
+    var expected = {'foo': ['bar', 'baz']};
+    if (!disabled) expected._pjax = "#main"
+    deepEqual(env['rack.request.form_hash'], expected)
 
     start()
   }
@@ -352,7 +356,7 @@ asyncTest("POST with data array"+s, function() {
   frame.$.pjax({
     type: 'POST',
     url: "env.html",
-    data: [{name: "foo", value: "bar"}],
+    data: [{name: "foo[]", value: "bar"}, {name: "foo[]", value: "baz"}],
     container: "#main"
   })
 })
