@@ -313,6 +313,50 @@ asyncTest("POST with data object"+s, function() {
   })
 })
 
+asyncTest("GET with data array"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "?foo=bar")
+
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "GET")
+    equal(env['rack.request.query_hash']['foo'], 'bar')
+
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'GET',
+    url: "env.html",
+    data: [{name: "foo", value: "bar"}],
+    container: "#main"
+  })
+})
+
+asyncTest("POST with data array"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "")
+
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "POST")
+    equal(env['rack.request.form_hash']['foo'], 'bar')
+
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'POST',
+    url: "env.html",
+    data: [{name: "foo", value: "bar"}],
+    container: "#main"
+  })
+})
+
 asyncTest("GET with data string"+s, function() {
   var frame = this.frame
 

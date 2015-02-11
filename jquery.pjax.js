@@ -521,6 +521,10 @@ function fallbackPjax(options) {
       var pair = value.split('=')
       form.append($('<input>', {type: 'hidden', name: pair[0], value: pair[1]}))
     })
+  } else if ($.isArray(data)) {
+    $.each(data, function(index, value) {
+      form.append($('<input>', {type: 'hidden', name: value.name, value: value.value}))
+    })
   } else if (typeof data === 'object') {
     for (key in data)
       form.append($('<input>', {type: 'hidden', name: key, value: data[key]}))
