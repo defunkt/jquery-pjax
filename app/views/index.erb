@@ -4,6 +4,12 @@
   <li><a href="/aliens.html">aliens</a></li>
 </ul>
 
+<h1><%= params[:text] %></h1>
+<form method="GET">
+   <input type="text" name="text">
+   <input type="submit">
+</form>
+
 <p>
   pjax loads html from your server into the current page
   without a full page load. It's ajax with real permalinks,
