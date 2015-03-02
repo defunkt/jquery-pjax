@@ -163,7 +163,7 @@ key | default | description
 `container` | | CSS selector for the element where content should be replaced
 `url` | link.href | a string or function that returns the URL for the ajax request
 `target` | link | eventually the `relatedTarget` value for [pjax events](#events)
-`fragment` | `"body"` | CSS selector for the fragment to extract from ajax response
+`fragment` | | CSS selector for the fragment to extract from ajax response
 
 You can change the defaults globally by writing to the `$.pjax.defaults` object:
 
