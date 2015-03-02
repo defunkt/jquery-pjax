@@ -225,7 +225,7 @@ function pjax(options) {
       settings.timeout = 0
     }
 
-    options.requestUrl = parseURL(settings.url).href
+    options.requestUrl = stripInternalParams(parseURL(settings.url).href)
   }
 
   options.complete = function(xhr, textStatus) {
@@ -366,7 +366,7 @@ function pjax(options) {
       // Cache current container element before replacing it
       cachePush(pjax.state.id, context.clone().contents())
 
-      window.history.pushState(null, "", stripPjaxParam(options.requestUrl))
+      window.history.pushState(null, "", options.requestUrl)
     }
 
     fire('pjax:start', [xhr, options])
@@ -544,16 +544,22 @@ function uniqueId() {
   return (new Date).getTime()
 }
 
-// Internal: Strips _pjax param from url
+// Internal: Strips named query param from url
 //
 // url - String
 //
 // Returns String.
-function stripPjaxParam(url) {
+function stripParam(url, name) {
   return url
-    .replace(/\?_pjax=[^&]+&?/, '?')
-    .replace(/_pjax=[^&]+&?/, '')
-    .replace(/[\?&]$/, '')
+    .replace(new RegExp('[?&]' + name + '=[^&]*'), '')
+    .replace(/[?&]$/, '')
+    .replace(/[?&]/, '?')
+}
+
+function stripInternalParams(url) {
+  url = stripParam(url, '_pjax')
+  url = stripParam(url, '_')
+  return url
 }
 
 // Internal: Parse URL components and returns a Locationish object.
@@ -669,7 +675,8 @@ function extractContainer(data, xhr, options) {
 
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
-  obj.url = stripPjaxParam(xhr.getResponseHeader('X-PJAX-URL') || options.requestUrl)
+  var serverUrl = xhr.getResponseHeader('X-PJAX-URL')
+  obj.url = serverUrl ? stripInternalParams(serverUrl) : options.requestUrl
 
   // Attempt to parse response html into elements
   if (fullDocument) {
