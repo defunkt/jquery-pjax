@@ -22,11 +22,13 @@ if ($.support.pjax) {
 
     frame.$('#main').on('pjax:success', function() {
       equal(frame.location.pathname, "/hello.html")
+      equal(frame.location.search, "")
       start()
     })
     frame.$.pjax({
       url: "hello.html",
-      container: "#main"
+      container: "#main",
+      cache: false
     })
   })
 
