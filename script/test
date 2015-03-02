@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-port=4567
-script/server &>/dev/null &
+port=3999
+script/server -p "$port" &>/dev/null &
 pid=$!
 
 trap "kill $pid" EXIT INT
