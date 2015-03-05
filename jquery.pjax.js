@@ -228,25 +228,48 @@ function pjax(options) {
     options.requestUrl = stripInternalParams(parseURL(settings.url).href)
   }
 
-  options.complete = function(xhr, textStatus) {
-    if (timeoutTimer)
-      clearTimeout(timeoutTimer)
 
-    fire('pjax:complete', [xhr, textStatus, options])
-
-    fire('pjax:end', [xhr, options])
+  // Initialize pjax.state for the initial page load. Assume we're
+  // using the container and options of the link we're loading for the
+  // back button to the initial page. This ensures good back button
+  // behavior.
+  if (!pjax.state) {
+    pjax.state = {
+      id: uniqueId(),
+      url: window.location.href,
+      title: document.title,
+      container: context.selector,
+      fragment: options.fragment,
+      timeout: options.timeout
+    }
+    window.history.replaceState(pjax.state, document.title)
   }
 
-  options.error = function(xhr, textStatus, errorThrown) {
+  // Cancel the current request if we're already pjaxing
+  var xhr = pjax.xhr
+  if ( xhr && xhr.readyState < 4) {
+    xhr.onreadystatechange = $.noop
+    xhr.abort()
+  }
+
+  pjax.options = options
+  var xhr = pjax.xhr = $.ajax(options)
+
+  xhr.fail(function(xhr, textStatus, errorThrown) {
+
+    // Ignore the failure if the request was cancelled
+    if (textStatus === "canceled")
+      return;
+
     var container = extractContainer("", xhr, options)
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
       locationReplace(container.url)
     }
-  }
+  })
 
-  options.success = function(data, status, xhr) {
+  .done(function(data, status, xhr) {
     var previousState = pjax.state;
 
     // If $.pjax.defaults.version is a function, invoke it first.
@@ -332,34 +355,15 @@ function pjax(options) {
     }
 
     fire('pjax:success', [data, status, xhr, options])
-  }
+  })
 
+  .always(function(dataOrJQXHR, textStatus) {
+    if (timeoutTimer)
+      clearTimeout(timeoutTimer)
 
-  // Initialize pjax.state for the initial page load. Assume we're
-  // using the container and options of the link we're loading for the
-  // back button to the initial page. This ensures good back button
-  // behavior.
-  if (!pjax.state) {
-    pjax.state = {
-      id: uniqueId(),
-      url: window.location.href,
-      title: document.title,
-      container: context.selector,
-      fragment: options.fragment,
-      timeout: options.timeout
-    }
-    window.history.replaceState(pjax.state, document.title)
-  }
-
-  // Cancel the current request if we're already pjaxing
-  var xhr = pjax.xhr
-  if ( xhr && xhr.readyState < 4) {
-    xhr.onreadystatechange = $.noop
-    xhr.abort()
-  }
-
-  pjax.options = options
-  var xhr = pjax.xhr = $.ajax(options)
+    fire('pjax:complete', [xhr, textStatus, options])
+    fire('pjax:end', [xhr, options])
+  });
 
   if (xhr.readyState > 0) {
     if (options.push && !options.replace) {
