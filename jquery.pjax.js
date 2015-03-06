@@ -423,7 +423,7 @@ if ('state' in window.history) {
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
 function onPjaxPopstate(event) {
-  var previousState = pjax.state;
+  var previousState = pjax.state
   var state = event.state
 
   if (state && state.container) {
@@ -432,22 +432,26 @@ function onPjaxPopstate(event) {
     // page.
     if (initialPop && initialURL == state.url) return
 
-    // If popping back to the same state, just skip.
-    // Could be clicking back from hashchange rather than a pushState.
-    if (pjax.state && pjax.state.id === state.id) return
+    var direction, containerSelector = state.container
 
-    var container = $(state.container)
+    if (previousState) {
+      // If popping back to the same state, just skip.
+      // Could be clicking back from hashchange rather than a pushState.
+      if (previousState.id === state.id) return
+
+      // Since state IDs always increase, we can deduce the navigation direction
+      direction = previousState.id < state.id ? 'forward' : 'back'
+      if (direction == 'back') containerSelector = previousState.container
+    }
+
+    var container = $(containerSelector)
     if (container.length) {
-      var direction, contents = cacheMapping[state.id]
+      var contents = cacheMapping[state.id]
 
-      if (pjax.state) {
-        // Since state ids always increase, we can deduce the history
-        // direction from the previous state.
-        direction = pjax.state.id < state.id ? 'forward' : 'back'
-
+      if (previousState) {
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
-        cachePop(direction, pjax.state.id, cloneContents(container))
+        cachePop(direction, previousState.id, cloneContents(container))
       }
 
       var popstateEvent = $.Event('pjax:popstate', {
