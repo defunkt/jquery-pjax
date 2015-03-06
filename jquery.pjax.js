@@ -225,7 +225,9 @@ function pjax(options) {
       settings.timeout = 0
     }
 
-    options.requestUrl = stripInternalParams(parseURL(settings.url).href)
+    var url = parseURL(settings.url)
+    url.hash = hash
+    options.requestUrl = stripInternalParams(url.href)
   }
 
   options.complete = function(xhr, textStatus) {
@@ -567,8 +569,8 @@ function cloneContents(container) {
 // Returns String.
 function stripParam(url, name) {
   return url
-    .replace(new RegExp('[?&]' + name + '=[^&]*'), '')
-    .replace(/[?&]$/, '')
+    .replace(new RegExp('[?&]' + name + '=[^&#]*'), '')
+    .replace(/[?&]($|#)/, '\1')
     .replace(/[?&]/, '?')
 }
 

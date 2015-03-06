@@ -123,6 +123,8 @@ asyncTest("scrolls to anchor at top page"+s, function() {
 
   this.loaded = function(frame) {
     setTimeout(function() {
+      equal(frame.location.pathname, "/anchor.html")
+      equal(frame.location.hash, "#top")
       equal(frame.window.scrollY, 8)
       start()
     }, 100)
@@ -132,6 +134,14 @@ asyncTest("scrolls to anchor at top page"+s, function() {
     url: "/anchor.html#top",
     container: "#main"
   })
+
+  if (disabled) {
+    equal(frame.location.pathname, "/home.html")
+    equal(frame.location.hash, "")
+  } else {
+    equal(frame.location.pathname, "/anchor.html")
+    equal(frame.location.hash, "#top")
+  }
 })
 
 asyncTest("empty anchor doesn't scroll page"+s, function() {
