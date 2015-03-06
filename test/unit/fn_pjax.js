@@ -230,21 +230,6 @@ if ($.support.pjax) {
     frame.$("a[href='/dinosaurs.html']").click()
   })
 
-
-  asyncTest("scrolls to anchor after load", function() {
-    var frame = this.frame
-
-    frame.$("#main").pjax("a").on("pjax:end", function() {
-      equal(frame.location.pathname, "/dinosaurs.html")
-      equal(frame.location.hash, "#main")
-      start()
-    })
-
-    var link = frame.$("a[href='/dinosaurs.html']")
-    link.attr('href', "/dinosaurs.html#main")
-    link.click()
-  })
-
   asyncTest("triggers pjax:click event from link", function() {
     var frame = this.frame
 
