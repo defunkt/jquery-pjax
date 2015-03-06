@@ -327,7 +327,8 @@ function pjax(options) {
       pjax.state.url = url.href
       window.history.replaceState(pjax.state, container.title, url.href)
 
-      var target = document.getElementById(url.hash.slice(1))
+      var name = hash.slice(1)
+      var target = document.getElementById(name) || document.getElementsByName(name)[0]
       if (target) $(window).scrollTop($(target).offset().top)
     }
 
