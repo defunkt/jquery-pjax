@@ -317,17 +317,16 @@ function pjax(options) {
 
     executeScriptTags(container.scripts)
 
-    // Scroll to top by default
-    if (typeof options.scrollTo === 'number')
-      $(window).scrollTop(options.scrollTo)
+    var scrollTo = options.scrollTo
 
-    // If the URL has a hash in it, make sure the browser
-    // knows to navigate to the hash.
+    // Ensure browser scrolls to the element referenced by the URL anchor
     if (hash) {
       var name = decodeURIComponent(hash.slice(1))
       var target = document.getElementById(name) || document.getElementsByName(name)[0]
-      if (target) $(window).scrollTop($(target).offset().top)
+      if (target) scrollTo = $(target).offset().top
     }
+
+    if (typeof scrollTo == 'number') $(window).scrollTop(scrollTo)
 
     fire('pjax:success', [data, status, xhr, options])
   }
