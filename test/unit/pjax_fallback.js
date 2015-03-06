@@ -170,7 +170,23 @@ asyncTest("scrolls to anchor at bottom page"+s, function() {
   })
 })
 
+asyncTest("scrolls to named encoded anchor"+s, function() {
+  var frame = this.frame
 
+  equal(frame.window.scrollY, 0)
+
+  this.loaded = function(frame) {
+    setTimeout(function() {
+      equal(frame.window.scrollY, 10008)
+      start()
+    }, 10)
+  }
+
+  frame.$.pjax({
+    url: "/anchor.html#%62%6F%74%74%6F%6D",
+    container: "#main"
+  })
+})
 
 asyncTest("sets GET method"+s, function() {
   var frame = this.frame
