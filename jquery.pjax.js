@@ -261,6 +261,12 @@ function pjax(options) {
 
     var container = extractContainer(data, xhr, options)
 
+    var url = parseURL(container.url)
+    if (hash) {
+      url.hash = hash
+      container.url = url.href
+    }
+
     // If there is a layout version mismatch, hard load the new url
     if (currentVersion && latestVersion && currentVersion !== latestVersion) {
       locationReplace(container.url)
@@ -317,18 +323,7 @@ function pjax(options) {
 
     // If the URL has a hash in it, make sure the browser
     // knows to navigate to the hash.
-    if ( hash !== '' ) {
-      // Avoid using simple hash set here. Will add another history
-      // entry. Replace the url with replaceState and scroll to target
-      // by hand.
-      //
-      //   window.location.hash = hash
-      var url = parseURL(container.url)
-      url.hash = hash
-
-      pjax.state.url = url.href
-      window.history.replaceState(pjax.state, container.title, url.href)
-
+    if (hash) {
       var name = decodeURIComponent(hash.slice(1))
       var target = document.getElementById(name) || document.getElementsByName(name)[0]
       if (target) $(window).scrollTop($(target).offset().top)

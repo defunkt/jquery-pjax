@@ -5,6 +5,10 @@ $.each([true, false], function() {
 var disabled = this == false
 var s = disabled ? " (disabled)" : ""
 
+var ua = navigator.userAgent
+var safari = ua.match("Safari") && !ua.match("Chrome") && !ua.match("Edge")
+var chrome = ua.match("Chrome") && !ua.match("Edge")
+
 module("$.pjax fallback"+s, {
   setup: function() {
     var self = this
@@ -420,6 +424,38 @@ asyncTest("handle form submit"+s, function() {
   }
 
   frame.$("form").submit()
+})
+
+asyncTest("browser URL is correct after redirect"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/hello.html")
+    var expectedHash = safari && disabled ? "" : "#new"
+    equal(frame.location.hash, expectedHash)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "redirect.html#new",
+    container: "#main"
+  })
+})
+
+asyncTest("server can't affect anchor after redirect"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/hello.html")
+    var expectedHash = safari && disabled ? "" : "#new"
+    equal(frame.location.hash, expectedHash)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "redirect.html?anchor=server#new",
+    container: "#main"
+  })
 })
 
 })
