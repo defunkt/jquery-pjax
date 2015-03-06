@@ -530,6 +530,7 @@ function fallbackPjax(options) {
       form.append($('<input>', {type: 'hidden', name: value.name, value: value.value}))
     })
   } else if (typeof data === 'object') {
+    var key
     for (key in data)
       form.append($('<input>', {type: 'hidden', name: key, value: data[key]}))
   }
