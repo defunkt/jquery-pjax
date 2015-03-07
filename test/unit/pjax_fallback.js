@@ -99,33 +99,6 @@ asyncTest("sends correct HTTP referer"+s, function() {
   })
 })
 
-asyncTest("adds entry to browser history"+s, function() {
-  var frame = this.frame
-  var count = 0
-
-  frame.onpopstate = function() {
-    window.iframeLoad(frame)
-  }
-
-  this.loaded = function() {
-    count++
-
-    if (count == 1) {
-      equal(frame.location.pathname, "/hello.html")
-      ok(frame.history.length > 1)
-      frame.history.back()
-    } else if (count == 2) {
-      equal(frame.location.pathname, "/home.html")
-      start()
-    }
-  }
-
-  frame.$.pjax({
-    url: "hello.html",
-    container: "#main"
-  })
-})
-
 asyncTest("scrolls to top of the page"+s, function() {
   var frame = this.frame
 
