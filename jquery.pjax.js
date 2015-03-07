@@ -225,7 +225,9 @@ function pjax(options) {
       settings.timeout = 0
     }
 
-    options.requestUrl = stripInternalParams(parseURL(settings.url).href)
+    var url = parseURL(settings.url)
+    url.hash = hash
+    options.requestUrl = stripInternalParams(url.href)
   }
 
   options.complete = function(xhr, textStatus) {
@@ -258,6 +260,12 @@ function pjax(options) {
     var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
 
     var container = extractContainer(data, xhr, options)
+
+    var url = parseURL(container.url)
+    if (hash) {
+      url.hash = hash
+      container.url = url.href
+    }
 
     // If there is a layout version mismatch, hard load the new url
     if (currentVersion && latestVersion && currentVersion !== latestVersion) {
@@ -309,27 +317,16 @@ function pjax(options) {
 
     executeScriptTags(container.scripts)
 
-    // Scroll to top by default
-    if (typeof options.scrollTo === 'number')
-      $(window).scrollTop(options.scrollTo)
+    var scrollTo = options.scrollTo
 
-    // If the URL has a hash in it, make sure the browser
-    // knows to navigate to the hash.
-    if ( hash !== '' ) {
-      // Avoid using simple hash set here. Will add another history
-      // entry. Replace the url with replaceState and scroll to target
-      // by hand.
-      //
-      //   window.location.hash = hash
-      var url = parseURL(container.url)
-      url.hash = hash
-
-      pjax.state.url = url.href
-      window.history.replaceState(pjax.state, container.title, url.href)
-
-      var target = document.getElementById(url.hash.slice(1))
-      if (target) $(window).scrollTop($(target).offset().top)
+    // Ensure browser scrolls to the element referenced by the URL anchor
+    if (hash) {
+      var name = decodeURIComponent(hash.slice(1))
+      var target = document.getElementById(name) || document.getElementsByName(name)[0]
+      if (target) scrollTo = $(target).offset().top
     }
+
+    if (typeof scrollTo == 'number') $(window).scrollTop(scrollTo)
 
     fire('pjax:success', [data, status, xhr, options])
   }
@@ -566,8 +563,8 @@ function cloneContents(container) {
 // Returns String.
 function stripParam(url, name) {
   return url
-    .replace(new RegExp('[?&]' + name + '=[^&]*'), '')
-    .replace(/[?&]$/, '')
+    .replace(new RegExp('[?&]' + name + '=[^&#]*'), '')
+    .replace(/[?&]($|#)/, '\1')
     .replace(/[?&]/, '?')
 }
 

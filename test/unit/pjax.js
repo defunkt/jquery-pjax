@@ -1192,24 +1192,10 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("follows redirect with X-PJAX-URL header", function() {
-    var frame = this.frame
-
-    frame.$('#main').on("pjax:success", function() {
-      equal(frame.location.pathname, "/hello.html")
-      equal(frame.$("#main > p").html().trim(), "Hello!")
-      start()
-    })
-    frame.$.pjax({
-      url: "redirect.html",
-      container: "#main"
-    })
-  })
-
   asyncTest("lazily sets initial $.pjax.state", function() {
     var frame = this.frame
 
-    ok(!frame.$.pjax.state)
+    equal(frame.$.pjax.state, null)
 
     frame.$('#main').on("pjax:success", function() {
       start()
@@ -1219,24 +1205,28 @@ if ($.support.pjax) {
       container: "#main"
     })
 
-    ok(frame.$.pjax.state.id)
-    ok(frame.$.pjax.state.url.match("/home.html"))
-    equal(frame.$.pjax.state.container, "#main")
+    var initialState = frame.$.pjax.state
+    ok(initialState.id)
+    equal(initialState.url, "http://" + frame.location.host + "/home.html")
+    equal(initialState.container, "#main")
   })
 
   asyncTest("updates $.pjax.state to new page", function() {
     var frame = this.frame
 
     frame.$('#main').on("pjax:success", function() {
-      ok(frame.$.pjax.state.id)
-      ok(frame.$.pjax.state.url.match("/hello.html"))
-      equal(frame.$.pjax.state.container, "#main")
+      var state = frame.$.pjax.state
+      ok(state.id)
+      equal(state.url, "http://" + frame.location.host + "/hello.html#new")
+      equal(state.container, "#main")
       start()
     })
     frame.$.pjax({
-      url: "hello.html",
+      url: "hello.html#new",
       container: "#main"
     })
+
+    var initialState = frame.$.pjax.state
   })
 
   asyncTest("new id is generated for new pages", function() {

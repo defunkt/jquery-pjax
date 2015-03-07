@@ -21,7 +21,7 @@ end
 
 after do
   if pjax?
-    response.headers['X-PJAX-URL'] = request.url
+    response.headers['X-PJAX-URL'] ||= request.url
     response.headers['X-PJAX-Version'] = 'v1'
   end
 end
@@ -48,7 +48,17 @@ delete '/env.html' do
 end
 
 get '/redirect.html' do
-  redirect "/hello.html"
+  if params[:anchor]
+    path = "/hello.html##{params[:anchor]}"
+    if pjax?
+      response.headers['X-PJAX-URL'] = uri(path)
+      status 200
+    else
+      redirect path
+    end
+  else
+    redirect "/hello.html"
+  end
 end
 
 get '/timeout.html' do

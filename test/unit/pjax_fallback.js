@@ -5,6 +5,10 @@ $.each([true, false], function() {
 var disabled = this == false
 var s = disabled ? " (disabled)" : ""
 
+var ua = navigator.userAgent
+var safari = ua.match("Safari") && !ua.match("Chrome") && !ua.match("Edge")
+var chrome = ua.match("Chrome") && !ua.match("Edge")
+
 module("$.pjax fallback"+s, {
   setup: function() {
     var self = this
@@ -123,6 +127,8 @@ asyncTest("scrolls to anchor at top page"+s, function() {
 
   this.loaded = function(frame) {
     setTimeout(function() {
+      equal(frame.location.pathname, "/anchor.html")
+      equal(frame.location.hash, "#top")
       equal(frame.window.scrollY, 8)
       start()
     }, 100)
@@ -132,6 +138,14 @@ asyncTest("scrolls to anchor at top page"+s, function() {
     url: "/anchor.html#top",
     container: "#main"
   })
+
+  if (disabled) {
+    equal(frame.location.pathname, "/home.html")
+    equal(frame.location.hash, "")
+  } else {
+    equal(frame.location.pathname, "/anchor.html")
+    equal(frame.location.hash, "#top")
+  }
 })
 
 asyncTest("empty anchor doesn't scroll page"+s, function() {
@@ -170,7 +184,23 @@ asyncTest("scrolls to anchor at bottom page"+s, function() {
   })
 })
 
+asyncTest("scrolls to named encoded anchor"+s, function() {
+  var frame = this.frame
 
+  equal(frame.window.scrollY, 0)
+
+  this.loaded = function(frame) {
+    setTimeout(function() {
+      equal(frame.window.scrollY, 10008)
+      start()
+    }, 10)
+  }
+
+  frame.$.pjax({
+    url: "/anchor.html#%62%6F%74%74%6F%6D",
+    container: "#main"
+  })
+})
 
 asyncTest("sets GET method"+s, function() {
   var frame = this.frame
@@ -394,6 +424,38 @@ asyncTest("handle form submit"+s, function() {
   }
 
   frame.$("form").submit()
+})
+
+asyncTest("browser URL is correct after redirect"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/hello.html")
+    var expectedHash = safari && disabled ? "" : "#new"
+    equal(frame.location.hash, expectedHash)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "redirect.html#new",
+    container: "#main"
+  })
+})
+
+asyncTest("server can't affect anchor after redirect"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/hello.html")
+    var expectedHash = safari && disabled ? "" : "#new"
+    equal(frame.location.hash, expectedHash)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "redirect.html?anchor=server#new",
+    container: "#main"
+  })
 })
 
 })
