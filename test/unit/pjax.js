@@ -741,13 +741,17 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.$.pjax({
-      url: "timeout.html",
+      url: "timeout.html#hello",
       container: "#main"
     })
+
+    equal(frame.location.pathname, "/timeout.html")
+    equal(frame.location.hash, "#hello")
 
     this.iframe.onload = function() {
       equal(frame.$("#main p").html(), "SLOW DOWN!")
       equal(frame.location.pathname, "/timeout.html")
+      equal(frame.location.hash, "#hello")
       start()
     }
   })
