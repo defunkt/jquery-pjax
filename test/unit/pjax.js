@@ -845,6 +845,46 @@ if ($.support.pjax) {
     }, 0)
   }
 
+  asyncTest("clicking back while loading cancels XHR", function() {
+    var frame = this.frame
+
+    frame.$('#main').on('pjax:timeout', function(event) {
+      event.preventDefault()
+    })
+
+    frame.$("#main").one('pjax:send', function() {
+
+      // Check that our request is aborted (need to check
+      // how robust this is across browsers)
+      frame.$("#main").one('pjax:complete', function(e, xhr, textStatus) {
+        equal(xhr.status, 0)
+        equal(textStatus, 'abort')
+      })
+
+      setTimeout(function() {
+        frame.history.back()
+      }, 250)
+
+      // Make sure the URL and content remain the same after the
+      // XHR would have arrived (delay on timeout.html is 1s)
+      setTimeout(function() {
+        var afterBackLocation = frame.location.pathname
+        var afterBackTitle = frame.document.title
+
+        setTimeout(function() {
+          equal(frame.location.pathname, afterBackLocation)
+          equal(frame.document.title, afterBackTitle)
+          start()
+        }, 1000)
+      }, 500)
+    })
+
+    frame.$.pjax({
+      url: "timeout.html",
+      container: "#main"
+    })
+  })
+
   asyncTest("popstate going back to page", function() {
     var frame = this.frame
 

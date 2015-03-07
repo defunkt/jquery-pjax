@@ -349,11 +349,7 @@ function pjax(options) {
   }
 
   // Cancel the current request if we're already pjaxing
-  var xhr = pjax.xhr
-  if ( xhr && xhr.readyState < 4) {
-    xhr.onreadystatechange = $.noop
-    xhr.abort()
-  }
+  abortXHR(pjax.xhr)
 
   pjax.options = options
   var xhr = pjax.xhr = $.ajax(options)
@@ -420,6 +416,12 @@ if ('state' in window.history) {
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
 function onPjaxPopstate(event) {
+
+  // Hitting back or forward should override any pending PJAX request.
+  if (!initialPop) {
+    abortXHR(pjax.xhr)
+  }
+
   var previousState = pjax.state
   var state = event.state
 
@@ -534,6 +536,15 @@ function fallbackPjax(options) {
 
   $(document.body).append(form)
   form.submit()
+}
+
+// Internal: Abort an XmlHttpRequest if it hasn't been completed,
+// also removing its event handlers.
+function abortXHR(xhr) {
+  if ( xhr && xhr.readyState < 4) {
+    xhr.onreadystatechange = $.noop
+    xhr.abort()
+  }
 }
 
 // Internal: Generate unique id for state object.
