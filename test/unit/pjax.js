@@ -351,6 +351,40 @@ if ($.support.pjax) {
     equal(frame.location.search, "?foo=1&bar=2")
   })
 
+  asyncTest("mixed containers", function() {
+    var frame = this.frame
+
+    frame.$.pjax({
+      url: "fragment.html",
+      container: "#main"
+    })
+
+    frame.$("#main").one("pjax:end", function() {
+      frame.$.pjax({
+        url: "aliens.html",
+        container: "#foo"
+      })
+
+      frame.$("#foo").one("pjax:end", function() {
+        equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
+
+        goBack(frame, function() {
+          equal(frame.$("#main > #foo").text().trim(), "Foo")
+
+          goBack(frame, function() {
+            equal(frame.$("#main > ul > li").first().text(), "home")
+
+            goForward(frame, function() {
+              goForward(frame, function() {
+                equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
+                start()
+              })
+            })
+          })
+        })
+      })
+    })
+  })
 
   asyncTest("only fragment is inserted", function() {
     var frame = this.frame
