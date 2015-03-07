@@ -125,12 +125,31 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.evaledScriptLoaded = function() {
-      equal(2, frame.evaledSrcScriptNum)
-      equal(true, frame.evaledInlineScript)
-      start()
+      equal(frame.evaledSrcScriptNum, 2)
+      deepEqual(frame.evaledInlineLog, ["one"])
+
+      frame.$.pjax({
+        url: "scripts.html?name=two",
+        container: "#main"
+      })
+
+      frame.$("#main").one("pjax:end", function() {
+        deepEqual(frame.evaledInlineLog, ["one", "two"])
+
+        goBack(frame, function() {
+          deepEqual(frame.evaledInlineLog, ["one", "two", "one"])
+
+          goForward(frame, function() {
+            deepEqual(frame.evaledInlineLog, ["one", "two", "one", "two"])
+            equal(frame.evaledSrcScriptNum, 2)
+            start()
+          })
+        })
+      })
     }
+
     frame.$.pjax({
-      url: "scripts.html",
+      url: "scripts.html?name=one",
       container: "#main"
     })
   })
@@ -927,7 +946,6 @@ if ($.support.pjax) {
     })
   })
 
-  // Test is fragile
   asyncTest("no initial pjax:popstate event", function() {
     var frame = this.frame
     var count = 0
@@ -944,19 +962,16 @@ if ($.support.pjax) {
       } else if (count == 3) {
         equal(frame.location.pathname, "/env.html")
         frame.history.back()
-        setTimeout(function() { window.iframeLoad(frame) }, 1000)
       } else if (count == 4) {
         equal(frame.location.pathname, "/hello.html")
         frame.history.back()
-        setTimeout(function() { window.iframeLoad(frame) }, 1000)
       } else if (count == 5) {
         equal(frame.location.pathname, "/home.html")
         frame.history.forward()
-        setTimeout(function() { window.iframeLoad(frame) }, 1000)
       } else if (count == 6) {
-        // Should skip pjax:popstate since there's no initial pjax.state
         frame.$('#main').on('pjax:popstate', function(event) {
           if (count == 6) {
+            // Should skip pjax:popstate since there's no initial pjax.state
             ok(event.state.url.match("/hello.html"), event.state.url)
             ok(false)
           } else if (count == 7) {
@@ -969,11 +984,13 @@ if ($.support.pjax) {
           if (count == 6) {
             count++
             frame.history.forward()
-            setTimeout(function() { window.iframeLoad(frame) }, 1000)
-          } else {
-            setTimeout(function() { start() }, 1000)
           }
         })
+
+        // Browsers that don't fire initial "popstate" should just resume
+        setTimeout(function() {
+          start()
+        }, 100)
       }
     }
 

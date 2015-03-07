@@ -364,7 +364,7 @@ function pjax(options) {
   if (xhr.readyState > 0) {
     if (options.push && !options.replace) {
       // Cache current container element before replacing it
-      cachePush(pjax.state.id, context.clone().contents())
+      cachePush(pjax.state.id, cloneContents(context))
 
       window.history.pushState(null, "", options.requestUrl)
     }
@@ -447,7 +447,7 @@ function onPjaxPopstate(event) {
 
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
-        cachePop(direction, pjax.state.id, container.clone().contents())
+        cachePop(direction, pjax.state.id, cloneContents(container))
       }
 
       var popstateEvent = $.Event('pjax:popstate', {
@@ -542,6 +542,16 @@ function fallbackPjax(options) {
 // Returns Number.
 function uniqueId() {
   return (new Date).getTime()
+}
+
+function cloneContents(container) {
+  var cloned = container.clone()
+  // Unmark script tags as already being eval'd so they can get executed again
+  // when restored from cache. HAXX: Uses jQuery internal method.
+  cloned.find('script').each(function(){
+    if (!this.src) jQuery._data(this, 'globalEval', false)
+  })
+  return cloned.contents()
 }
 
 // Internal: Strips named query param from url
