@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'json'
 
-set :public_folder, settings.root
+set :public_folder, File.dirname(settings.root)
 enable :static
 
 helpers do
@@ -21,7 +21,7 @@ end
 
 after do
   if pjax?
-    response.headers['X-PJAX-URL'] = request.url
+    response.headers['X-PJAX-URL'] ||= request.url
     response.headers['X-PJAX-Version'] = 'v1'
   end
 end
@@ -29,14 +29,6 @@ end
 
 get '/' do
   erb :qunit
-end
-
-get '/jquery.pjax.js' do
-  send_file "#{settings.root}/../jquery.pjax.js"
-end
-
-get '/test/:file' do
-  send_file "#{settings.root}/../test/#{params[:file]}"
 end
 
 get '/env.html' do
@@ -56,7 +48,17 @@ delete '/env.html' do
 end
 
 get '/redirect.html' do
-  redirect "/hello.html"
+  if params[:anchor]
+    path = "/hello.html##{params[:anchor]}"
+    if pjax?
+      response.headers['X-PJAX-URL'] = uri(path)
+      status 200
+    else
+      redirect path
+    end
+  else
+    redirect "/hello.html"
+  end
 end
 
 get '/timeout.html' do
@@ -81,6 +83,11 @@ end
 get '/boom.html' do
   status 500
   erb :boom, :layout => !pjax?
+end
+
+get '/boom_sans_pjax.html' do
+  status 500
+  erb :boom_sans_pjax, :layout => false
 end
 
 get '/:page.html' do
