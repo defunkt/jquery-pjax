@@ -889,6 +889,55 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("clicking back while loading maintains history", function() {
+    var frame = this.frame
+
+    equal(frame.location.pathname, "/home.html")
+    equal(frame.document.title, "Home")
+
+    frame.$("#main").on('pjax:timeout', function(e) {
+      e.preventDefault();
+    })
+
+    frame.$("#main").one('pjax:complete', function() {
+
+      equal(frame.location.pathname, "/hello.html")
+      equal(frame.document.title, "Hello")
+
+      frame.$("#main").one('pjax:send', function() {
+
+        // don't use goBack here, because pjax:end isn't triggered
+        // when clicking back while loading
+
+        frame.history.back();
+
+        setTimeout(function() {
+          equal(frame.location.pathname, "/home.html")
+          equal(frame.document.title, "Home")
+
+          frame.history.forward()
+
+          setTimeout(function() {
+            equal(frame.location.pathname, "/hello.html")
+            equal(frame.document.title, "Hello")
+            start()
+          }, 250)
+
+        }, 1500)
+      })
+
+      frame.$.pjax({
+        url: "timeout.html",
+        container: "#main"
+      })
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
+      container: "#main"
+    })
+  })
+
   asyncTest("popstate going back to page", function() {
     var frame = this.frame
 
