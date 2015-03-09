@@ -90,6 +90,15 @@ get '/boom_sans_pjax.html' do
   erb :boom_sans_pjax, :layout => false
 end
 
+get '/referer_timeout.html' do
+  if pjax?
+    sleep 1
+    erb :referer, :layout => false
+  else
+    erb :referer
+  end
+end
+
 get '/:page.html' do
   erb :"#{params[:page]}", :layout => !pjax?
 end

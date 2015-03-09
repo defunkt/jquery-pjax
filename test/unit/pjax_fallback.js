@@ -103,6 +103,21 @@ asyncTest("sends correct HTTP referer"+s, function() {
   })
 })
 
+asyncTest("sends correct HTTP referer after failed request"+s, function() {
+  var frame = this.frame
+
+  $('iframe')[0].onload = function() {
+    var referer = frame.document.getElementById("referer").textContent
+    ok(referer.match("/home.html"), referer)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "/referer_timeout.html",
+    container: "#main"
+  })
+})
+
 asyncTest("scrolls to top of the page"+s, function() {
   var frame = this.frame
 
