@@ -107,10 +107,10 @@ asyncTest("scrolls to top of the page"+s, function() {
   var frame = this.frame
 
   frame.window.scrollTo(0, 100)
-  equal(frame.window.scrollY, 100)
+  equal(frame.window.pageYOffset, 100)
 
   this.loaded = function(frame) {
-    equal(frame.window.scrollY, 0)
+    equal(frame.window.pageYOffset, 0)
     start()
   }
 
@@ -123,13 +123,13 @@ asyncTest("scrolls to top of the page"+s, function() {
 asyncTest("scrolls to anchor at top page"+s, function() {
   var frame = this.frame
 
-  equal(frame.window.scrollY, 0)
+  equal(frame.window.pageYOffset, 0)
 
   this.loaded = function(frame) {
     setTimeout(function() {
       equal(frame.location.pathname, "/anchor.html")
       equal(frame.location.hash, "#top")
-      equal(frame.window.scrollY, 8)
+      equal(frame.window.pageYOffset, 8)
       start()
     }, 100)
   }
@@ -151,11 +151,11 @@ asyncTest("scrolls to anchor at top page"+s, function() {
 asyncTest("empty anchor doesn't scroll page"+s, function() {
   var frame = this.frame
 
-  equal(frame.window.scrollY, 0)
+  equal(frame.window.pageYOffset, 0)
 
   this.loaded = function(frame) {
     setTimeout(function() {
-      equal(frame.window.scrollY, 0)
+      equal(frame.window.pageYOffset, 0)
       start()
     }, 10)
   }
@@ -169,11 +169,11 @@ asyncTest("empty anchor doesn't scroll page"+s, function() {
 asyncTest("scrolls to anchor at bottom page"+s, function() {
   var frame = this.frame
 
-  equal(frame.window.scrollY, 0)
+  equal(frame.window.pageYOffset, 0)
 
   this.loaded = function(frame) {
     setTimeout(function() {
-      equal(frame.window.scrollY, 10008)
+      equal(frame.window.pageYOffset, 10008)
       start()
     }, 10)
   }
@@ -187,11 +187,11 @@ asyncTest("scrolls to anchor at bottom page"+s, function() {
 asyncTest("scrolls to named encoded anchor"+s, function() {
   var frame = this.frame
 
-  equal(frame.window.scrollY, 0)
+  equal(frame.window.pageYOffset, 0)
 
   this.loaded = function(frame) {
     setTimeout(function() {
-      equal(frame.window.scrollY, 10008)
+      equal(frame.window.pageYOffset, 10008)
       start()
     }, 10)
   }
