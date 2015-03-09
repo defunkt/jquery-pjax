@@ -322,10 +322,6 @@ if ($.support.pjax) {
       data: { foo: 1, bar: 2 },
       container: "#main"
     })
-
-    // URL is set immediately
-    equal(frame.location.pathname, "/env.html")
-    equal(frame.location.search, "?foo=1&bar=2")
   })
 
   asyncTest("GET data is merged into query string", function() {
@@ -345,10 +341,6 @@ if ($.support.pjax) {
       data: { bar: 2 },
       container: "#main"
     })
-
-    // URL is set immediately
-    equal(frame.location.pathname, "/env.html")
-    equal(frame.location.search, "?foo=1&bar=2")
   })
 
   asyncTest("mixed containers", function() {
@@ -745,9 +737,6 @@ if ($.support.pjax) {
       container: "#main"
     })
 
-    equal(frame.location.pathname, "/timeout.html")
-    equal(frame.location.hash, "#hello")
-
     this.iframe.onload = function() {
       equal(frame.$("#main p").html(), "SLOW DOWN!")
       equal(frame.location.pathname, "/timeout.html")
@@ -817,7 +806,7 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.$("#main").on("pjax:complete", function() {
-      equal(frame.location.pathname, "/boom.html")
+      equal(frame.location.pathname, "/home.html")
       start()
     })
     frame.$("#main").on("pjax:error", function(event, xhr) {
@@ -831,6 +820,26 @@ if ($.support.pjax) {
     frame.$.pjax({
       type: 'POST',
       url: "boom.html",
+      container: "#main"
+    })
+  })
+
+  asyncTest("address bar only updates on success", function() {
+    var frame = this.frame
+
+    equal(frame.location.pathname, "/home.html")
+
+    frame.$("#main").on('pjax:send', function() {
+      equal(frame.location.pathname, "/home.html")
+    })
+
+    frame.$("#main").on('pjax:end', function() {
+      equal(frame.location.pathname, "/hello.html")
+      start()
+    })
+
+    frame.$.pjax({
+      url: "hello.html",
       container: "#main"
     })
   })

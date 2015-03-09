@@ -154,13 +154,8 @@ asyncTest("scrolls to anchor at top page"+s, function() {
     container: "#main"
   })
 
-  if (disabled) {
-    equal(frame.location.pathname, "/home.html")
-    equal(frame.location.hash, "")
-  } else {
-    equal(frame.location.pathname, "/anchor.html")
-    equal(frame.location.hash, "#top")
-  }
+  equal(frame.location.pathname, "/home.html")
+  equal(frame.location.hash, "")
 })
 
 asyncTest("empty anchor doesn't scroll page"+s, function() {
