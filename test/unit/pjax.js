@@ -861,41 +861,55 @@ if ($.support.pjax) {
   asyncTest("clicking back while loading cancels XHR", function() {
     var frame = this.frame
 
-    frame.$('#main').on('pjax:timeout', function(event) {
-      event.preventDefault()
+    equal(frame.location.pathname, "/home.html")
+    equal(frame.document.title, "Home")
+
+    frame.$("#main").on('pjax:timeout', function(e) {
+      e.preventDefault();
     })
 
-    frame.$("#main").one('pjax:send', function() {
+    frame.$("#main").one('pjax:complete', function() {
 
-      // Check that our request is aborted (need to check
-      // how robust this is across browsers)
-      frame.$("#main").one('pjax:complete', function(e, xhr, textStatus) {
-        equal(xhr.status, 0)
-        equal(textStatus, 'abort')
+      equal(frame.location.pathname, "/hello.html")
+      equal(frame.document.title, "Hello")
+
+      frame.$("#main").one('pjax:send', function() {
+
+        // don't use goBack here, because pjax:end isn't triggered
+        // when clicking back while loading
+
+        frame.$("#main").one('pjax:complete', function(e, xhr, textStatus) {
+          equal(xhr.status, 0);
+          equal(textStatus, 'abort')
+        })
+
+        frame.history.back();
+
+        // Make sure the URL and content remain the same after the
+        // XHR would have arrived (delay on timeout.html is 1s)
+        setTimeout(function() {
+          var afterBackLocation = frame.location.pathname
+          var afterBackTitle = frame.document.title
+
+          setTimeout(function() {
+            equal(frame.location.pathname, afterBackLocation)
+            equal(frame.document.title, afterBackTitle)
+            start()
+          }, 1000)
+        }, 500)
       })
 
-      setTimeout(function() {
-        frame.history.back()
-      }, 250)
-
-      // Make sure the URL and content remain the same after the
-      // XHR would have arrived (delay on timeout.html is 1s)
-      setTimeout(function() {
-        var afterBackLocation = frame.location.pathname
-        var afterBackTitle = frame.document.title
-
-        setTimeout(function() {
-          equal(frame.location.pathname, afterBackLocation)
-          equal(frame.document.title, afterBackTitle)
-          start()
-        }, 1000)
-      }, 500)
+      frame.$.pjax({
+        url: "timeout.html",
+        container: "#main"
+      })
     })
 
     frame.$.pjax({
-      url: "timeout.html",
+      url: "hello.html",
       container: "#main"
     })
+
   })
 
   asyncTest("clicking back while loading maintains history", function() {
