@@ -93,3 +93,7 @@ end
 get '/:page.html' do
   erb :"#{params[:page]}", :layout => !pjax?
 end
+
+get '/some-&-path/hello.html' do
+  erb :hello, :layout => !pjax?
+end
