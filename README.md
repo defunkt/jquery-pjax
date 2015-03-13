@@ -364,7 +364,7 @@ end
 
 An `X-PJAX` request header is set to differentiate a pjax request from normal XHR requests. In this case, if the request is pjax, we skip the layout html and just render the inner contents of the container.
 
-Check if your favorite server framework supports pjax here: https://gist.github.com/4283721
+[Check if there is a pjax plugin][plugins] for your favorite server framework.
 
 #### Layout Reloading
 
@@ -390,3 +390,4 @@ Deploying a deploy, bumping the version constant to force clients to do a full r
 [$.fn.on]: http://api.jquery.com/on/
 [$.ajax]: http://api.jquery.com/jQuery.ajax/
 [pushState]: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries
+[plugins]: https://gist.github.com/4283721
