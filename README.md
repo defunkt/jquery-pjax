@@ -190,7 +190,7 @@ if ($.support.pjax) {
 
 ### `$.pjax.submit`
 
-Submits a form via pjax. This function is experimental but GitHub uses it on [Gist][gist] so give it a shot!
+Submits a form via pjax.
 
 ``` javascript
 $(document).on('submit', 'form[data-pjax]', function(event) {
@@ -405,7 +405,6 @@ $ open http://localhost:4567/
 ```
 
 [compat]: http://caniuse.com/#search=pushstate
-[gist]: https://gist.github.com/
 [$.fn.on]: http://api.jquery.com/on/
 [$.ajax]: http://api.jquery.com/jQuery.ajax/
 [pushState]: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries
