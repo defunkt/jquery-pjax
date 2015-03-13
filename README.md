@@ -386,38 +386,6 @@ end
 
 Deploying a deploy, bumping the version constant to force clients to do a full reload the next request getting the new layout and assets.
 
-### Legacy API
-
-Pre 1.0 versions used an older style syntax that was analogous to the now deprecated `$.fn.live` api. The current api is based off `$.fn.on`.
-
-``` javascript
-$('a[data-pjax]').pjax('#pjax-container')
-```
-
-Expanded to
-
-``` javascript
-$('a[data-pjax]').live('click', function(event) {
-  $.pjax.click(event, '#pjax-container')
-})
-```
-
-The new api
-
-``` javascript
-$(document).pjax('a[data-pjax]', '#pjax-container')
-```
-
-Which is roughly the same as
-
-``` javascript
-$(document).on('click', 'a[data-pjax]', function(event) {
-  $.pjax.click(event, '#pjax-container')
-})
-```
-
-**NOTE** The new api gives you control over the delegated element container. `$.fn.live` always bound to `document`. This is what you still want to do most of the time.
-
 ## Contributing
 
 ```
