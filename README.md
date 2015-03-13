@@ -121,7 +121,6 @@ Requires jQuery 1.8.x or higher.
 pjax only works with [browsers that support the `history.pushState`
 API][compat]. When the API isn't supported pjax goes into fallback mode:
 `$.fn.pjax` calls will be a no-op and `$.pjax` will hard load the given URL.
-This mode targets the browser requirements of the jQuery version being used.
 
 For debugging purposes, you can intentionally disable pjax even if the browser supports `pushState`. Just call `$.pjax.disable()`. To see if pjax is actually supports `pushState`, check `$.support.pjax`.
 
