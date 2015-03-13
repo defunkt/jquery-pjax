@@ -92,10 +92,10 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.window.scrollTo(0, 100)
-    equal(frame.window.scrollY, 100)
+    equal(frame.window.pageYOffset, 100)
 
     frame.$('#main').on('pjax:success', function() {
-      equal(frame.window.scrollY, 0)
+      equal(frame.window.pageYOffset, 0)
       start()
     })
     frame.$.pjax({
@@ -108,10 +108,10 @@ if ($.support.pjax) {
     var frame = this.frame
 
     frame.window.scrollTo(0, 100)
-    equal(frame.window.scrollY, 100)
+    equal(frame.window.pageYOffset, 100)
 
     frame.$('#main').on('pjax:success', function() {
-      equal(frame.window.scrollY, 100)
+      equal(frame.window.pageYOffset, 100)
       start()
     })
     frame.$.pjax({
@@ -943,11 +943,11 @@ if ($.support.pjax) {
     equal(frame.location.pathname, "/home.html")
 
     frame.window.scrollTo(0, 100)
-    equal(frame.window.scrollY, 100)
+    equal(frame.window.pageYOffset, 100)
 
     frame.$("#main").on("pjax:complete", function() {
       equal(frame.location.pathname, "/long.html")
-      equal(frame.window.scrollY, 0)
+      equal(frame.window.pageYOffset, 0)
 
       ok(frame.history.length > 1)
       goBack(frame, function() {
@@ -955,7 +955,7 @@ if ($.support.pjax) {
 
         // PENDING: Popstate scroll position restore doesn't seem to
         // work inside an iframe.
-        // equal(frame.window.scrollY, 100)
+        // equal(frame.window.pageYOffset, 100)
 
         start()
       })
