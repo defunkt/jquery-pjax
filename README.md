@@ -74,15 +74,15 @@ def index
 end
 ```
 
-If you'd like a more automatic solution than pjax for Rails check out [Turbolinks](https://github.com/rails/turbolinks).
+If you'd like a more automatic solution than pjax for Rails check out [Turbolinks][].
 
-Also check out [RailsCasts #294 : Playing with PJAX](http://railscasts.com/episodes/294-playing-with-pjax)
+Also check out [RailsCasts #294: Playing with PJAX][railscasts].
 
 ## Installation
 
 ### bower
 
-Via [bower](https://github.com/twitter/bower).
+Via [Bower][]:
 
 ```
 $ bower install jquery-pjax
@@ -391,3 +391,6 @@ Deploying a deploy, bumping the version constant to force clients to do a full r
 [$.ajax]: http://api.jquery.com/jQuery.ajax/
 [pushState]: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries
 [plugins]: https://gist.github.com/4283721
+[turbolinks]: https://github.com/rails/turbolinks
+[railscasts]: http://railscasts.com/episodes/294-playing-with-pjax
+[bower]: https://github.com/twitter/bower
