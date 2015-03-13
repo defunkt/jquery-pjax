@@ -386,24 +386,6 @@ end
 
 Deploying a deploy, bumping the version constant to force clients to do a full reload the next request getting the new layout and assets.
 
-## Contributing
-
-```
-$ git clone https://github.com/defunkt/jquery-pjax.git
-$ cd jquery-pjax/
-```
-
-To run the test suite locally, start up the Sinatra test application.
-
-```
-$ bundle install
-$ bundle exec ruby test/app.rb
-== Sinatra/1.4.5 has taken the stage on 4567 for development with backup from WEBrick
-
-# in another tab:
-$ open http://localhost:4567/
-```
-
 [compat]: http://caniuse.com/#search=pushstate
 [$.fn.on]: http://api.jquery.com/on/
 [$.ajax]: http://api.jquery.com/jQuery.ajax/
