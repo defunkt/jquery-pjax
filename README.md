@@ -1,4 +1,4 @@
-# pjax
+# pjax = pushState + ajax
 
 
             .--.
@@ -21,11 +21,15 @@
      jgs  |___\_.\_
           `-"--'---'
 
-## pjax = pushState + ajax
+## Introduction
 
 pjax is a jQuery plugin that uses ajax and pushState to deliver a fast browsing experience with real permalinks, page titles, and a working back button.
 
-pjax works by grabbing html from your server via ajax and replacing the content of a container on your page with the ajax'd html. It then updates the browser's current url using pushState without reloading your page's layout or any resources (js, css), giving the appearance of a fast, full page load. But really it's just ajax and pushState.
+pjax works by grabbing html from your server via ajax and replacing the content
+of a container on your page with the ajax'd html. It then updates the browser's
+current URL using pushState without reloading your page's layout or any
+resources (JS, CSS), giving the appearance of a fast, full page load. But really
+it's just ajax and pushState.
 
 For [browsers that don't support pushState][compat] pjax fully degrades.
 
@@ -50,7 +54,9 @@ Consider the following page.
 </html>
 ```
 
-We want pjax to grab the url `/page/2` then replace `#pjax-container` with whatever it gets back. No styles or scripts will be reloaded and even the h1 can stay the same - we just want to change the `#pjax-container` element.
+We want pjax to grab the URL `/page/2` then replace `#pjax-container` with
+whatever it gets back. No styles or scripts will be reloaded and even the `<h1>`
+can stay the same - we just want to change the `#pjax-container` element.
 
 We do this by telling pjax to listen on `a` tags and use `#pjax-container` as the target container:
 
@@ -74,21 +80,21 @@ def index
 end
 ```
 
-If you'd like a more automatic solution than pjax for Rails check out [Turbolinks](https://github.com/rails/turbolinks).
+If you'd like a more automatic solution than pjax for Rails check out [Turbolinks][].
 
-Also check out [RailsCasts #294 : Playing with PJAX](http://railscasts.com/episodes/294-playing-with-pjax)
+Also check out [RailsCasts #294: Playing with PJAX][railscasts].
 
 ## Installation
 
 ### bower
 
-Via [bower](https://github.com/twitter/bower).
+Via [Bower][]:
 
 ```
 $ bower install jquery-pjax
 ```
 
-Or add `jquery-pjax` to your apps `bower.json`.
+Or, add `jquery-pjax` to your app's `bower.json`.
 
 ``` json
   "dependencies": {
@@ -112,7 +118,9 @@ Requires jQuery 1.8.x or higher.
 
 ## Compatibility
 
-pjax only works with [browsers that support the `history.pushState` API][compat]. When the API isn't supported pjax goes into fallback mode: `$.fn.pjax` calls will be a no-op and `$.pjax` will hard load the given url. This mode targets the browser requirements of the jQuery version being used.
+pjax only works with [browsers that support the `history.pushState`
+API][compat]. When the API isn't supported pjax goes into fallback mode:
+`$.fn.pjax` calls will be a no-op and `$.pjax` will hard load the given URL.
 
 For debugging purposes, you can intentionally disable pjax even if the browser supports `pushState`. Just call `$.pjax.disable()`. To see if pjax is actually supports `pushState`, check `$.support.pjax`.
 
@@ -190,7 +198,7 @@ if ($.support.pjax) {
 
 ### `$.pjax.submit`
 
-Submits a form via pjax. This function is experimental but GitHub uses it on [Gist][gist] so give it a shot!
+Submits a form via pjax.
 
 ``` javascript
 $(document).on('submit', 'form[data-pjax]', function(event) {
@@ -364,7 +372,34 @@ end
 
 An `X-PJAX` request header is set to differentiate a pjax request from normal XHR requests. In this case, if the request is pjax, we skip the layout html and just render the inner contents of the container.
 
-Check if your favorite server framework supports pjax here: https://gist.github.com/4283721
+[Check if there is a pjax plugin][plugins] for your favorite server framework.
+
+#### Response types that force a reload
+
+By default, pjax will force a full reload of the page if it receives one of the
+following responses from the server:
+
+* Page content that includes `<html>` when `fragment` selector wasn't explicitly
+  configured. Pjax presumes that the server's response hasn't been properly
+  configured for pjax. If `fragment` pjax option is given, pjax will simply
+  extract the content to insert into the DOM based on that selector.
+
+* Page content that is blank. Pjax assumes that the server is unable to deliver
+  proper pjax contents.
+
+* HTTP response code that is 4xx or 5xx, indicating some server error.
+
+#### Affecting the browser URL
+
+If the server needs to affect the URL which will appear in the browser URL after
+pjax navigation (like HTTP redirects work for normal requests), it can set the
+`X-PJAX-URL` header:
+
+``` ruby
+def index
+  request.headers['X-PJAX-URL'] = "http://example.com/hello"
+end
+```
 
 #### Layout Reloading
 
@@ -386,58 +421,11 @@ end
 
 Deploying a deploy, bumping the version constant to force clients to do a full reload the next request getting the new layout and assets.
 
-### Legacy API
-
-Pre 1.0 versions used an older style syntax that was analogous to the now deprecated `$.fn.live` api. The current api is based off `$.fn.on`.
-
-``` javascript
-$('a[data-pjax]').pjax('#pjax-container')
-```
-
-Expanded to
-
-``` javascript
-$('a[data-pjax]').live('click', function(event) {
-  $.pjax.click(event, '#pjax-container')
-})
-```
-
-The new api
-
-``` javascript
-$(document).pjax('a[data-pjax]', '#pjax-container')
-```
-
-Which is roughly the same as
-
-``` javascript
-$(document).on('click', 'a[data-pjax]', function(event) {
-  $.pjax.click(event, '#pjax-container')
-})
-```
-
-**NOTE** The new api gives you control over the delegated element container. `$.fn.live` always bound to `document`. This is what you still want to do most of the time.
-
-## Contributing
-
-```
-$ git clone https://github.com/defunkt/jquery-pjax.git
-$ cd jquery-pjax/
-```
-
-To run the test suite locally, start up the Sinatra test application.
-
-```
-$ bundle install
-$ bundle exec ruby test/app.rb
-== Sinatra/1.4.5 has taken the stage on 4567 for development with backup from WEBrick
-
-# in another tab:
-$ open http://localhost:4567/
-```
-
 [compat]: http://caniuse.com/#search=pushstate
-[gist]: https://gist.github.com/
 [$.fn.on]: http://api.jquery.com/on/
 [$.ajax]: http://api.jquery.com/jQuery.ajax/
 [pushState]: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries
+[plugins]: https://gist.github.com/4283721
+[turbolinks]: https://github.com/rails/turbolinks
+[railscasts]: http://railscasts.com/episodes/294-playing-with-pjax
+[bower]: https://github.com/twitter/bower
