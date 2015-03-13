@@ -32,19 +32,17 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("copes with ampersands when pushing urls", function() {
+  asyncTest("compatible with pathnames that contain an ampersand", function() {
     var frame = this.frame
 
     frame.$('#main').on('pjax:success', function() {
-      console.log(frame.location.pathname)
       equal(frame.location.pathname, "/some-&-path/hello.html")
       equal(frame.location.search, "")
       start()
     })
     frame.$.pjax({
       url: "/some-&-path/hello.html",
-      container: "#main",
-      cache: false
+      container: "#main"
     })
   })
 
