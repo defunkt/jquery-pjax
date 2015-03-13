@@ -1,4 +1,4 @@
-# pjax
+# pjax = pushState + ajax
 
 
             .--.
@@ -21,7 +21,7 @@
      jgs  |___\_.\_
           `-"--'---'
 
-## pjax = pushState + ajax
+## Introduction
 
 pjax is a jQuery plugin that uses ajax and pushState to deliver a fast browsing experience with real permalinks, page titles, and a working back button.
 
