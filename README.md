@@ -374,6 +374,33 @@ An `X-PJAX` request header is set to differentiate a pjax request from normal XH
 
 [Check if there is a pjax plugin][plugins] for your favorite server framework.
 
+#### Response types that force a reload
+
+By default, pjax will force a full reload of the page if it receives one of the
+following responses from the server:
+
+* Page content that includes `<html>` when `fragment` selector wasn't explicitly
+  configured. Pjax presumes that the server's response hasn't been properly
+  configured for pjax. If `fragment` pjax option is given, pjax will simply
+  extract the content to insert into the DOM based on that selector.
+
+* Page content that is blank. Pjax assumes that the server is unable to deliver
+  proper pjax contents.
+
+* HTTP response code that is 4xx or 5xx, indicating some server error.
+
+#### Affecting the browser URL
+
+If the server needs to affect the URL which will appear in the browser URL after
+pjax navigation (like HTTP redirects work for normal requests), it can set the
+`X-PJAX-URL` header:
+
+``` ruby
+def index
+  request.headers['X-PJAX-URL'] = "http://example.com/hello"
+end
+```
+
 #### Layout Reloading
 
 Layouts can be forced to do a hard reload when assets or html changes.
