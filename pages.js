@@ -6,7 +6,7 @@ $(function() {
 
   $(':checkbox').change(function() {
     if ( $.pjax == $.noop ) {
-      $(this).removeProp('checked')
+      this.checked = false
       return alert( "Sorry, your browser doesn't support pjax :(" )
     }
     if ( $(this).prop('checked') )
