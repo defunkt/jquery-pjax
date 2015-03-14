@@ -5,7 +5,7 @@ $(function() {
     $.pjax.disable()
 
   $(':checkbox').change(function() {
-    if ( $.pjax == $.noop ) {
+    if ( !$.support.pjax ) {
       this.checked = false
       return alert( "Sorry, your browser doesn't support pjax :(" )
     }
