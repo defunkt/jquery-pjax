@@ -1,19 +1,18 @@
 $(function() {
-  $(':checkbox').attr('checked', $.cookie('pjax'))
+  $(':checkbox').prop('checked', sessionStorage['pjax'])
 
-  if ( !$(':checkbox').attr('checked') )
-    $.fn.pjax = $.noop
+  if ( !$(':checkbox').prop('checked') )
+    $.pjax.disable()
 
   $(':checkbox').change(function() {
-    if ( $.pjax == $.noop ) {
-      $(this).removeAttr('checked')
+    if ( !$.support.pjax ) {
+      this.checked = false
       return alert( "Sorry, your browser doesn't support pjax :(" )
     }
-
-    if ( $(this).attr('checked') )
-      $.cookie('pjax', true)
+    if ( $(this).prop('checked') )
+      sessionStorage['pjax'] = true
     else
-      $.cookie('pjax', null)
+      sessionStorage['pjax'] = ''
 
     window.location = location.href
   })
