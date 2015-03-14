@@ -2,7 +2,7 @@ $(function() {
   $(':checkbox').prop('checked', sessionStorage['pjax'])
 
   if ( !$(':checkbox').prop('checked') )
-    $.fn.pjax = $.pjax.submit = $.noop
+    $.pjax.disable()
 
   $(':checkbox').change(function() {
     if ( $.pjax == $.noop ) {
