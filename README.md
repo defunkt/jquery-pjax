@@ -165,7 +165,7 @@ key | default | description
 `replace` | false | replace URL without adding browser history entry
 `maxCacheLength` | 20 | maximum cache size for previous container contents
 `version` | | a string or function returning the current pjax version
-`scrollTo` | 0 | vertical position to scroll to after navigation
+`scrollTo` | 0 | vertical position to scroll to after navigation. To avoid changing scroll position, pass `false`.
 `type` | `"GET"` | see [$.ajax][]
 `dataType` | `"html"` | see [$.ajax][]
 `container` | | CSS selector for the element where content should be replaced
