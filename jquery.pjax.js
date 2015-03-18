@@ -244,7 +244,7 @@ function pjax(options) {
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
-      locationReplace(container.url)
+      window.location.assign(container.url)
     }
   }
 
@@ -269,14 +269,18 @@ function pjax(options) {
 
     // If there is a layout version mismatch, hard load the new url
     if (currentVersion && latestVersion && currentVersion !== latestVersion) {
-      locationReplace(container.url)
+      window.location.assign(container.url)
       return
     }
 
     // If the new response is missing a body, hard load the page
     if (!container.contents) {
-      locationReplace(container.url)
+      window.location.assign(container.url)
       return
+    }
+
+    if (options.push) {
+      cachePush(pjax.state.id, cloneContents(context))
     }
 
     pjax.state = {
@@ -288,7 +292,9 @@ function pjax(options) {
       timeout: options.timeout
     }
 
-    if (options.push || options.replace) {
+    if (options.push) {
+      window.history.pushState(pjax.state, container.title, container.url)
+    } else if (options.replace) {
       window.history.replaceState(pjax.state, container.title, container.url)
     }
 
@@ -355,13 +361,6 @@ function pjax(options) {
   var xhr = pjax.xhr = $.ajax(options)
 
   if (xhr.readyState > 0) {
-    if (options.push && !options.replace) {
-      // Cache current container element before replacing it
-      cachePush(pjax.state.id, cloneContents(context))
-
-      window.history.pushState(null, "", options.requestUrl)
-    }
-
     fire('pjax:start', [xhr, options])
     fire('pjax:send', [xhr, options])
   }
