@@ -977,10 +977,11 @@ if ($.support.pjax) {
       ok(frame.history.length > 1)
       goBack(frame, function() {})
     })
-    frame.$('#main').on('pjax:popstate', function(event) {
+    frame.$('#main').on('pjax:popstate', function(event, contents) {
       equal(frame.location.pathname, "/home.html")
       equal(event.state.container, '#main')
       equal(event.direction, 'back')
+      ok(contents)
       start()
     })
 

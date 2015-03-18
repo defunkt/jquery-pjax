@@ -312,7 +312,7 @@ container, not the link that was clicked.
 <tr>
   <td><code>pjax:popstate</code></td>
   <td></td>
-  <td></td>
+  <td><code>contents</code></td>
   <td>event <code>direction</code> property: &quot;back&quot;/&quot;forward&quot;</td>
 </tr>
 <tr>
