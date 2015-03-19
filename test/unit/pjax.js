@@ -154,6 +154,157 @@ if ($.support.pjax) {
     })
   })
 
+  asyncTest("beforeReplace option function fire", function() {
+    var frame = this.frame
+    var didBeforeReplaceFire = false
+
+    frame.$("#main").on("pjax:success", function() {
+      equal(didBeforeReplaceFire, true)
+      start()
+    })
+    frame.$.pjax({
+      url: "replace.html",
+      container: "#main",
+      beforeReplace: function (contents, options) {
+        didBeforeReplaceFire = true
+      }
+    })
+  })
+
+  asyncTest("beforeReplace option function arguments", function() {
+    var frame = this.frame
+    var argumentsLength = 0
+    var jQueryObject
+    var optionsObjectType
+    var optionsObjectContainer
+
+    frame.$("#main").on("pjax:success", function() {
+      equal(argumentsLength, 2)
+      equal(jQueryObject, $.fn.jquery)
+      equal(optionsObjectType, "object")
+      equal(optionsObjectContainer, "#main")
+      start()
+    })
+    frame.$.pjax({
+      url: "replace.html",
+      container: "#main",
+      beforeReplace: function (contents, options) {
+        argumentsLength = arguments.length
+        jQueryObject = contents.jquery
+        optionsObjectType = typeof options
+        optionsObjectContainer = options.container
+      }
+    })
+  })
+
+  asyncTest("beforeReplace option replace simple HTML", function() {
+    var frame = this.frame
+
+    frame.$("#main").on("pjax:success", function() {
+      equal(frame.$("#main > h1").text(), "Hello, Stranger!")
+      start()
+    })
+    frame.$.pjax({
+      url: "replace.html",
+      container: "#main",
+      beforeReplace: function (contents, options) {
+        contents.find(".placeUsernameHere").html("Stranger")
+      }
+    })
+  })
+
+  asyncTest("beforeReplace option function no return", function() {
+    var frame = this.frame
+
+    frame.$("#main").on("pjax:success", function() {
+      equal(frame.$("#main > h1").text(), "Hello, Guest!")
+      start()
+    })
+    frame.$.pjax({
+      url: "replace.html",
+      container: "#main",
+      beforeReplace: $.noop
+    })
+  })
+
+  asyncTest("beforeReplace option going back to page", function() {
+    var frame = this.frame
+
+    equal(frame.location.pathname, "/home.html")
+    equal(frame.document.title, "Home")
+
+    frame.$("#main").one("pjax:complete", function() {
+      equal(frame.location.pathname, "/replace.html")
+      equal(frame.document.title, "Replace")
+
+      frame.$.pjax({
+        url: "hello.html",
+        container: "#main"
+      })
+
+      frame.$("#main").one("pjax:complete", function() {
+        equal(frame.location.pathname, "/hello.html")
+        equal(frame.document.title, "Hello")
+
+        goBack(frame, function() {
+          equal(frame.location.pathname, "/replace.html")
+          equal(frame.document.title, "Replace")
+          equal(frame.$("#main > h1").text(), "Hello, Stranger!")
+
+          // without beforeReplace option
+          frame.$.pjax({
+            url: "replace.html",
+            container: "#main"
+          })
+          frame.$("#main").one("pjax:complete", function() {
+            equal(frame.location.pathname, "/replace.html")
+            equal(frame.document.title, "Replace")
+            equal(frame.$("#main > h1").text(), "Hello, Guest!")
+            start()
+          })
+        })
+      })
+    })
+    frame.$.pjax({
+      url: "replace.html",
+      container: "#main",
+      beforeReplace: function (contents, options) {
+        contents.find(".placeUsernameHere").html("Stranger")
+      }
+    })
+  })
+
+  asyncTest("beforeReplace option going forward to page", function() {
+    var frame = this.frame
+
+    equal(frame.location.pathname, "/home.html")
+    equal(frame.document.title, "Home")
+
+    frame.$("#main").one("pjax:complete", function() {
+      equal(frame.location.pathname, "/replace.html")
+      equal(frame.document.title, "Replace")
+      equal(frame.$("#main > h1").text(), "Hello, Stranger!")
+
+      goBack(frame, function() {
+        equal(frame.location.pathname, "/home.html")
+        equal(frame.document.title, "Home")
+
+        goForward(frame, function() {
+          equal(frame.location.pathname, "/replace.html")
+          equal(frame.document.title, "Replace")
+          equal(frame.$("#main > h1").text(), "Hello, Stranger!")
+          start()
+        })
+      })
+    })
+    frame.$.pjax({
+      url: "replace.html",
+      container: "#main",
+      beforeReplace: function (contents, options) {
+        contents.find(".placeUsernameHere").html("Stranger")
+      }
+    })
+  })
 
   asyncTest("container option accepts String selector", function() {
     var frame = this.frame

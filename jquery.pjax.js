@@ -175,6 +175,8 @@ function pjax(options) {
     options.url = options.url()
   }
 
+  $.pjax.beforeReplace = $.isFunction(options.beforeReplace) ? options.beforeReplace : false
+
   var target = options.target
 
   var hash = parseURL(options.url).hash
@@ -303,7 +305,16 @@ function pjax(options) {
       state: pjax.state,
       previousState: previousState
     })
-    context.html(container.contents)
+
+    var contents = container.contents
+    var replaced = false
+
+    // Editing contents before it's inserted onto the page.
+    if ($.pjax.beforeReplace) {
+      replaced = $.pjax.beforeReplace(contents, options)
+    }
+
+    context.html(replaced || contents)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
     // This behavior is incorrect. So if theres no current focus, autofocus
@@ -479,8 +490,15 @@ function onPjaxPopstate(event) {
           previousState: previousState
         })
         container.trigger(beforeReplaceEvent, [contents, options])
-        container.html(contents)
 
+        var replaced = false
+
+        // Editing contents before it's inserted onto the page.
+        if ($.pjax.beforeReplace) {
+          replaced = $.pjax.beforeReplace(contents, options);
+        }
+
+        container.html(replaced || contents)
         container.trigger('pjax:end', [null, options])
       } else {
         pjax(options)
@@ -878,6 +896,7 @@ function enable() {
   $.pjax.click = handleClick
   $.pjax.submit = handleSubmit
   $.pjax.reload = pjaxReload
+  $.pjax.beforeReplace = false;
   $.pjax.defaults = {
     timeout: 650,
     push: true,
