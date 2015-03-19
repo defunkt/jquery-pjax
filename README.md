@@ -163,6 +163,7 @@ key | default | description
 `timeout` | 650 | ajax timeout in milliseconds after which a full refresh is forced
 `push` | true | use [pushState][] to add a browser history entry upon navigation
 `replace` | false | replace URL without adding browser history entry
+`beforeReplace` | false | function returning the alter content before appending to the DOM
 `maxCacheLength` | 20 | maximum cache size for previous container contents
 `version` | | a string or function returning the current pjax version
 `scrollTo` | 0 | vertical position to scroll to after navigation. To avoid changing scroll position, pass `false`.
