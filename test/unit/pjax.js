@@ -303,69 +303,62 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("missing fragment falls back to full load", function() {
-    var frame = this.frame
+  asyncTest("missing fragment falls back to full load", 2, function() {
+    var iframe = this.iframe
 
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      fragment: "#missing",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "hello.html?layout=true", fragment: "#missing", container: "#main" }, function() {
+      return new PoorMansPromise(function(resolve) {
+        iframe.onload = function() { resolve(this.contentWindow) }
+      }).then(function(frame) {
+        equal(frame.$("#main p").html(), "Hello!")
+        equal(frame.location.pathname, "/hello.html")
+      })
     })
-
-    this.iframe.onload = function() {
-      equal(frame.$("#main p").html(), "Hello!")
-      equal(frame.location.pathname, "/hello.html")
-      start()
-    }
   })
 
-  asyncTest("missing data falls back to full load", function() {
-    var frame = this.frame
+  asyncTest("missing data falls back to full load", 2, function() {
+    var iframe = this.iframe
 
-    frame.$.pjax({
-      url: "empty.html",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "empty.html", container: "#main" }, function() {
+      return new PoorMansPromise(function(resolve) {
+        iframe.onload = function() { resolve(this.contentWindow) }
+      }).then(function(frame) {
+        equal(frame.$("#main").html().trim(), "")
+        equal(frame.location.pathname, "/empty.html")
+      })
     })
-
-    this.iframe.onload = function() {
-      equal(frame.$("#main").html().trim(), "")
-      equal(frame.location.pathname, "/empty.html")
-      start()
-    }
   })
 
-  asyncTest("full html page falls back to full load", function() {
-    var frame = this.frame
+  asyncTest("full html page falls back to full load", 2, function() {
+    var iframe = this.iframe
 
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "hello.html?layout=true", container: "#main" }, function() {
+      return new PoorMansPromise(function(resolve) {
+        iframe.onload = function() { resolve(this.contentWindow) }
+      }).then(function(frame) {
+        equal(frame.$("#main p").html(), "Hello!")
+        equal(frame.location.pathname, "/hello.html")
+      })
     })
-
-    this.iframe.onload = function() {
-      equal(frame.$("#main p").html(), "Hello!")
-      equal(frame.location.pathname, "/hello.html")
-      start()
-    }
   })
 
-  asyncTest("header version mismatch does a full load", function() {
-    var frame = this.frame
+  asyncTest("header version mismatch does a full load", 2, function() {
+    var iframe = this.iframe
+    this.frame.$.pjax.defaults.version = "v2"
 
-    frame.$.pjax.defaults.version = 'v2'
-
-    frame.$.pjax({
-      url: "hello.html",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "hello.html", container: "#main" }, function() {
+      return new PoorMansPromise(function(resolve) {
+        iframe.onload = function() { resolve(this.contentWindow) }
+      }).then(function(frame) {
+        equal(frame.$("#main p").html(), "Hello!")
+        equal(frame.location.pathname, "/hello.html")
+      })
     })
-
-    this.iframe.onload = function() {
-      equal(frame.$("#main p").html(), "Hello!")
-      equal(frame.location.pathname, "/hello.html")
-      start()
-    }
   })
-
 
   asyncTest("triggers pjax:start event from container", function() {
     var frame = this.frame
