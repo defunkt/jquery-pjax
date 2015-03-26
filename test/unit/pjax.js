@@ -76,36 +76,35 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("evals scripts", function() {
-    var frame = this.frame
-
-    frame.evaledScriptLoaded = function() {
-      equal(frame.evaledSrcScriptNum, 2)
-      deepEqual(frame.evaledInlineLog, ["one"])
-
-      frame.$.pjax({
-        url: "scripts.html?name=two",
-        container: "#main"
-      })
-
-      frame.$("#main").one("pjax:end", function() {
-        deepEqual(frame.evaledInlineLog, ["one", "two"])
-
-        goBack(frame, function() {
-          deepEqual(frame.evaledInlineLog, ["one", "two", "one"])
-
-          goForward(frame, function() {
-            deepEqual(frame.evaledInlineLog, ["one", "two", "one", "two"])
-            equal(frame.evaledSrcScriptNum, 2)
-            start()
-          })
-        })
-      })
+  asyncTest("evals scripts", 7, function() {
+    var externalLoadedCount = 0
+    this.frame.externalScriptLoaded = function() {
+      externalLoadedCount++
     }
 
-    frame.$.pjax({
-      url: "scripts.html?name=one",
-      container: "#main"
+    navigate(this.frame)
+    .pjax({ url: "scripts.html?name=one", container: "#main" }, function(frame) {
+      deepEqual(frame.evaledInlineLog, ["one"])
+      equal(externalLoadedCount, 0)
+      return new PoorMansPromise(function(resolve) {
+        setTimeout(resolve, 100)
+      }).then(function() {
+        equal(externalLoadedCount, 2, "expected scripts to have loaded")
+      })
+    })
+    .pjax({ url: "scripts.html?name=two", container: "#main" }, function(frame) {
+      deepEqual(frame.evaledInlineLog, ["one", "two"])
+    })
+    .back(-1, function(frame) {
+      deepEqual(frame.evaledInlineLog, ["one", "two", "one"])
+    })
+    .back(+1, function(frame) {
+      deepEqual(frame.evaledInlineLog, ["one", "two", "one", "two"])
+      return new PoorMansPromise(function(resolve) {
+        setTimeout(resolve, 100)
+      }).then(function() {
+        equal(externalLoadedCount, 2, "expected no extra scripts to load")
+      })
     })
   })
 
