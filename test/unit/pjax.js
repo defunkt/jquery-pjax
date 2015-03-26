@@ -253,7 +253,7 @@ if ($.support.pjax) {
     }, 0)
   })
 
-  asyncTest("mixed containers", 4, function() {
+  asyncTest("mixed containers", 6, function() {
     navigate(this.frame)
     .pjax({ url: "fragment.html", container: "#main" })
     .pjax({ url: "aliens.html", container: "#foo" }, function(frame) {
@@ -261,6 +261,11 @@ if ($.support.pjax) {
     })
     .back(-1, function(frame) {
       equal(frame.$("#main > #foo").text().trim(), "Foo")
+    })
+    .pjax({ url: "env.html", replace: true, fragment: "#env", container: "#bar" }, function(frame) {
+      // This replaceState shouldn't affect restoring other popstates
+      equal(frame.$("#main > #foo").text().trim(), "Foo")
+      ok(JSON.parse(frame.$("#bar").text()))
     })
     .back(-1, function(frame) {
       equal(frame.$("#main > ul > li").first().text(), "home")

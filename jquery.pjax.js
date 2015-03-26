@@ -424,14 +424,13 @@ function onPjaxPopstate(event) {
 
   var previousState = pjax.state
   var state = event.state
+  var direction
 
   if (state && state.container) {
     // When coming forward from a separate history session, will get an
     // initial pop with a state we are already at. Skip reloading the current
     // page.
     if (initialPop && initialURL == state.url) return
-
-    var direction, containerSelector = state.container
 
     if (previousState) {
       // If popping back to the same state, just skip.
@@ -440,13 +439,12 @@ function onPjaxPopstate(event) {
 
       // Since state IDs always increase, we can deduce the navigation direction
       direction = previousState.id < state.id ? 'forward' : 'back'
-      if (direction == 'back') containerSelector = previousState.container
     }
 
-    var container = $(containerSelector)
-    if (container.length) {
-      var contents = cacheMapping[state.id]
+    var cache = cacheMapping[state.id] || []
+    var container = $(cache[0] || state.container), contents = cache[1]
 
+    if (container.length) {
       if (previousState) {
         // Cache current container before replacement and inform the
         // cache which direction the history shifted.
@@ -564,7 +562,7 @@ function cloneContents(container) {
   cloned.find('script').each(function(){
     if (!this.src) jQuery._data(this, 'globalEval', false)
   })
-  return cloned.contents()
+  return [container.selector, cloned.contents()]
 }
 
 // Internal: Strips named query param from url
