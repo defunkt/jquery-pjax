@@ -272,78 +272,35 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("only fragment is inserted", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function(event, data) {
-      equal(typeof data, 'string')
+  asyncTest("only fragment is inserted", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html?layout=true", fragment: "#main", container: "#main" }, function(frame) {
       equal(frame.$("#main > p").html().trim(), "Hello!")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      fragment: "#main",
-      container: "#main"
+      equal(frame.document.title, "Hello")
     })
   })
 
-  asyncTest("use body as fragment", function() {
-    var frame = this.frame
-
-    frame.$('body').on('pjax:success', function(event, data) {
-      equal(typeof data, 'string')
+  asyncTest("use body as fragment", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "hello.html?layout=true", fragment: "body", container: "body" }, function(frame) {
       equal(frame.$("body > #main > p").html().trim(), "Hello!")
       equal(frame.document.title, "Hello")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      fragment: "body",
-      container: "body"
     })
   })
 
-  asyncTest("fragment sets title to response title tag", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
-      equal(frame.document.title, "Hello")
-      start()
-    })
-    frame.$.pjax({
-      url: "hello.html?layout=true",
-      fragment: "#main",
-      container: "#main"
-    })
-  })
-
-  asyncTest("fragment sets title to response title attr", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("fragment sets title to response title attr", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "fragment.html", fragment: "#foo", container: "#main" }, function(frame) {
+      equal(frame.$("#main > p").html(), "Foo")
       equal(frame.document.title, "Foo")
-      equal(frame.$("#main p").html(), "Foo")
-      start()
-    })
-    frame.$.pjax({
-      url: "fragment.html",
-      fragment: "#foo",
-      container: "#main"
     })
   })
 
-  asyncTest("fragment sets title to response data-title attr", function() {
-    var frame = this.frame
-
-    frame.$('#main').on('pjax:success', function() {
+  asyncTest("fragment sets title to response data-title attr", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "fragment.html", fragment: "#bar", container: "#main" }, function(frame) {
+      equal(frame.$("#main > p").html(), "Bar")
       equal(frame.document.title, "Bar")
-      equal(frame.$("#main p").html(), "Bar")
-      start()
-    })
-    frame.$.pjax({
-      url: "fragment.html",
-      fragment: "#bar",
-      container: "#main"
     })
   })
 
