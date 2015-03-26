@@ -254,38 +254,21 @@ if ($.support.pjax) {
     }, 0)
   })
 
-  asyncTest("mixed containers", function() {
-    var frame = this.frame
-
-    frame.$.pjax({
-      url: "fragment.html",
-      container: "#main"
+  asyncTest("mixed containers", 4, function() {
+    navigate(this.frame)
+    .pjax({ url: "fragment.html", container: "#main" })
+    .pjax({ url: "aliens.html", container: "#foo" }, function(frame) {
+      equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
     })
-
-    frame.$("#main").one("pjax:end", function() {
-      frame.$.pjax({
-        url: "aliens.html",
-        container: "#foo"
-      })
-
-      frame.$("#foo").one("pjax:end", function() {
-        equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
-
-        goBack(frame, function() {
-          equal(frame.$("#main > #foo").text().trim(), "Foo")
-
-          goBack(frame, function() {
-            equal(frame.$("#main > ul > li").first().text(), "home")
-
-            goForward(frame, function() {
-              goForward(frame, function() {
-                equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
-                start()
-              })
-            })
-          })
-        })
-      })
+    .back(-1, function(frame) {
+      equal(frame.$("#main > #foo").text().trim(), "Foo")
+    })
+    .back(-1, function(frame) {
+      equal(frame.$("#main > ul > li").first().text(), "home")
+    })
+    .back(+1)
+    .back(+1, function(frame) {
+      equal(frame.$("#main > #foo > ul > li").last().text(), "aliens")
     })
   })
 
