@@ -652,7 +652,7 @@ function optionsFor(container, options) {
 //
 // Returns a jQuery object whose context is `document` and has a selector.
 function findContainerFor(container) {
-  if($.isFunction(container){
+  if($.isFunction(container)){
     container = container();
   }
   container = $(container)
