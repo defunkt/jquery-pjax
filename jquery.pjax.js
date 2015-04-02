@@ -226,7 +226,9 @@ function pjax(options) {
     }
 
     var url = parseURL(settings.url)
-    url.hash = hash
+    if(hash){
+      url.hash = hash
+    }
     options.requestUrl = stripInternalParams(url.href)
   }
 
