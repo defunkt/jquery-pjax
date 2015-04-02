@@ -1091,4 +1091,12 @@ if ($.support.pjax) {
       container: "#main"
     })
   })
+
+  asyncTest("copes with ampersands when pushing urls", 2, function() {
+    navigate(this.frame)
+    .pjax({ url: "/some-&-path/hello.html", container: "#main" }, function(frame) {
+      equal(frame.location.pathname, "/some-&-path/hello.html")
+      equal(frame.location.search, "")
+    })
+  })
 }

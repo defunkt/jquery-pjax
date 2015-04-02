@@ -227,7 +227,7 @@ function pjax(options) {
 
     var url = parseURL(settings.url)
     if (hash) url.hash = hash
-    options.requestUrl = stripInternalParams(url.href)
+    options.requestUrl = stripInternalParams(url)
   }
 
   options.complete = function(xhr, textStatus) {
@@ -565,22 +565,12 @@ function cloneContents(container) {
   return [container.selector, cloned.contents()]
 }
 
-// Internal: Strips named query param from url
+// Internal: Strip internal query params from parsed URL.
 //
-// url - String
-//
-// Returns String.
-function stripParam(url, name) {
-  return url
-    .replace(new RegExp('[?&]' + name + '=[^&#]*'), '')
-    .replace(/[?&]($|#)/, '\1')
-    .replace(/[?&]/, '?')
-}
-
+// Returns sanitized url.href String.
 function stripInternalParams(url) {
-  url = stripParam(url, '_pjax')
-  url = stripParam(url, '_')
-  return url
+  url.search = url.search.replace(/([?&])(_pjax|_)=[^&]*/g, '')
+  return url.href.replace(/\?($|#)/, '$1')
 }
 
 // Internal: Parse URL components and returns a Locationish object.
@@ -697,7 +687,7 @@ function extractContainer(data, xhr, options) {
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
   var serverUrl = xhr.getResponseHeader('X-PJAX-URL')
-  obj.url = serverUrl ? stripInternalParams(serverUrl) : options.requestUrl
+  obj.url = serverUrl ? stripInternalParams(parseURL(serverUrl)) : options.requestUrl
 
   // Attempt to parse response html into elements
   if (fullDocument) {
