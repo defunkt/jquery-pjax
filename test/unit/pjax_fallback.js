@@ -141,7 +141,7 @@ asyncTest("scrolls to anchor at top page"+s, function() {
 
   if (disabled) {
     equal(frame.location.pathname, "/home.html")
-    equal(frame.location.hash, "")
+    equal(frame.location.href.indexOf("#"), -1)
   } else {
     equal(frame.location.pathname, "/anchor.html")
     equal(frame.location.hash, "#top")

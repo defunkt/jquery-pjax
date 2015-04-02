@@ -205,7 +205,7 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("GET data is appended to query string", 5, function() {
+  asyncTest("GET data is appended to query string", 6, function() {
     var data = { foo: 1, bar: 2 }
 
     navigate(this.frame)
@@ -226,10 +226,11 @@ if ($.support.pjax) {
       // URL is set immediately
       equal(frame.location.pathname, "/env.html")
       equal(frame.location.search, "?foo=1&bar=2")
+      equal(frame.location.href.indexOf("#"), -1)
     }, 0)
   })
 
-  asyncTest("GET data is merged into query string", 5, function() {
+  asyncTest("GET data is merged into query string", 6, function() {
     var data = { bar: 2 }
 
     navigate(this.frame)
@@ -250,6 +251,7 @@ if ($.support.pjax) {
       // URL is set immediately
       equal(frame.location.pathname, "/env.html")
       equal(frame.location.search, "?foo=1&bar=2")
+      equal(frame.location.href.indexOf("#"), -1)
     }, 0)
   })
 
