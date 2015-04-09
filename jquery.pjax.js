@@ -395,7 +395,6 @@ function locationReplace(url) {
 }
 
 
-var initialPop = true
 var initialURL = window.location.href
 var initialState = window.history.state
 
@@ -406,21 +405,27 @@ if (initialState && initialState.container) {
   pjax.state = initialState
 }
 
-// Non-webkit browsers don't fire an initial popstate event
-if ('state' in window.history) {
-  initialPop = false
-}
-
 // popstate handler takes care of the back and forward buttons
 //
 // You probably shouldn't use pjax on pages with other pushState
 // stuff yet.
 function onPjaxPopstate(event) {
 
-  // Hitting back or forward should override any pending PJAX request.
-  if (!initialPop) {
-    abortXHR(pjax.xhr)
+  // This may occur in Safari and older versions of Chrome, where an
+  //   "empty" popstate event will fire on load. the timing of this event
+  //   seems to be non-deterministic in Safari, as of this writing, meaning
+  //   that it may "randomly" fire as an initial pjax request has fired.
+  //   see: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
+  if (initialURL === window.location.href) {
+    // ensures that this check only takes place on initial load, as intended.
+    initialURL = null;
+    return;
+  } else {
+    initialURL = null;
   }
+
+  // Hitting back or forward should override any pending PJAX request.
+  abortXHR(pjax.xhr)
 
   var previousState = pjax.state
   var state = event.state
@@ -430,7 +435,6 @@ function onPjaxPopstate(event) {
     // When coming forward from a separate history session, will get an
     // initial pop with a state we are already at. Skip reloading the current
     // page.
-    if (initialPop && initialURL == state.url) return
 
     if (previousState) {
       // If popping back to the same state, just skip.
@@ -491,7 +495,6 @@ function onPjaxPopstate(event) {
       locationReplace(location.href)
     }
   }
-  initialPop = false
 }
 
 // Fallback version of main pjax function for browsers that don't
