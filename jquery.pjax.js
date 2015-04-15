@@ -446,12 +446,6 @@ function onPjaxPopstate(event) {
     if (container.length) {
       var contents = cacheMapping[state.id]
 
-      if (previousState) {
-        // Cache current container before replacement and inform the
-        // cache which direction the history shifted.
-        cachePop(direction, previousState.id, cloneContents(container))
-      }
-
       var popstateEvent = $.Event('pjax:popstate', {
         state: state,
         direction: direction
@@ -468,8 +462,18 @@ function onPjaxPopstate(event) {
         scrollTo: false
       }
 
+      function doCachePop() {
+        if (previousState) {
+          cachePop(direction, previousState.id, cloneContents(container))
+        }
+      }
+
       if (contents) {
         container.trigger('pjax:start', [null, options])
+
+        // Only touch the cache after pjax:start for consistency with the
+        // sequence of events in pjax().
+        doCachePop()
 
         pjax.state = state
         if (state.title) document.title = state.title
@@ -482,6 +486,7 @@ function onPjaxPopstate(event) {
 
         container.trigger('pjax:end', [null, options])
       } else {
+        doCachePop()
         pjax(options)
       }
 
