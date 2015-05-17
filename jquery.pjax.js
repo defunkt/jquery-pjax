@@ -202,6 +202,8 @@ function pjax(options) {
 
   var timeoutTimer
 
+  var preEvalCache = []
+
   options.beforeSend = function(xhr, settings) {
     // No timeout for non-GET requests
     // Its not safe to request the resource again with a fallback method.
@@ -315,6 +317,11 @@ function pjax(options) {
       autofocusEl.focus();
     }
 
+    if (options.cacheBeforeEval) {
+      // cache container element before executing JS
+      preEvalCache.push(pjax.state.id, cloneContents(context))
+    }
+
     executeScriptTags(container.scripts)
 
     var scrollTo = options.scrollTo
@@ -357,7 +364,11 @@ function pjax(options) {
   if (xhr.readyState > 0) {
     if (options.push && !options.replace) {
       // Cache current container element before replacing it
-      cachePush(pjax.state.id, cloneContents(context))
+      if (options.cacheBeforeEval) {
+        cachePush(preEvalCache[0], preEvalCache[1])
+      } else {
+        cachePush(pjax.state.id, cloneContents(context))
+      }
 
       window.history.pushState(null, "", options.requestUrl)
     }
@@ -869,6 +880,7 @@ function enable() {
   $.pjax.defaults = {
     timeout: 650,
     push: true,
+    cacheBeforeEval: false,
     replace: false,
     type: 'GET',
     dataType: 'html',
