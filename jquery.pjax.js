@@ -71,8 +71,13 @@ function handleClick(event, container, options) {
   if ( event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey )
     return
 
+  var parser = document.createElement('a')
+  parser.href = link.href;
+  var linkHostname = parser.hostname
+  var linkProtocol = parser.protocol
+
   // Ignore cross origin links
-  if ( location.protocol !== link.protocol || location.hostname !== link.hostname )
+  if ( location.protocol !== linkProtocol || location.hostname !== linkHostname )
     return
 
   // Ignore case when a hash is being tacked on the current URL
