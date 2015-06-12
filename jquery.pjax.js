@@ -288,7 +288,7 @@ function pjax(options) {
       timeout: options.timeout
     }
 
-    if (options.push || options.replace) {
+    if ((options.push || options.replace) && hasSameOrigin(container.url, window.location)) {
       window.history.replaceState(pjax.state, container.title, container.url)
     }
 
@@ -847,6 +847,17 @@ function findVersion() {
     var name = $(this).attr('http-equiv')
     return name && name.toUpperCase() === 'X-PJAX-VERSION'
   }).attr('content')
+}
+
+// Internal: Determines if two URLs have the same origin
+// Based on jQuery: https://github.com/jquery/jquery/blob/a644101ed04d0beacea864ce805e0c4f86ba1cd1/src/ajax.js#L511-L517
+//
+// Returns true if the origin is the same; false if they are different.
+function hasSameOrigin(url1, url2) {
+  var url1Anchor = parseURL(url1)
+  var url2Anchor = parseURL(url2)
+
+  return url1Anchor.protocol + "//" + url1Anchor.host === url2Anchor.protocol + "//" + url2Anchor.host
 }
 
 // Install pjax functions on $.pjax to enable pushState behavior.
