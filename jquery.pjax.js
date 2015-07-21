@@ -292,10 +292,15 @@ function pjax(options) {
       window.history.replaceState(pjax.state, container.title, container.url)
     }
 
+    // Only blur the focus if the focused element is within the container.
+    var blurFocus = $.contains(options.container, document.activeElement)
+
     // Clear out any focused controls before inserting new page contents.
-    try {
-      document.activeElement.blur()
-    } catch (e) { }
+    if (blurFocus) {
+      try {
+        document.activeElement.blur()
+      } catch (e) { }
+    }
 
     if (container.title) document.title = container.title
 
