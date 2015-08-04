@@ -169,6 +169,7 @@ function handleSubmit(event, container, options) {
 //
 // Returns whatever $.ajax returns.
 function pjax(options) {
+  var context;
   options = $.extend(true, {}, $.ajaxSettings, pjax.defaults, options)
 
   if ($.isFunction(options.url)) {
@@ -198,6 +199,21 @@ function pjax(options) {
     var event = $.Event(type, props)
     context.trigger(event, args)
     return !event.isDefaultPrevented()
+  }
+
+  function updateOptions(opts) {
+    var hasBeenPushed = options.push && !options.replace;
+
+    // Update options
+    options = $.extend(true, {}, options, opts);
+
+    // Update container
+    context = options.context = findContainerFor(options.container);
+
+    // Replace state, we were not supposed to push
+    if (hasBeenPushed && !options.push) {
+      window.history.replaceState(pjax.state, pjax.state.title, pjax.state.url)
+    }
   }
 
   var timeoutTimer
@@ -258,6 +274,8 @@ function pjax(options) {
       $.pjax.defaults.version
 
     var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
+
+    fire('pjax:updateOptions', [data, updateOptions], {})
 
     var container = extractContainer(data, xhr, options)
 
