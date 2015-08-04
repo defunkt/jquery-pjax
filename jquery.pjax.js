@@ -275,7 +275,7 @@ function pjax(options) {
 
     var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
 
-    fire('pjax:beforeApply', [data, updateOptions], {})
+    fire('pjax:beforeApply', [xhr, data, updateOptions], {})
 
     var container = extractContainer(data, xhr, options)
 
