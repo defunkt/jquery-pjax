@@ -118,8 +118,8 @@ function handleClick(event, container, options) {
 function handleSubmit(event, container, options) {
   options = optionsFor(container, options)
 
-  var form = event.currentTarget;
-  var $form = $(form);
+  var form = event.currentTarget
+  var $form = $(form)
 
   if (form.tagName.toUpperCase() !== 'FORM')
     throw "$.pjax.submit requires a form element"
