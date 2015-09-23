@@ -564,6 +564,7 @@ function cloneContents(container) {
   findAll(container, "select").each(function(i, elem){
     elem = $(elem);
     var values = $(elem).val();
+    values = $.isArray(values) ? values : [values];
     elem.find('option[selected]').attr('selected', false);
     elem.find('option').filter(function(){
       return ($.inArray(this.value, values) !== -1);
