@@ -1,0 +1,23 @@
+{
+  "name": "jquery-pjax",
+  "version": "1.9.6",
+  "description": "pushState + ajax = pjax",
+  "main": "jquery.pjax.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "script/test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/defunkt/jquery-pjax.git"
+  },
+  "keywords": ["jquery", "pjax"],
+  "author": "Chris Wanstrath <chris@github.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/defunkt/jquery-pjax/issues"
+  },
+  "homepage": "https://github.com/defunkt/jquery-pjax#readme"
+}
