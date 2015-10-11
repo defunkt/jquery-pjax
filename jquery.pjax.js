@@ -391,7 +391,7 @@ function pjaxReload(container, options) {
 
 // Internal: Hard replace current state with url.
 //
-// Work for around WebKit
+// Workaround for WebKit
 //   https://bugs.webkit.org/show_bug.cgi?id=93506
 //
 // Returns nothing.
