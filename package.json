@@ -1,0 +1,16 @@
+{
+  "name": "jquery-pjax",
+  "version": "1.9.6",
+  "main": "jquery.pjax.js",
+  "repository": "defunkt/jquery-pjax",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/defunkt/jquery-pjax/blob/master/LICENSE"
+    }
+  ],
+  "files" : [
+    "LICENSE",
+    "jquery.pjax.js"
+  ]
+}
