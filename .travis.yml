@@ -8,3 +8,11 @@ script: script/test
 
 notifications:
   email: false
+deploy:
+  provider: npm
+  email: mislav.marohnic@gmail.com
+  api_key:
+    secure: nstPtsdxAHGPkKl2wOnMW4FXHg1nKxG/yCYQYqiC61JqhbfSaZFVjIQrdH+9GSel7F/K7VLwGZwSVgfiWUymWeEsNw8R/cyI9xCXf5iNF6WHIwuX6Q3Tnvb3Cx/bkeoc8+4v7qR172FtzwKWJq2iKXawd58/4zf2sduOwld1PMw=
+  on:
+    tags: true
+    repo: defunkt/jquery-pjax
