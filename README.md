@@ -162,6 +162,7 @@ key | default | description
 ----|---------|------------
 `timeout` | 650 | ajax timeout in milliseconds after which a full refresh is forced
 `push` | true | use [pushState][] to add a browser history entry upon navigation
+`cacheBeforeEval` | false | cache HTML received from the server before executing JS
 `replace` | false | replace URL without adding browser history entry
 `maxCacheLength` | 20 | maximum cache size for previous container contents
 `version` | | a string or function returning the current pjax version
