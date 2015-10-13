@@ -82,7 +82,7 @@ end
 
 If you'd like a more automatic solution than pjax for Rails check out [Turbolinks][].
 
-Also check out [RailsCasts #294: Playing with PJAX][railscasts].
+Also check out [RailsCasts #294: Playing with PJAX][railscasts], [Laracasts: Faster Page Loads With Pjax][laracasts].
 
 ## Installation
 
@@ -428,4 +428,5 @@ Deploying a deploy, bumping the version constant to force clients to do a full r
 [plugins]: https://gist.github.com/4283721
 [turbolinks]: https://github.com/rails/turbolinks
 [railscasts]: http://railscasts.com/episodes/294-playing-with-pjax
+[laracasts]: https://laracasts.com/lessons/faster-page-loads-with-pjax
 [bower]: https://github.com/twitter/bower
