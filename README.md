@@ -82,7 +82,7 @@ end
 
 If you'd like a more automatic solution than pjax for Rails check out [Turbolinks][].
 
-Also check out [RailsCasts #294: Playing with PJAX][railscasts], [Laracasts: Faster Page Loads With Pjax][laracasts].
+Also check out [RailsCasts #294: Playing with PJAX][railscasts] and [Laracasts : Faster Page Loads With Pjax][laracasts].
 
 ## Installation
 
