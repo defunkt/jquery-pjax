@@ -110,7 +110,21 @@ pjax can be downloaded directly into your app's public directory - just be sure 
 curl -LO https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
 ```
 
-**WARNING** Do not hotlink the raw script url. GitHub is not a CDN.
+**WARNING** Do not hotlink the raw script url. GitHub is not a CDN, use one of the *real* CDNs below.
+
+### cdn
+If you wish to use a CDN, please take a look at the ones below.
+
+#### cdnjs.com
+```
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.pjax/1.8.2/jquery.pjax.min.js"></script>
+```
+
+#### jsdelivr.com
+
+```
+<script src="//cdn.jsdelivr.net/jquery.pjax/1.8/jquery.pjax.min.js"></script>
+```
 
 ## Dependencies
 
