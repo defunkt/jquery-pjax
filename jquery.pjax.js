@@ -309,6 +309,10 @@ function pjax(options) {
       state: pjax.state,
       previousState: previousState
     })
+    
+    // include script file
+    executeScriptTags(container.scripts)
+    
     context.html(container.contents)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
@@ -320,9 +324,7 @@ function pjax(options) {
     if (autofocusEl && document.activeElement !== autofocusEl) {
       autofocusEl.focus();
     }
-
-    executeScriptTags(container.scripts)
-
+    
     var scrollTo = options.scrollTo
 
     // Ensure browser scrolls to the element referenced by the URL anchor
