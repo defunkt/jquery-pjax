@@ -309,10 +309,18 @@ function pjax(options) {
       state: pjax.state,
       previousState: previousState
     })
-    
-    // include script file
-    executeScriptTags(container.scripts)
-    
+
+    var pjaxScriptReady
+
+    // Rewrit jQuery ready deferred
+    jQuery.ready.promise = function( obj ) {
+      if ( !pjaxScriptReady ) {
+        pjaxScriptReady = jQuery.Deferred()
+        executeScriptTags(container.scripts, pjaxScriptReady)
+      }
+      return pjaxScriptReady.promise( obj )
+    };
+
     context.html(container.contents)
 
     // FF bug: Won't autofocus fields that are inserted via JS.
@@ -762,10 +770,17 @@ function extractContainer(data, xhr, options) {
 // scripts - jQuery object of script Elements
 //
 // Returns nothing.
-function executeScriptTags(scripts) {
+function executeScriptTags(scripts, readydeferred) {
   if (!scripts) return
 
-  var existingScripts = $('script[src]')
+  var existingScripts = $('script[src]'),
+      scriptfiles = [],
+      getMultiScripts = function(arr) {
+        var _arr = $.map(arr, function(src) {
+          return $.ajax( {url:src, dataType:"script", cache:true} )
+        })
+        return $.when.apply(null, _arr)
+      }
 
   scripts.each(function() {
     var src = this.src
@@ -773,12 +788,11 @@ function executeScriptTags(scripts) {
       return this.src === src
     })
     if (matchedScripts.length) return
+    scriptfiles.push(src)
+  })
 
-    var script = document.createElement('script')
-    var type = $(this).attr('type')
-    if (type) script.type = type
-    script.src = $(this).attr('src')
-    document.head.appendChild(script)
+  getMultiScripts(scriptfiles).done(function() {
+    readydeferred.resolve()
   })
 }
 
