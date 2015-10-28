@@ -82,7 +82,7 @@ end
 
 If you'd like a more automatic solution than pjax for Rails check out [Turbolinks][].
 
-Also check out [RailsCasts #294: Playing with PJAX][railscasts].
+Also check out [RailsCasts #294: Playing with PJAX][railscasts]. For laravel users, [Faster Page loads with PJAX][laracasts] and [Faster Page Loads With Pjax: The Server][laracasts]
 
 ## Installation
 
@@ -352,7 +352,7 @@ An example of canceling a `pjax:timeout` event would be to disable the fallback
 timeout behavior if a spinner is being shown:
 
 ``` javascript
-$(document).on('pjax:timeout', function(event) {
+$(document).on('pjax:timeout', funrction(event) {
   // Prevent default timeout redirection behavior
   event.preventDefault()
 })
@@ -428,4 +428,5 @@ Deploying a deploy, bumping the version constant to force clients to do a full r
 [plugins]: https://gist.github.com/4283721
 [turbolinks]: https://github.com/rails/turbolinks
 [railscasts]: http://railscasts.com/episodes/294-playing-with-pjax
+[laracasts]: https://laracasts.com/lessons/faster-page-loads-with-pjax & https://laracasts.com/lessons/faster-page-loads-with-pjax-the-server-side
 [bower]: https://github.com/twitter/bower
