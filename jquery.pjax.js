@@ -801,7 +801,7 @@ function cachePush(id, value) {
   trimCacheStack(cacheForwardStack, 0)
 
   // Trim back history stack to max cache length.
-  trimCacheStack(cacheBackStack, pjax.defaults.maxCacheLength)
+  trimCacheStack(cacheBackStack, pjax.options.maxCacheLength)
 }
 
 // Shifts cache from directional history cache. Should be
@@ -830,7 +830,7 @@ function cachePop(direction, id, value) {
     delete cacheMapping[id]
 
   // Trim whichever stack we just pushed to to max cache length.
-  trimCacheStack(pushStack, pjax.defaults.maxCacheLength)
+  trimCacheStack(pushStack, pjax.options.maxCacheLength)
 }
 
 // Trim a cache stack (either cacheBackStack or cacheForwardStack) to be no
