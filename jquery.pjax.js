@@ -773,9 +773,10 @@ function executeScriptTags(scripts) {
     if (matchedScripts.length) return
 
     var script = document.createElement('script')
-    var type = $(this).attr('type')
-    if (type) script.type = type
-    script.src = $(this).attr('src')
+    // Make sure we copy all attributes over, including data- & more.
+    $.each(this.attributes, function(i, attr) {
+      script.setAttribute(attr.name, attr.value)
+    })
     document.head.appendChild(script)
   })
 }
