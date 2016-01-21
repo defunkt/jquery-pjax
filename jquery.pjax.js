@@ -20,7 +20,7 @@
 //
 //
 // container - Where to stick the response body. Usually a String selector.
-//             $(container).html(xhr.responseBody)
+//             $(container).html(jqXHR.responseBody)
 //             (default: current jquery context)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
@@ -159,14 +159,14 @@ function handleSubmit(event, container, options) {
 // Accepts these extra keys:
 //
 // container - Where to stick the response body.
-//             $(container).html(xhr.responseBody)
+//             $(container).html(jqXHR.responseBody)
 //      push - Whether to pushState the URL. Defaults to true (of course).
 //   replace - Want to use replaceState instead? That's cool.
 //
 // Use it just like $.ajax:
 //
-//   var xhr = $.pjax({ url: this.href, container: '#main' })
-//   console.log( xhr.readyState )
+//   var jqXHR = $.pjax({ url: this.href, container: '#main' })
+//   console.log( jqXHR.readyState )
 //
 // Returns whatever $.ajax returns.
 function pjax(options) {
@@ -203,23 +203,23 @@ function pjax(options) {
 
   var timeoutTimer
 
-  options.beforeSend = function(xhr, settings) {
+  options.beforeSend = function(jqXHR, settings) {
     // No timeout for non-GET requests
     // Its not safe to request the resource again with a fallback method.
     if (settings.type !== 'GET') {
       settings.timeout = 0
     }
 
-    xhr.setRequestHeader('X-PJAX', 'true')
-    xhr.setRequestHeader('X-PJAX-Container', context.selector)
+    jqXHR.setRequestHeader('X-PJAX', 'true')
+    jqXHR.setRequestHeader('X-PJAX-Container', context.selector)
 
-    if (!fire('pjax:beforeSend', [xhr, settings]))
+    if (!fire('pjax:beforeSend', [jqXHR, settings]))
       return false
 
     if (settings.timeout > 0) {
       timeoutTimer = setTimeout(function() {
-        if (fire('pjax:timeout', [xhr, options]))
-          xhr.abort('timeout')
+        if (fire('pjax:timeout', [jqXHR, options]))
+          jqXHR.abort('timeout')
       }, settings.timeout)
 
       // Clear timeout setting so jquerys internal timeout isn't invoked
@@ -231,25 +231,34 @@ function pjax(options) {
     options.requestUrl = stripInternalParams(url)
   }
 
-  options.complete = function(xhr, textStatus) {
+  options.xhr = function(){
+      var xhr = $.ajaxSettings.xhr();
+      pjax.xhr = xhr;
+      
+      return xhr;
+  }
+  
+  options.complete = function(jqXHR, textStatus) {
     if (timeoutTimer)
       clearTimeout(timeoutTimer)
 
-    fire('pjax:complete', [xhr, textStatus, options])
+    fire('pjax:complete', [jqXHR, textStatus, options])
 
-    fire('pjax:end', [xhr, options])
+    fire('pjax:end', [jqXHR, options])
   }
 
-  options.error = function(xhr, textStatus, errorThrown) {
-    var container = extractContainer("", xhr, options)
+  options.error = function(jqXHR, textStatus, errorThrown) {
+    var container = extractContainer("", jqXHR, options)
 
-    var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
+    var allowed = fire('pjax:error', [jqXHR, textStatus, errorThrown, options])
     if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
       locationReplace(container.url)
+    } else if (pjax.xhr.responseURL !== container.url) {
+      locationReplace(pjax.xhr.responseURL)
     }
   }
 
-  options.success = function(data, status, xhr) {
+  options.success = function(data, status, jqXHR) {
     var previousState = pjax.state;
 
     // If $.pjax.defaults.version is a function, invoke it first.
@@ -258,9 +267,9 @@ function pjax(options) {
       $.pjax.defaults.version() :
       $.pjax.defaults.version
 
-    var latestVersion = xhr.getResponseHeader('X-PJAX-Version')
+    var latestVersion = jqXHR.getResponseHeader('X-PJAX-Version')
 
-    var container = extractContainer(data, xhr, options)
+    var container = extractContainer(data, jqXHR, options)
 
     var url = parseURL(container.url)
     if (hash) {
@@ -334,7 +343,7 @@ function pjax(options) {
 
     if (typeof scrollTo == 'number') $(window).scrollTop(scrollTo)
 
-    fire('pjax:success', [data, status, xhr, options])
+    fire('pjax:success', [data, status, jqXHR, options])
   }
 
 
@@ -355,12 +364,12 @@ function pjax(options) {
   }
 
   // Cancel the current request if we're already pjaxing
-  abortXHR(pjax.xhr)
+  abortXHR(pjax.jqXHR)
 
   pjax.options = options
-  var xhr = pjax.xhr = $.ajax(options)
+  var jqXHR = pjax.jqXHR = $.ajax(options)
 
-  if (xhr.readyState > 0) {
+  if (jqXHR.readyState > 0) {
     if (options.push && !options.replace) {
       // Cache current container element before replacing it
       cachePush(pjax.state.id, cloneContents(context))
@@ -368,11 +377,11 @@ function pjax(options) {
       window.history.pushState(null, "", options.requestUrl)
     }
 
-    fire('pjax:start', [xhr, options])
-    fire('pjax:send', [xhr, options])
+    fire('pjax:start', [jqXHR, options])
+    fire('pjax:send', [jqXHR, options])
   }
 
-  return pjax.xhr
+  return pjax.jqXHR
 }
 
 // Public: Reload current page with pjax.
@@ -425,7 +434,7 @@ function onPjaxPopstate(event) {
 
   // Hitting back or forward should override any pending PJAX request.
   if (!initialPop) {
-    abortXHR(pjax.xhr)
+    abortXHR(pjax.jqXHR)
   }
 
   var previousState = pjax.state
@@ -544,10 +553,10 @@ function fallbackPjax(options) {
 
 // Internal: Abort an XmlHttpRequest if it hasn't been completed,
 // also removing its event handlers.
-function abortXHR(xhr) {
-  if ( xhr && xhr.readyState < 4) {
-    xhr.onreadystatechange = $.noop
-    xhr.abort()
+function abortXHR(jqXHR) {
+  if ( jqXHR && jqXHR.readyState < 4) {
+    jqXHR.onreadystatechange = $.noop
+    jqXHR.abort()
   }
 }
 
@@ -683,16 +692,16 @@ function parseHTML(html) {
 // 3. Builds response Element and extracts fragment if set
 //
 // data    - String response data
-// xhr     - XHR response
+// jqXHR     - jqXHR response
 // options - pjax options Object
 //
 // Returns an Object with url, title, and contents keys.
-function extractContainer(data, xhr, options) {
+function extractContainer(data, jqXHR, options) {
   var obj = {}, fullDocument = /<html/i.test(data)
 
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
-  var serverUrl = xhr.getResponseHeader('X-PJAX-URL')
+  var serverUrl = jqXHR.getResponseHeader('X-PJAX-URL')
   obj.url = serverUrl ? stripInternalParams(parseURL(serverUrl)) : options.requestUrl
 
   // Attempt to parse response html into elements
