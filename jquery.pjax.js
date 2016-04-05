@@ -4,7 +4,14 @@
  * https://github.com/defunkt/jquery-pjax
  */
 
-(function($){
+(function(factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        factory(require("jquery"), window, document);
+    }
+    else {
+        factory(jQuery, window, document);
+    }
+} (function($, window, document, undefined) {
 
 // When called on a container with a selector, fetches the href with
 // ajax into the container or with the data-pjax attribute on the link
@@ -922,4 +929,4 @@ $.support.pjax =
 
 $.support.pjax ? enable() : disable()
 
-})(jQuery);
+}));
