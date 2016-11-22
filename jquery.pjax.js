@@ -309,7 +309,9 @@ function pjax(options) {
       state: pjax.state,
       previousState: previousState
     })
+    var _scroll_top = window.document.body.scrollTop;
     context.html(container.contents)
+    window.document.body.scrollTop = _scroll_top;
 
     // FF bug: Won't autofocus fields that are inserted via JS.
     // This behavior is incorrect. So if theres no current focus, autofocus
