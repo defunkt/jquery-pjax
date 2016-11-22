@@ -880,7 +880,8 @@ function enable() {
     dataType: 'html',
     scrollTo: 0,
     maxCacheLength: 20,
-    version: findVersion
+    version: findVersion,
+	fragment: 'body'
   }
   $(window).on('popstate.pjax', onPjaxPopstate)
 }
