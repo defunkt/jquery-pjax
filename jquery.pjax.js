@@ -711,6 +711,10 @@ function extractContainer(data, xhr, options) {
   // the page's title.
   obj.title = findAll($head, 'title').last().text()
 
+  // If a full html doc is received, handle it like $.load
+  if (!options.fragment && $head !== $body)
+    options.fragment = options.container.selector;
+
   if (options.fragment) {
     // If they specified a fragment, look for it in the response
     // and pull it out.
