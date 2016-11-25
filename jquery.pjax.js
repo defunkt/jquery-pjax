@@ -204,6 +204,45 @@ function pjax(options) {
   var timeoutTimer
 
   options.beforeSend = function(xhr, settings) {
+    
+        /* Include CSS Files */
+    var css_content=settings.css;
+    if(css_content!=''){
+        var charExists_css = (css_content.indexOf(',') >= 0) ? true : false;
+        if(charExists_css==true){
+            var css_content_array = new Array();
+            css_content_array=css_content.split(',');
+var length_css = css_content_array.length;
+                for (var i_css = 0; i_css < length_css; i_css++) {
+                $('head').append('<link rel="stylesheet" href="'+css_content_array[i_css]+'" type="text/css" />');
+                }
+        }
+        else
+            {
+                $('head').append('<link rel="stylesheet" href="'+css_content+'" type="text/css" />');
+            }
+    }
+    /* Include CSS Files */
+    
+    /* Include JS Files */
+    var js_content=settings.js;
+    if(js_content!=''){
+        var charExists_js = (js_content.indexOf(',') >= 0) ? true : false;
+        if(charExists_js==true){
+            var js_content_array = new Array();
+            js_content_array=js_content.split(',');
+var length_js = js_content_array.length;
+                for (var i_js = 0; i_js < length_js; i_js++) {
+                $('head').append('<script type="text/javascript" src="'+js_content_array[i_js]+'" />');
+                }
+        }
+        else
+            {
+                $('head').append('<script type="text/javascript" src="'+js_content+'" />');
+            }
+    }
+    /* Include JS Files */
+    
     // No timeout for non-GET requests
     // Its not safe to request the resource again with a fallback method.
     if (settings.type !== 'GET') {
@@ -877,6 +916,8 @@ function enable() {
     push: true,
     replace: false,
     type: 'GET',
+    css: '',
+    js: '',
     dataType: 'html',
     scrollTo: 0,
     maxCacheLength: 20,
