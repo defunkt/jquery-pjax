@@ -255,4 +255,15 @@ if ($.support.pjax) {
 
     frame.$("a[href='/dinosaurs.html']").click()
   })
+
+  asyncTest("supports links inside svg", function() {
+    var frame = this.frame
+
+    frame.$("#main").pjax("a").on("pjax:end", function() {
+      equal(frame.location.pathname, "/hello.html")
+      start()
+    })
+
+    frame.$("svg a[href='/hello.html']").click()
+  })
 }
