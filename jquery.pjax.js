@@ -61,15 +61,20 @@ function fnPjax(selector, container, options) {
 function handleClick(event, container, options) {
   options = optionsFor(container, options)
 
-  var link = event.currentTarget
+  var el = event.currentTarget
 
-  if (link.tagName.toUpperCase() !== 'A')
+  if (el.tagName.toUpperCase() !== 'A')
     throw "$.fn.pjax or $.pjax.click requires an anchor element"
 
   // Middle click, cmd click, and ctrl click should open
   // links in a new tab as normal.
   if ( event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey )
     return
+
+  var link = el
+  if (link.href instanceof SVGAnimatedString) {
+    link = parseURL(link.getAttribute('href'))
+  }
 
   // Ignore cross origin links
   if ( location.protocol !== link.protocol || location.hostname !== link.hostname )
@@ -85,18 +90,18 @@ function handleClick(event, container, options) {
 
   var defaults = {
     url: link.href,
-    container: $(link).attr('data-pjax'),
-    target: link
+    container: $(el).attr('data-pjax'),
+    target: el
   }
 
   var opts = $.extend({}, defaults, options)
   var clickEvent = $.Event('pjax:click')
-  $(link).trigger(clickEvent, [opts])
+  $(el).trigger(clickEvent, [opts])
 
   if (!clickEvent.isDefaultPrevented()) {
     pjax(opts)
     event.preventDefault()
-    $(link).trigger('pjax:clicked', [opts])
+    $(el).trigger('pjax:clicked', [opts])
   }
 }
 
