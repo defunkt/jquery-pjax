@@ -35,7 +35,7 @@ function fnPjax(selector, container, options) {
     var opts = $.extend({}, optionsFor(container, options))
     if (!opts.container)
       opts.container = $(this).attr('data-pjax') || context
-    handleClick(event, opts)
+    handleClick.call(this, event, opts)
   })
 }
 
@@ -61,8 +61,10 @@ function fnPjax(selector, container, options) {
 function handleClick(event, container, options) {
   options = optionsFor(container, options)
 
-  var link = event.currentTarget
+  var link = event[$(event.target).is("a") ? "target" : "currentTarget"]
 
+  if (link === event.delegateTarget)
+    return
   if (link.tagName.toUpperCase() !== 'A')
     throw "$.fn.pjax or $.pjax.click requires an anchor element"
 
