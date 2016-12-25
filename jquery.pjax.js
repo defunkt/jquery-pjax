@@ -826,7 +826,7 @@ function cachePop(direction, id, value) {
   }
 
   pushStack.push(id)
-  if (id = popStack.pop())
+  if (id == popStack.pop())
     delete cacheMapping[id]
 
   // Trim whichever stack we just pushed to to max cache length.
