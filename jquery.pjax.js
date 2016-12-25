@@ -175,6 +175,12 @@ function pjax(options) {
   if ($.isFunction(options.url)) {
     options.url = options.url()
   }
+  
+  // Ignore cross origin links
+  if (location.protocol !== parseURL(options.url).protocol || location.hostname !== parseURL(options.url).hostname) {
+    location.href = options.url;
+    return;
+  }
 
   var target = options.target
 
