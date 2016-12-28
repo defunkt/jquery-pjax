@@ -4,7 +4,7 @@
  * https://github.com/defunkt/jquery-pjax
  */
 
-(function($){
+;(function($){
 
 // When called on a container with a selector, fetches the href with
 // ajax into the container or with the data-pjax attribute on the link
