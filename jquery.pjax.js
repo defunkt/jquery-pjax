@@ -288,8 +288,15 @@ function pjax(options) {
       fragment: options.fragment,
       timeout: options.timeout
     }
+	
+    if (options.push && !options.replace) {
+      // Cache current container element before replacing it
+      cachePush(previousState.id, cloneContents(context))
 
-    if (options.push || options.replace) {
+      window.history.pushState(pjax.state, container.title, container.url)
+    }
+
+    if (options.replace) {
       window.history.replaceState(pjax.state, container.title, container.url)
     }
 
@@ -361,13 +368,6 @@ function pjax(options) {
   var xhr = pjax.xhr = $.ajax(options)
 
   if (xhr.readyState > 0) {
-    if (options.push && !options.replace) {
-      // Cache current container element before replacing it
-      cachePush(pjax.state.id, cloneContents(context))
-
-      window.history.pushState(null, "", options.requestUrl)
-    }
-
     fire('pjax:start', [xhr, options])
     fire('pjax:send', [xhr, options])
   }
