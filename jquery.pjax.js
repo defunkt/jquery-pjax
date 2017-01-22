@@ -642,20 +642,25 @@ function optionsFor(container, options) {
 // Because we can't persist elements using the history API, we must be
 // able to find a String selector that will consistently find the Element.
 //
-// container - A selector String, jQuery object, or DOM Element.
+// container - A selector String or jQuery object.
 //
 // Returns a jQuery object whose context is `document` and has a selector.
 function findContainerFor(container) {
-  container = $(container)
+  var formatedContainer
 
-  if ( !container.length ) {
-    throw "no pjax container for " + container.selector
-  } else if ( container.selector !== '' && container.context === document ) {
-    return container
-  } else if ( container.attr('id') ) {
-    return $('#' + container.attr('id'))
+  if (jQuery.type(container) === 'string') {
+    formatedContainer = $(container)
+    formatedContainer.selector = container
   } else {
-    throw "cant get selector for pjax container!"
+    formatedContainer = container
+  }
+
+  if (!formatedContainer.length) {
+    throw "no pjax container for " + container
+  } else if (!formatedContainer.selector) {
+    throw "cant get selector for pjax container"
+  } else {
+    return formatedContainer
   }
 }
 
@@ -911,8 +916,11 @@ function disable() {
 
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
-if ( $.inArray('state', $.event.props) < 0 )
+if ($.event.props && $.inArray('state', $.event.props) < 0) {
   $.event.props.push('state')
+} else if (!('state' in $.Event.prototype)) {
+  $.event.addProp('state')
+}
 
 // Is pjax supported by this browser?
 $.support.pjax =
