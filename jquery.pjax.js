@@ -4,7 +4,7 @@
  * https://github.com/defunkt/jquery-pjax
  */
 
-(function($){
+(function($) {
 
 // When called on a container with a selector, fetches the href with
 // ajax into the container or with the data-pjax attribute on the link
@@ -68,15 +68,15 @@ function handleClick(event, container, options) {
 
   // Middle click, cmd click, and ctrl click should open
   // links in a new tab as normal.
-  if ( event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey )
+  if (event.which > 1 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
     return
 
   // Ignore cross origin links
-  if ( location.protocol !== link.protocol || location.hostname !== link.hostname )
+  if (location.protocol !== link.protocol || location.hostname !== link.hostname)
     return
 
   // Ignore case when a hash is being tacked on the current URL
-  if ( link.href.indexOf('#') > -1 && stripHash(link) == stripHash(location) )
+  if (link.href.indexOf('#') > -1 && stripHash(link) == stripHash(location))
     return
 
   // Ignore event with default prevented
@@ -165,8 +165,8 @@ function handleSubmit(event, container, options) {
 //
 // Use it just like $.ajax:
 //
-//   var xhr = $.pjax({ url: this.href, container: '#main' })
-//   console.log( xhr.readyState )
+//   var xhr = $.pjax({url: this.href, container: '#main'})
+//   console.log(xhr.readyState)
 //
 // Returns whatever $.ajax returns.
 function pjax(options) {
@@ -300,7 +300,7 @@ function pjax(options) {
     if (blurFocus) {
       try {
         document.activeElement.blur()
-      } catch (e) { }
+      } catch (e) {}
     }
 
     if (container.title) document.title = container.title
@@ -545,7 +545,7 @@ function fallbackPjax(options) {
 // Internal: Abort an XmlHttpRequest if it hasn't been completed,
 // also removing its event handlers.
 function abortXHR(xhr) {
-  if ( xhr && xhr.readyState < 4) {
+  if (xhr && xhr.readyState < 4) {
     xhr.onreadystatechange = $.noop
     xhr.abort()
   }
@@ -565,7 +565,7 @@ function cloneContents(container) {
   var cloned = container.clone()
   // Unmark script tags as already being eval'd so they can get executed again
   // when restored from cache. HAXX: Uses jQuery internal method.
-  cloned.find('script').each(function(){
+  cloned.find('script').each(function() {
     if (!this.src) jQuery._data(this, 'globalEval', false)
   })
   return [container.selector, cloned.contents()]
@@ -619,11 +619,11 @@ function stripHash(location) {
 // Returns options Object.
 function optionsFor(container, options) {
   // Both container and options
-  if ( container && options )
+  if (container && options)
     options.container = container
 
   // First argument is options Object
-  else if ( $.isPlainObject(container) )
+  else if ($.isPlainObject(container))
     options = container
 
   // Only container
@@ -642,20 +642,25 @@ function optionsFor(container, options) {
 // Because we can't persist elements using the history API, we must be
 // able to find a String selector that will consistently find the Element.
 //
-// container - A selector String, jQuery object, or DOM Element.
+// container - A selector String or jQuery object.
 //
 // Returns a jQuery object whose context is `document` and has a selector.
 function findContainerFor(container) {
-  container = $(container)
+  var formatedContainer
 
-  if ( !container.length ) {
-    throw "no pjax container for " + container.selector
-  } else if ( container.selector !== '' && container.context === document ) {
-    return container
-  } else if ( container.attr('id') ) {
-    return $('#' + container.attr('id'))
+  if (jQuery.type(container) === 'string') {
+    formatedContainer = $(container)
+    formatedContainer.selector = container
   } else {
-    throw "cant get selector for pjax container!"
+    formatedContainer = container
+  }
+
+  if (!formatedContainer.length) {
+    throw "no pjax container for " + container
+  } else if (!formatedContainer.selector) {
+    throw "cant get selector for pjax container"
+  } else {
+    return formatedContainer
   }
 }
 
@@ -736,7 +741,7 @@ function extractContainer(data, xhr, options) {
   // Clean up any <title> tags
   if (obj.contents) {
     // Remove any parent title elements
-    obj.contents = obj.contents.not(function() { return $(this).is('title') })
+    obj.contents = obj.contents.not(function() {return $(this).is('title')})
 
     // Then scrub any titles from their descendants
     obj.contents.find('title').remove()
@@ -897,13 +902,13 @@ function enable() {
 //
 // Returns nothing.
 function disable() {
-  $.fn.pjax = function() { return this }
+  $.fn.pjax = function() {return this}
   $.pjax = fallbackPjax
   $.pjax.enable = enable
   $.pjax.disable = $.noop
   $.pjax.click = $.noop
   $.pjax.submit = $.noop
-  $.pjax.reload = function() { window.location.reload() }
+  $.pjax.reload = function() {window.location.reload()}
 
   $(window).off('popstate.pjax', onPjaxPopstate)
 }
@@ -911,8 +916,11 @@ function disable() {
 
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
-if ( $.inArray('state', $.event.props) < 0 )
+if ($.event.props && $.inArray('state', $.event.props) < 0) {
   $.event.props.push('state')
+} else if (!('state' in $.Event.prototype)) {
+  $.event.addProp('state')
+}
 
 // Is pjax supported by this browser?
 $.support.pjax =
