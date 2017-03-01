@@ -332,6 +332,8 @@ function pjax(options) {
       if (target) scrollTo = $(target).offset().top
     }
 
+    if (typeof scrollTo === 'string') scrollTo = $(scrollTo).offset().top || 0
+
     if (typeof scrollTo == 'number') $(window).scrollTop(scrollTo)
 
     fire('pjax:success', [data, status, xhr, options])
