@@ -370,6 +370,14 @@ def index
 end
 ```
 
+The following example shows how you might configure CakePHP.
+
+``` php
+if ($this->request->header('X-PJAX')) {
+  $this->layout = false;
+} 
+```
+
 An `X-PJAX` request header is set to differentiate a pjax request from normal XHR requests. In this case, if the request is pjax, we skip the layout html and just render the inner contents of the container.
 
 [Check if there is a pjax plugin][plugins] for your favorite server framework.
