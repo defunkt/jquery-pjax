@@ -325,14 +325,21 @@ function pjax(options) {
 
     var scrollTo = options.scrollTo
 
+    if (typeof scrollTo == 'number') {
+      var scrollTarget = findContainerFor(options.container)
+      if (scrollTarget) {
+        setScrollTop(scrollableParent(scrollTarget.children()), scrollTo)
+      }
+    }
+
     // Ensure browser scrolls to the element referenced by the URL anchor
     if (hash) {
       var name = decodeURIComponent(hash.slice(1))
-      var target = document.getElementById(name) || document.getElementsByName(name)[0]
-      if (target) scrollTo = $(target).offset().top
+      var hashTarget = document.getElementById(name) || document.getElementsByName(name)[0]
+      if (hashTarget) {
+        setScrollTop(scrollableParent(hashTarget), scrollOffset(hashTarget))
+      }
     }
-
-    if (typeof scrollTo == 'number') $(window).scrollTop(scrollTo)
 
     fire('pjax:success', [data, status, xhr, options])
   }
@@ -908,6 +915,82 @@ function disable() {
   $(window).off('popstate.pjax', onPjaxPopstate)
 }
 
+// Internal: Determines if the element is a "root" element, meaning that it is
+// one of these elements: window, document, html, or body.
+//
+// el - jQuery object or DOM element of element to check.
+//
+// Returns a Boolean.
+function isRootElement(el) {
+  return $.isWindow($(el)[0]) || $(el).is(document) || $(el).is('body, html')
+}
+
+// Internal: Finds the first parent of the element that might have a vertical
+// scroll.
+//
+// el - jQuery object or DOM element.
+//
+// Returns a jQuery object.
+function scrollableParent(el) {
+  var parents = $(el).parents()
+  var scrollableParent = $(document.body)
+  for ( i = 0; i < parents.length; i++) {
+    var p = $(parents.get(i))
+    if (isRootElement(p)) {
+      continue
+    }
+    if (p.css('overflow-y') != 'scroll' && p.css('overflow-y') != 'auto') {
+      continue
+    }
+    scrollableParent = p
+    break
+  }
+  return scrollableParent
+}
+
+// Internal: Finds the offset between the element and the top of the first
+// vertically scrollable window that contains the element.
+//
+// el - jQuery object or DOM element.
+//
+// Returns a Number.
+function scrollOffset(el) {
+  var sel = scrollableParent(el),
+    sst = scrollTop(sel),
+    eo = Math.ceil($(el).offset().top),
+    so = Math.ceil(sel.offset().top)
+  if(isRootElement(sel)) {
+    return eo
+  }
+  return sst + eo - so
+}
+
+// Internal: Get the scrollTop of the element. For cross-browser comptability,
+// for "root" ( see `isRootElement` doc ) elements it is best to read from
+// the `window` element.
+//
+// sel - jQuery object or DOM element.
+//
+// Returns a Number.
+function scrollTop(sel) {
+  return isRootElement(sel) ? $(window).scrollTop() : $(sel).scrollTop()
+}
+
+// Internal: Set the `scrollTop` of the element. For cross-browser comptability,
+// for "root" ( see `isRootElement` doc ) elements it is best to set the setting
+// on the `body` and `html` elments.
+//
+// sel - jQuery object or DOM element.
+// st - Number.
+//
+// Returns nothing.
+function setScrollTop(sel, st) {
+  if (isRootElement(sel)) {
+    $('body, html').scrollTop(st)
+    return
+  }
+  $(sel).scrollTop(st)
+}
 
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
@@ -923,3 +1006,4 @@ $.support.pjax =
 $.support.pjax ? enable() : disable()
 
 })(jQuery);
+// vim: ts=2 sw=2 et
