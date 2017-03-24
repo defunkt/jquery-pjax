@@ -575,8 +575,14 @@ function cloneContents(container) {
 //
 // Returns sanitized url.href String.
 function stripInternalParams(url) {
-  url.search = url.search.replace(/([?&])(_pjax|_)=[^&]*/g, '')
-  return url.href.replace(/\?($|#)/, '$1')
+
+  // Strip internal params and the preceding ampersands if not first in the query string
+  // (i.e. remove '&_pjax=asdf' from '?_=asdf&a=b&_pjax=asdf')
+  url.search = url.search.replace(/&(_pjax|_)=[^&]*/g, '')
+
+  // Strip internal param and following ampersand if first in the query string
+  // (i.e. remove '_=asdf&' from '?_=asdf&a=b')
+  url.search = url.search.replace(/(_pjax|_)=[^&]*&*/g, '')
 }
 
 // Internal: Parse URL components and returns a Locationish object.
