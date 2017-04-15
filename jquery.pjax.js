@@ -583,6 +583,7 @@ function stripInternalParams(url) {
   // Strip internal param and following ampersand if first in the query string
   // (i.e. remove '_=asdf&' from '?_=asdf&a=b')
   url.search = url.search.replace(/(_pjax|_)=[^&]*&*/g, '')
+  return url.href.replace(/\?($|#)/, '$1')
 }
 
 // Internal: Parse URL components and returns a Locationish object.
