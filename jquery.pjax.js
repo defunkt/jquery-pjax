@@ -440,7 +440,7 @@ if ('state' in window.history) {
 // stuff yet.
 function onPjaxPopstate(event) {
   var previousState = pjax.state;
-  var state = event.state
+  var state = event.state || (state = event.originalEvent) && state.state;
 
   if (state && state.container) {
     // When coming forward from a separate history session, will get an
@@ -1024,7 +1024,7 @@ function disable() {
 
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
-if ( $.inArray('state', $.event.props) < 0 )
+if ( $.event.props && $.inArray('state', $.event.props) < 0 )
   $.event.props.push('state')
 
 // Is pjax supported by this browser?
