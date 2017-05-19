@@ -57,6 +57,7 @@ function handleClick(event, container, options) {
   options = optionsFor(container, options)
 
   var link = event.currentTarget
+  var $link = $(link)
 
   if (link.tagName.toUpperCase() !== 'A')
     throw "$.fn.pjax or $.pjax.click requires an anchor element"
@@ -80,18 +81,18 @@ function handleClick(event, container, options) {
 
   var defaults = {
     url: link.href,
-    container: $(link).attr('data-pjax'),
+    container: $link.attr('data-pjax'),
     target: link
   }
 
   var opts = $.extend({}, defaults, options)
   var clickEvent = $.Event('pjax:click')
-  $(link).trigger(clickEvent, [opts])
+  $link.trigger(clickEvent, [opts])
 
   if (!clickEvent.isDefaultPrevented()) {
     pjax(opts)
     event.preventDefault()
-    $(link).trigger('pjax:clicked', [opts])
+    $link.trigger('pjax:clicked', [opts])
   }
 }
 
@@ -131,12 +132,12 @@ function handleSubmit(event, container, options) {
     defaults.contentType = false;
   } else {
     // Can't handle file uploads, exit
-    if ($(form).find(':file').length) {
+    if ($form.find(':file').length) {
       return;
     }
 
     // Fallback to manually serializing the fields
-    defaults.data = $(form).serializeArray();
+    defaults.data = $form.serializeArray()
   }
 
   pjax($.extend({}, defaults, options))
