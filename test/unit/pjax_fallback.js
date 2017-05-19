@@ -325,7 +325,7 @@ asyncTest("GET with data array"+s, function() {
 
     var env = JSON.parse(frame.$("#env").text())
     equal(env['REQUEST_METHOD'], "GET")
-    var expected = {'foo': ['bar', 'baz']};
+    var expected = {'foo': ['bar', 'baz']}
     if (!disabled) expected._pjax = "#main"
     deepEqual(env['rack.request.query_hash'], expected)
 
@@ -349,7 +349,7 @@ asyncTest("POST with data array"+s, function() {
 
     var env = JSON.parse(frame.$("#env").text())
     equal(env['REQUEST_METHOD'], "POST")
-    var expected = {'foo': ['bar', 'baz']};
+    var expected = {'foo': ['bar', 'baz']}
     if (!disabled) expected._pjax = "#main"
     deepEqual(env['rack.request.form_hash'], expected)
 

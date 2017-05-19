@@ -4,6 +4,8 @@ require 'json'
 set :public_folder, File.dirname(settings.root)
 enable :static
 
+jquery_version = '3.2'
+
 helpers do
   def pjax?
     env['HTTP_X_PJAX'] && !params[:layout]
@@ -17,6 +19,10 @@ helpers do
       nil
     end
   end
+
+  define_method(:jquery_version) do
+    jquery_version
+  end
 end
 
 after do
@@ -28,6 +34,7 @@ end
 
 
 get '/' do
+  jquery_version = params[:jquery] if params[:jquery]
   erb :qunit
 end
 
