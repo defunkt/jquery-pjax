@@ -127,13 +127,13 @@ function handleSubmit(event, container, options) {
   }
 
   if (defaults.type !== 'GET' && window.FormData !== undefined) {
-    defaults.data = new FormData(form);
-    defaults.processData = false;
-    defaults.contentType = false;
+    defaults.data = new FormData(form)
+    defaults.processData = false
+    defaults.contentType = false
   } else {
     // Can't handle file uploads, exit
     if ($form.find(':file').length) {
-      return;
+      return
     }
 
     // Fallback to manually serializing the fields
@@ -249,7 +249,7 @@ function pjax(options) {
   }
 
   options.success = function(data, status, xhr) {
-    var previousState = pjax.state;
+    var previousState = pjax.state
 
     // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
@@ -317,7 +317,7 @@ function pjax(options) {
     // http://www.w3.org/html/wg/drafts/html/master/forms.html
     var autofocusEl = context.find('input[autofocus], textarea[autofocus]').last()[0]
     if (autofocusEl && document.activeElement !== autofocusEl) {
-      autofocusEl.focus();
+      autofocusEl.focus()
     }
 
     executeScriptTags(container.scripts)
@@ -639,7 +639,7 @@ function optionsFor(container, options) {
 //
 // Returns a jQuery object.
 function findAll(elems, selector) {
-  return elems.filter(selector).add(elems.find(selector));
+  return elems.filter(selector).add(elems.find(selector))
 }
 
 function parseHTML(html) {
@@ -895,4 +895,4 @@ $.support.pjax =
 
 $.support.pjax ? enable() : disable()
 
-})(jQuery);
+})(jQuery)
