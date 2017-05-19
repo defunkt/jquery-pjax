@@ -11,4 +11,7 @@ while ! lsof -i :$port >/dev/null; do
   sleep .05
 done
 
-phantomjs ./test/run-qunit.coffee "http://localhost:$port/"
+phantomjs ./test/run-qunit.js \
+  "http://localhost:$port/?jquery=3.2" \
+  "http://localhost:$port/?jquery=2.2" \
+  "http://localhost:$port/?jquery=1.12"
