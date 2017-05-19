@@ -1,6 +1,6 @@
 {
   "name": "jquery-pjax",
-  "version": "1.9.6",
+  "version": "2.0.0",
   "main": "jquery.pjax.js",
   "repository": "defunkt/jquery-pjax",
   "licenses": [
