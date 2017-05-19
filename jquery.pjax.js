@@ -308,8 +308,12 @@ function pjax(options) {
       state: pjax.state,
       previousState: previousState
     })
-    context.html(container.contents)
-
+		
+		if(typeof options.replacementHandler === "function")
+			options.replacementHandler(context, container.contents, options)
+		else
+			context.html(container.contents)
+		
     // FF bug: Won't autofocus fields that are inserted via JS.
     // This behavior is incorrect. So if theres no current focus, autofocus
     // the last field.
