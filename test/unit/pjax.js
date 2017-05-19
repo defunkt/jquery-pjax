@@ -108,24 +108,6 @@ if ($.support.pjax) {
     })
   })
 
-  asyncTest("container option accepts jQuery object", 1, function() {
-    var container = this.frame.$("#main")
-
-    navigate(this.frame)
-    .pjax({ url: "hello.html", container: container }, function(frame) {
-      equal(frame.$("#main > p").html().trim(), "Hello!")
-    })
-  })
-
-  asyncTest("container option accepts DOM element with ID", 1, function() {
-    var container = this.frame.document.getElementById("main")
-
-    navigate(this.frame)
-    .pjax({ url: "hello.html", container: container }, function(frame) {
-      equal(frame.$("#main > p").html().trim(), "Hello!")
-    })
-  })
-
   asyncTest("url option accepts function", 2, function() {
     var numCalls = 0
     var url = function() {
