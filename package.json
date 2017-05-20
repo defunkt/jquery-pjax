@@ -12,5 +12,8 @@
   "files" : [
     "LICENSE",
     "jquery.pjax.js"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^3.19.0"
+  }
 }
