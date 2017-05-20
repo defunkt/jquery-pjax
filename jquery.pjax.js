@@ -575,7 +575,7 @@ function cloneContents(container) {
 //
 // Returns sanitized url.href String.
 function stripInternalParams(url) {
-  url.search = url.search.replace(/([?&])(_pjax|_)=[^&]*/g, '')
+  url.search = url.search.replace(/([?&])(_pjax|_)=[^&]*/g, '').replace(/^&/, '')
   return url.href.replace(/\?($|#)/, '$1')
 }
 
