@@ -293,7 +293,7 @@ function pjax(options) {
     }
 
     // Only blur the focus if the focused element is within the container.
-    var blurFocus = $.contains(options.container, document.activeElement)
+    var blurFocus = $.contains(context, document.activeElement)
 
     // Clear out any focused controls before inserting new page contents.
     if (blurFocus) {
