@@ -11,5 +11,8 @@
   ],
   "devDependencies": {
     "eslint": "^3.19.0"
+  },
+  "scripts": {
+    "test": "./script/test"
   }
 }
