@@ -600,6 +600,18 @@ function stripHash(location) {
   return location.href.replace(/#.*/, '')
 }
 
+// Internal: Parse unicode character and return unescaped String. Unicode 
+// character looks like "\u0000".
+//
+// url - String URL
+//
+// Return String
+function unescapeUnicode(url){
+  return url.replace(/\\u([\d\w]{4})/gi, function (match, grp) {
+    return String.fromCharCode(parseInt(grp, 16));
+  });
+}
+
 // Internal: Build options Object for arguments.
 //
 // For convenience the first parameter can be either the container or
@@ -663,7 +675,7 @@ function extractContainer(data, xhr, options) {
   // Prefer X-PJAX-URL header if it was set, otherwise fallback to
   // using the original requested url.
   var serverUrl = xhr.getResponseHeader('X-PJAX-URL')
-  obj.url = serverUrl ? stripInternalParams(parseURL(serverUrl)) : options.requestUrl
+  obj.url = serverUrl ? stripInternalParams(parseURL(unescapeUnicode(serverUrl))) : options.requestUrl
 
   var $head, $body
   // Attempt to parse response html into elements
