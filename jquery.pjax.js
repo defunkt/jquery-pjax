@@ -562,6 +562,21 @@ function uniqueId() {
 }
 
 function cloneContents(container) {
+  // Preserve textarea values
+  var textarea = findAll(container, "textarea")
+  textarea.text(function(i, text){return textarea[i].value})
+
+  // Preserve select values
+  findAll(container, "select").each(function(i, elem){
+    elem = $(elem);
+    var values = $(elem).val();
+    values = $.isArray(values) ? values : [values];
+    elem.find('option[selected]').attr('selected', false);
+    elem.find('option').filter(function(){
+      return ($.inArray(this.value, values) !== -1);
+    }).attr('selected', true);
+  })
+
   var cloned = container.clone()
   // Unmark script tags as already being eval'd so they can get executed again
   // when restored from cache. HAXX: Uses jQuery internal method.

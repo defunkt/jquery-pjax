@@ -1081,4 +1081,161 @@ if ($.support.pjax) {
       equal(frame.location.search, "")
     })
   })
+
+  asyncTest("preserves input value when going back and forth", 1, function() {
+    var count = 0
+    var frame = this.frame
+
+    frame.$.pjax({url: "form.html", container: "#main"})
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+      var field = frame.$("input[type=text]")
+
+      if (count == 1) {
+        // Form
+        field.val("changed")
+        frame.history.back()
+      } else if (count == 2) {
+        // Hello
+        frame.history.forward()
+      } else if (count == 3) {
+        // Form
+        equal(field.val(), "changed", "Field value is preserved")
+        start()
+      }
+    })
+  })
+
+  asyncTest("preserves textarea value when going back and forth", 1, function() {
+    var count = 0
+    var frame = this.frame
+
+    frame.$.pjax({url: "form.html", container: "#main"})
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+      var field = frame.$("textarea")
+
+      if (count == 1) {
+        // Form
+        field.val("changed")
+        frame.history.back()
+      } else if (count == 2) {
+        // Hello
+        frame.history.forward()
+      } else if (count == 3) {
+        // Form
+        equal(field.val(), "changed", "Field value is preserved")
+        start()
+      }
+    })
+  })
+
+  asyncTest("preserves checkbox value when going back and forth", 1, function() {
+    var count = 0
+    var frame = this.frame
+
+    frame.$.pjax({url: "form.html", container: "#main"})
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+      var field = frame.$("input[type=checkbox]")
+
+      if (count == 1) {
+        // Form
+        field.prop("checked", true)
+        frame.history.back()
+      } else if (count == 2) {
+        // Hello
+        frame.history.forward()
+      } else if (count == 3) {
+        // Form
+        ok(field.prop("checked"), "Field value is preserved")
+        start()
+      }
+    })
+  })
+
+  asyncTest("preserves checkbox value when going back and forth", 1, function() {
+    var count = 0
+    var frame = this.frame
+
+    frame.$.pjax({url: "form.html", container: "#main"})
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+      var field = frame.$("input[type=radio]")
+
+      if (count == 1) {
+        // Form
+        field.prop("checked", true)
+        frame.history.back()
+      } else if (count == 2) {
+        // Hello
+        frame.history.forward()
+      } else if (count == 3) {
+        // Form
+        ok(field.prop("checked"), "Field value is preserved")
+        start()
+      }
+    })
+  })
+
+  asyncTest("preserves select value when going back and forth", 1, function() {
+    var count = 0
+    var frame = this.frame
+
+    frame.$.pjax({url: "form.html", container: "#main"})
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+      var option = frame.$("select option:last")
+
+      if (count == 1) {
+        // Form
+        option.prop("selected", true)
+
+        frame.history.back()
+      } else if (count == 2) {
+        // Hello
+        frame.history.forward()
+      } else if (count == 3) {
+        // Form
+        //var option = frame.$("select option:last")
+        equal(option.prop("selected"), true, "Field value is preserved")
+        start()
+      }
+    })
+  })
+
+  asyncTest("preserves multiple select value when going back and forth", 3, function() {
+    var count = 0
+    var frame = this.frame
+
+    frame.$.pjax({url: "form.html", container: "#main"})
+
+    frame.$("#main").on("pjax:end", function() {
+      count++
+      var field = frame.$("select").prop("multiple", true)
+      var options = field.find("option")
+
+      if (count == 1) {
+        // Form
+        options.prop("selected", true)
+
+        frame.history.back()
+      } else if (count == 2) {
+        // Hello
+        frame.history.forward()
+      } else if (count == 3) {
+        // Form
+        options.each(function(){
+          equal($(this).prop("selected"), true, "Field value is preserved")
+        })
+        start()
+      }
+    })
+  })
+
 }
