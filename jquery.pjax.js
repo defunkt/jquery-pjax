@@ -523,6 +523,9 @@ function fallbackPjax(options) {
   }
 
   var data = options.data
+  if (!data && method === 'GET' && url.indexOf('?') != -1) {
+    data = url.match(/\?(.+)$/)[1]
+  }
   if (typeof data === 'string') {
     $.each(data.split('&'), function(index, value) {
       var pair = value.split('=')
