@@ -350,7 +350,9 @@ function pjax(options) {
       fragment: options.fragment,
       timeout: options.timeout
     }
-    window.history.replaceState(pjax.state, document.title)
+    if (options.push || options.replace) {
+      window.history.replaceState(pjax.state, document.title)
+    }
   }
 
   // Cancel the current request if we're already pjaxing
