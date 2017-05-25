@@ -168,7 +168,7 @@ container element.
 <table>
 <tr>
   <th>event</th>
-  <th>cancel</th>
+  <th>default<br />preventable</th>
   <th>arguments</th>
   <th>notes</th>
 </tr>
