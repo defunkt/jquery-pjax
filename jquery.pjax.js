@@ -431,7 +431,7 @@ function onPjaxPopstate(event) {
   var state = event.state
   var direction
 
-  if (state && state.container) {
+  if (pjax.state && state && state.container) {
     // When coming forward from a separate history session, will get an
     // initial pop with a state we are already at. Skip reloading the current
     // page.
