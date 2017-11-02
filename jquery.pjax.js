@@ -35,7 +35,12 @@ function fnPjax(selector, container, options) {
       opts = $.extend({}, options)
       opts.container = $(this).attr('data-pjax')
     }
-    handleClick(event, opts)
+    if(event.ctrlKey || event.metaKey){
+      return true; //bizness as usual, open in new window
+    }else{
+      handleClick(event, opts)
+      return false; //prevent other events UNDER the link to be trigered (ex: modal on results)
+    }
   })
 }
 
