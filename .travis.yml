@@ -1,16 +1,15 @@
-language: ruby
-rvm:
-  - 1.9.3
-
-install: gem install sinatra
-
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - ruby ./test/app.rb 2>/dev/null &
-  - sleep 2
-
-script: phantomjs ./test/run-qunit.coffee "http://localhost:4567/"
+sudo: false
+language: node_js
+node_js: "6"
+before_script: script/bootstrap
 
 notifications:
   email: false
+deploy:
+  provider: npm
+  email: mislav.marohnic@gmail.com
+  api_key:
+    secure: nstPtsdxAHGPkKl2wOnMW4FXHg1nKxG/yCYQYqiC61JqhbfSaZFVjIQrdH+9GSel7F/K7VLwGZwSVgfiWUymWeEsNw8R/cyI9xCXf5iNF6WHIwuX6Q3Tnvb3Cx/bkeoc8+4v7qR172FtzwKWJq2iKXawd58/4zf2sduOwld1PMw=
+  on:
+    tags: true
+    repo: defunkt/jquery-pjax

@@ -5,6 +5,10 @@ $.each([true, false], function() {
 var disabled = this == false
 var s = disabled ? " (disabled)" : ""
 
+var ua = navigator.userAgent
+var safari = ua.match("Safari") && !ua.match("Chrome") && !ua.match("Edge")
+var chrome = ua.match("Chrome") && !ua.match("Edge")
+
 module("$.pjax fallback"+s, {
   setup: function() {
     var self = this
@@ -99,42 +103,14 @@ asyncTest("sends correct HTTP referer"+s, function() {
   })
 })
 
-asyncTest("adds entry to browser history"+s, function() {
-  var frame = this.frame
-  var count = 0
-
-  frame.onpopstate = function() {
-    window.iframeLoad(frame)
-  }
-
-  this.loaded = function() {
-    count++
-
-    if (count == 1) {
-      equal(frame.location.pathname, "/hello.html")
-      ok(frame.history.length > 1)
-      frame.history.back()
-    } else if (count == 2) {
-      equal(frame.location.pathname, "/home.html")
-      frame.history.forward()
-      start()
-    }
-  }
-
-  frame.$.pjax({
-    url: "hello.html",
-    container: "#main"
-  })
-})
-
 asyncTest("scrolls to top of the page"+s, function() {
   var frame = this.frame
 
   frame.window.scrollTo(0, 100)
-  equal(frame.window.scrollY, 100)
+  equal(frame.window.pageYOffset, 100)
 
   this.loaded = function(frame) {
-    equal(frame.window.scrollY, 0)
+    equal(frame.window.pageYOffset, 0)
     start()
   }
 
@@ -147,11 +123,13 @@ asyncTest("scrolls to top of the page"+s, function() {
 asyncTest("scrolls to anchor at top page"+s, function() {
   var frame = this.frame
 
-  equal(frame.window.scrollY, 0)
+  equal(frame.window.pageYOffset, 0)
 
   this.loaded = function(frame) {
     setTimeout(function() {
-      equal(frame.window.scrollY, 8)
+      equal(frame.location.pathname, "/anchor.html")
+      equal(frame.location.hash, "#top")
+      equal(frame.window.pageYOffset, 8)
       start()
     }, 100)
   }
@@ -160,16 +138,24 @@ asyncTest("scrolls to anchor at top page"+s, function() {
     url: "/anchor.html#top",
     container: "#main"
   })
+
+  if (disabled) {
+    equal(frame.location.pathname, "/home.html")
+    equal(frame.location.href.indexOf("#"), -1)
+  } else {
+    equal(frame.location.pathname, "/anchor.html")
+    equal(frame.location.hash, "#top")
+  }
 })
 
 asyncTest("empty anchor doesn't scroll page"+s, function() {
   var frame = this.frame
 
-  equal(frame.window.scrollY, 0)
+  equal(frame.window.pageYOffset, 0)
 
   this.loaded = function(frame) {
     setTimeout(function() {
-      equal(frame.window.scrollY, 0)
+      equal(frame.window.pageYOffset, 0)
       start()
     }, 10)
   }
@@ -183,11 +169,11 @@ asyncTest("empty anchor doesn't scroll page"+s, function() {
 asyncTest("scrolls to anchor at bottom page"+s, function() {
   var frame = this.frame
 
-  equal(frame.window.scrollY, 0)
+  equal(frame.window.pageYOffset, 0)
 
   this.loaded = function(frame) {
     setTimeout(function() {
-      equal(frame.window.scrollY, 10008)
+      equal(frame.window.pageYOffset, 10008)
       start()
     }, 10)
   }
@@ -198,7 +184,23 @@ asyncTest("scrolls to anchor at bottom page"+s, function() {
   })
 })
 
+asyncTest("scrolls to named encoded anchor"+s, function() {
+  var frame = this.frame
 
+  equal(frame.window.pageYOffset, 0)
+
+  this.loaded = function(frame) {
+    setTimeout(function() {
+      equal(frame.window.pageYOffset, 10008)
+      start()
+    }, 10)
+  }
+
+  frame.$.pjax({
+    url: "/anchor.html#%62%6F%74%74%6F%6D",
+    container: "#main"
+  })
+})
 
 asyncTest("sets GET method"+s, function() {
   var frame = this.frame
@@ -314,6 +316,54 @@ asyncTest("POST with data object"+s, function() {
   })
 })
 
+asyncTest("GET with data array"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "?foo%5B%5D=bar&foo%5B%5D=baz")
+
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "GET")
+    var expected = {'foo': ['bar', 'baz']}
+    if (!disabled) expected._pjax = "#main"
+    deepEqual(env['rack.request.query_hash'], expected)
+
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'GET',
+    url: "env.html",
+    data: [{name: "foo[]", value: "bar"}, {name: "foo[]", value: "baz"}],
+    container: "#main"
+  })
+})
+
+asyncTest("POST with data array"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/env.html")
+    equal(frame.location.search, "")
+
+    var env = JSON.parse(frame.$("#env").text())
+    equal(env['REQUEST_METHOD'], "POST")
+    var expected = {'foo': ['bar', 'baz']}
+    if (!disabled) expected._pjax = "#main"
+    deepEqual(env['rack.request.form_hash'], expected)
+
+    start()
+  }
+
+  frame.$.pjax({
+    type: 'POST',
+    url: "env.html",
+    data: [{name: "foo[]", value: "bar"}, {name: "foo[]", value: "baz"}],
+    container: "#main"
+  })
+})
+
 asyncTest("GET with data string"+s, function() {
   var frame = this.frame
 
@@ -354,6 +404,56 @@ asyncTest("POST with data string"+s, function() {
     type: 'POST',
     url: "env.html",
     data: "foo=bar",
+    container: "#main"
+  })
+})
+
+asyncTest("handle form submit"+s, function() {
+  var frame = this.frame
+
+  frame.$(frame.document).on("submit", "form", function(event) {
+    frame.$.pjax.submit(event, "#main")
+  })
+
+  this.loaded = function() {
+    var env = JSON.parse(frame.$("#env").text())
+    var expected = {foo: "1", bar: "2"}
+    if (!disabled) expected._pjax = "#main"
+    deepEqual(env['rack.request.query_hash'], expected)
+    start()
+  }
+
+  frame.$("form").submit()
+})
+
+asyncTest("browser URL is correct after redirect"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/hello.html")
+    var expectedHash = safari && disabled ? "" : "#new"
+    equal(frame.location.hash, expectedHash)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "redirect.html#new",
+    container: "#main"
+  })
+})
+
+asyncTest("server can't affect anchor after redirect"+s, function() {
+  var frame = this.frame
+
+  this.loaded = function() {
+    equal(frame.location.pathname, "/hello.html")
+    var expectedHash = safari && disabled ? "" : "#new"
+    equal(frame.location.hash, expectedHash)
+    start()
+  }
+
+  frame.$.pjax({
+    url: "redirect.html?anchor=server#new",
     container: "#main"
   })
 })

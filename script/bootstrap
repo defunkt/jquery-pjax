@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+[ -n "$CI" ] || npm install
+bundle install
+
+if phantom_version="$(phantomjs --version)"; then
+  echo "PhantomJS $phantom_version"
+else
+  echo "Warning: script/test will not be able to run, but you can still start" >&2
+  echo "script/server and open the test suite in your browser." >&2
+fi
