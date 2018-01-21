@@ -681,7 +681,7 @@ function extractContainer(data, xhr, options) {
 
   // If there's a <title> tag in the header, use it as
   // the page's title.
-  obj.title = findAll($head, 'title').last().text()
+  obj.title = findAll($head, 'title').first().text()
 
   if (options.fragment) {
     var $fragment = $body
