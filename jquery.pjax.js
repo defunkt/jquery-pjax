@@ -123,7 +123,8 @@ function handleSubmit(event, container, options) {
     type: ($form.attr('method') || 'GET').toUpperCase(),
     url: $form.attr('action'),
     container: $form.attr('data-pjax'),
-    target: form
+    target: form,
+    push: false,
   }
 
   if (defaults.type !== 'GET' && window.FormData !== undefined) {
@@ -139,7 +140,6 @@ function handleSubmit(event, container, options) {
     // Fallback to manually serializing the fields
     defaults.data = $form.serializeArray()
   }
-
   pjax($.extend({}, defaults, options))
 
   event.preventDefault()
@@ -244,7 +244,7 @@ function pjax(options) {
 
     var allowed = fire('pjax:error', [xhr, textStatus, errorThrown, options])
     if (options.type == 'GET' && textStatus !== 'abort' && allowed) {
-      locationReplace(container.url)
+      locationReplace(container.url, options)
     }
   }
 
@@ -269,13 +269,13 @@ function pjax(options) {
 
     // If there is a layout version mismatch, hard load the new url
     if (currentVersion && latestVersion && currentVersion !== latestVersion) {
-      locationReplace(container.url)
+      locationReplace(container.url, options)
       return
     }
 
     // If the new response is missing a body, hard load the page
     if (!container.contents) {
-      locationReplace(container.url)
+      locationReplace(container.url, options)
       return
     }
 
@@ -394,9 +394,23 @@ function pjaxReload(container, options) {
 //   https://bugs.webkit.org/show_bug.cgi?id=93506
 //
 // Returns nothing.
-function locationReplace(url) {
-  window.history.replaceState(null, "", pjax.state.url)
-  window.location.replace(url)
+function locationReplace(url, options) {
+  if (options.type.toUpperCase() === 'POST') {
+    forcePost(options)
+  } else {
+    window.history.replaceState(null, "", pjax.state.url)
+    window.location.replace(url)
+  }
+}
+
+function forcePost(options) {
+  var form = options.target
+  if (form.nodeName.toUpperCase() !== 'FORM') {
+    return locationReplace(options.url, {})
+  } else {
+    var $form = $(form)
+    $form.off('submit').submit()
+  }
 }
 
 
@@ -494,7 +508,7 @@ function onPjaxPopstate(event) {
       // scroll position.
       container[0].offsetHeight // eslint-disable-line no-unused-expressions
     } else {
-      locationReplace(location.href)
+      locationReplace(location.href, {})
     }
   }
   initialPop = false
