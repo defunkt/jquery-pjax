@@ -395,8 +395,8 @@ function pjaxReload(container, options) {
 //
 // Returns nothing.
 function locationReplace(url, options) {
-  if (options.type.toUpperCase() == 'POST') {
-    forcePost(options);
+  if (options.type.toUpperCase() === 'POST') {
+    forcePost(options)
   } else {
     window.history.replaceState(null, "", pjax.state.url)
     window.location.replace(url)
@@ -404,12 +404,12 @@ function locationReplace(url, options) {
 }
 
 function forcePost(options) {
-  var form = options.target;
-  if (form.nodeName.toUpperCase() != 'FORM') {
-    return locationReplace(options.url, {});
+  var form = options.target
+  if (form.nodeName.toUpperCase() !== 'FORM') {
+    return locationReplace(options.url, {})
   } else {
-    var $form = $(form);
-    $form.off('submit').submit();
+    var $form = $(form)
+    $form.off('submit').submit()
   }
 }
 
