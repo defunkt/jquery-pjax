@@ -192,6 +192,8 @@ function pjax(options) {
     options.data._pjax = options.container
   }
 
+  if (!options.fragment) options.fragment = options.container
+
   function fire(type, args, props) {
     if (!props) props = {}
     props.relatedTarget = options.target
@@ -700,7 +702,9 @@ function extractContainer(data, xhr, options) {
         obj.title = $fragment.attr('title') || $fragment.data('title')
     }
 
-  } else if (!fullDocument) {
+  }
+
+  if (!fullDocument && !obj.contents) {
     obj.contents = $body
   }
 
