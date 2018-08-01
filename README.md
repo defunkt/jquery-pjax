@@ -169,7 +169,7 @@ container element.
 <tr>
   <th>event</th>
   <th>cancel</th>
-  <th>arguments</th>
+  <th>arguments (event, ...)</th>
   <th>notes</th>
 </tr>
 <tr>
