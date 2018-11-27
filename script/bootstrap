@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+[ -n "$CI" ] || npm install
 bundle install
 
 if phantom_version="$(phantomjs --version)"; then

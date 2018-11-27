@@ -1,76 +1,68 @@
 # pjax = pushState + ajax
 
-
-            .--.
-           /    \
-          ## a  a
-          (   '._)
-           |'-- |
-         _.\___/_   ___pjax___
-       ."\> \Y/|<'.  '._.-'
-      /  \ \_\/ /  '-' /
-      | --'\_/|/ |   _/
-      |___.-' |  |`'`
-        |     |  |
-        |    / './
-       /__./` | |
-          \   | |
-           \  | |
-           ;  | |
-           /  | |
-     jgs  |___\_.\_
-          `-"--'---'
-
-## Introduction
-
 pjax is a jQuery plugin that uses ajax and pushState to deliver a fast browsing experience with real permalinks, page titles, and a working back button.
 
-pjax works by grabbing html from your server via ajax and replacing the content
-of a container on your page with the ajax'd html. It then updates the browser's
-current URL using pushState without reloading your page's layout or any
-resources (JS, CSS), giving the appearance of a fast, full page load. But really
-it's just ajax and pushState.
+pjax works by fetching HTML from your server via ajax and replacing the content
+of a container element on your page with the loaded HTML. It then updates the
+current URL in the browser using pushState. This results in faster page
+navigation for two reasons:
 
-For [browsers that don't support pushState][compat] pjax fully degrades.
+* No page resources (JS, CSS) get re-executed or re-applied;
+* If the server is configured for pjax, it can render only partial page
+  contents and thus avoid the potentially costly full layout render.
 
-## Overview
+### Status of this project
 
-pjax is not fully automatic. You'll need to setup and designate a containing element on your page that will be replaced when you navigate your site.
+jquery-pjax is **largely unmaintained** at this point. It might continue to
+receive important bug fixes, but _its feature set is frozen_ and it's unlikely
+that it will get new features or enhancements.
 
-Consider the following page.
+## Installation
 
-``` html
-<!DOCTYPE html>
-<html>
-<head>
-  <!-- styles, scripts, etc -->
-</head>
-<body>
-  <h1>My Site</h1>
-  <div class="container" id="pjax-container">
-    Go to <a href="/page/2">next page</a>.
-  </div>
-</body>
-</html>
+pjax depends on jQuery 1.8 or higher.
+
+### npm
+
+```
+$ npm install jquery-pjax
 ```
 
-We want pjax to grab the URL `/page/2` then replace `#pjax-container` with
-whatever it gets back. No styles or scripts will be reloaded and even the `<h1>`
-can stay the same - we just want to change the `#pjax-container` element.
+### standalone script
 
-We do this by telling pjax to listen on `a` tags and use `#pjax-container` as the target container:
+Download and include `jquery.pjax.js` in your web page:
+
+```
+curl -LO https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
+```
+
+## Usage
+
+### `$.fn.pjax`
+
+The simplest and most common use of pjax looks like this:
 
 ``` javascript
 $(document).pjax('a', '#pjax-container')
 ```
 
-Now when someone in a pjax-compatible browser clicks "next page" the content of `#pjax-container` will be replaced with the body of `/page/2`.
+This will enable pjax on all links on the page and designate the container as `#pjax-container`.
 
-Magic! Almost. You still need to configure your server to look for pjax requests and send back pjax-specific content.
+If you are migrating an existing site, you probably don't want to enable pjax
+everywhere just yet. Instead of using a global selector like `a`, try annotating
+pjaxable links with `data-pjax`, then use `'a[data-pjax]'` as your selector. Or,
+try this selector that matches any `<a data-pjax href=>` links inside a `<div
+data-pjax>` container:
 
-The pjax ajax request sends an `X-PJAX` header so in this example (and in most cases) we want to return just the content of the page without any layout for any requests with that header.
+``` javascript
+$(document).pjax('[data-pjax] a, a[data-pjax]', '#pjax-container')
+```
 
-Here's what it might look like in Rails:
+#### Server-side configuration
+
+Ideally, your server should detect pjax requests by looking at the special
+`X-PJAX` HTTP header, and render only the HTML meant to replace the contents of
+the container element (`#pjax-container` in our example) without the rest of
+the page layout. Here is an example of how this might be done in Ruby on Rails:
 
 ``` ruby
 def index
@@ -82,67 +74,9 @@ end
 
 If you'd like a more automatic solution than pjax for Rails check out [Turbolinks][].
 
+[Check if there is a pjax plugin][plugins] for your favorite server framework.
+
 Also check out [RailsCasts #294: Playing with PJAX][railscasts].
-
-## Installation
-
-### bower
-
-Via [Bower][]:
-
-```
-$ bower install jquery-pjax
-```
-
-Or, add `jquery-pjax` to your app's `bower.json`.
-
-``` json
-  "dependencies": {
-    "jquery-pjax": "latest"
-  }
-```
-
-### standalone
-
-pjax can be downloaded directly into your app's public directory - just be sure you've loaded jQuery first.
-
-```
-curl -LO https://raw.github.com/defunkt/jquery-pjax/master/jquery.pjax.js
-```
-
-**WARNING** Do not hotlink the raw script url. GitHub is not a CDN.
-
-## Dependencies
-
-Requires jQuery 1.8.x or higher.
-
-## Compatibility
-
-pjax only works with [browsers that support the `history.pushState`
-API][compat]. When the API isn't supported pjax goes into fallback mode:
-`$.fn.pjax` calls will be a no-op and `$.pjax` will hard load the given URL.
-
-For debugging purposes, you can intentionally disable pjax even if the browser supports `pushState`. Just call `$.pjax.disable()`. To see if pjax is actually supports `pushState`, check `$.support.pjax`.
-
-## Usage
-
-### `$.fn.pjax`
-
-Let's talk more about the most basic way to get started:
-
-``` javascript
-$(document).pjax('a', '#pjax-container')
-```
-
-This will enable pjax on all links and designate the container as `#pjax-container`.
-
-If you are migrating an existing site you probably don't want to enable pjax everywhere just yet. Instead of using a global selector like `a` try annotating pjaxable links with `data-pjax`, then use `'a[data-pjax]'` as your selector.
-
-Or try this selector that matches any `<a data-pjax href=>` links inside a `<div data-pjax>` container.
-
-``` javascript
-$(document).pjax('[data-pjax] a, a[data-pjax]', '#pjax-container')
-```
 
 #### Arguments
 
@@ -183,13 +117,14 @@ $.pjax.defaults.timeout = 1200
 
 This is a lower level function used by `$.fn.pjax` itself. It allows you to get a little more control over the pjax event handling.
 
-This example uses the current click context to set an ancestor as the container:
+This example uses the current click context to set an ancestor element as the container:
 
 ``` javascript
 if ($.support.pjax) {
   $(document).on('click', 'a[data-pjax]', function(event) {
     var container = $(this).closest('[data-pjax-container]')
-    $.pjax.click(event, {container: container})
+    var containerSelector = '#' + container.id
+    $.pjax.click(event, {container: containerSelector})
   })
 }
 ```
@@ -225,10 +160,10 @@ function applyFilters() {
 }
 ```
 
-### Events
+## Events
 
 All pjax events except `pjax:click` & `pjax:clicked` are fired from the pjax
-container, not the link that was clicked.
+container element.
 
 <table>
 <tr>
@@ -358,38 +293,42 @@ $(document).on('pjax:timeout', function(event) {
 })
 ```
 
-### Server side
+## Advanced configuration
 
-Server configuration will vary between languages and frameworks. The following example shows how you might configure Rails.
+### Reinitializing plugins/widget on new page content
 
-``` ruby
-def index
-  if request.headers['X-PJAX']
-    render :layout => false
-  end
-end
+The whole point of pjax is that it fetches and inserts new content _without_
+refreshing the page. However, other jQuery plugins or libraries that are set to
+react on page loaded event (such as `DOMContentLoaded`) will not pick up on
+these changes. Therefore, it's usually a good idea to configure these plugins to
+reinitialize in the scope of the updated page content. This can be done like so:
+
+``` js
+$(document).on('ready pjax:end', function(event) {
+  $(event.target).initializeMyPlugin()
+})
 ```
 
-An `X-PJAX` request header is set to differentiate a pjax request from normal XHR requests. In this case, if the request is pjax, we skip the layout html and just render the inner contents of the container.
+This will make `$.fn.initializeMyPlugin()` be called at the document level on
+normal page load, and on the container level after any pjax navigation (either
+after clicking on a link or going Back in the browser).
 
-[Check if there is a pjax plugin][plugins] for your favorite server framework.
-
-#### Response types that force a reload
+### Response types that force a reload
 
 By default, pjax will force a full reload of the page if it receives one of the
 following responses from the server:
 
 * Page content that includes `<html>` when `fragment` selector wasn't explicitly
   configured. Pjax presumes that the server's response hasn't been properly
-  configured for pjax. If `fragment` pjax option is given, pjax will simply
-  extract the content to insert into the DOM based on that selector.
+  configured for pjax. If `fragment` pjax option is given, pjax will extract the
+  content based on that selector.
 
 * Page content that is blank. Pjax assumes that the server is unable to deliver
   proper pjax contents.
 
 * HTTP response code that is 4xx or 5xx, indicating some server error.
 
-#### Affecting the browser URL
+### Affecting the browser URL
 
 If the server needs to affect the URL which will appear in the browser URL after
 pjax navigation (like HTTP redirects work for normal requests), it can set the
@@ -401,7 +340,7 @@ def index
 end
 ```
 
-#### Layout Reloading
+### Layout Reloading
 
 Layouts can be forced to do a hard reload when assets or html changes.
 
@@ -421,11 +360,10 @@ end
 
 Deploying a deploy, bumping the version constant to force clients to do a full reload the next request getting the new layout and assets.
 
-[compat]: http://caniuse.com/#search=pushstate
+
 [$.fn.on]: http://api.jquery.com/on/
 [$.ajax]: http://api.jquery.com/jQuery.ajax/
 [pushState]: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#Adding_and_modifying_history_entries
 [plugins]: https://gist.github.com/4283721
 [turbolinks]: https://github.com/rails/turbolinks
 [railscasts]: http://railscasts.com/episodes/294-playing-with-pjax
-[bower]: https://github.com/twitter/bower

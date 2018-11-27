@@ -1,0 +1,15 @@
+{ "extends": "eslint:recommended",
+  "env": {
+    "browser": true,
+    "jquery": true
+  },
+  "rules": {
+    "eqeqeq": "warn",
+    "no-eval": "error",
+    "no-extra-parens": "error",
+    "no-implicit-globals": "error",
+    "no-trailing-spaces": "error",
+    "no-unused-expressions": "error",
+    "semi": ["error", "never"]
+  }
+}

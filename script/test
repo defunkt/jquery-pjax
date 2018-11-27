@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+./node_modules/.bin/eslint *.js
+
 port=3999
 script/server -p "$port" &>/dev/null &
 pid=$!
@@ -10,8 +12,6 @@ trap "kill $pid" EXIT INT
 while ! lsof -i :$port >/dev/null; do
   sleep .05
 done
-
-[ -z "$CI" ] || echo "PhantomJS $(phantomjs --version)"
 
 phantomjs ./test/run-qunit.js \
   "http://localhost:$port/?jquery=3.2" \

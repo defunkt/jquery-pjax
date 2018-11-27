@@ -1,10 +1,7 @@
 sudo: false
-language: ruby
-rvm:
-  - 1.9.3
-
-install: script/bootstrap
-script: script/test
+language: node_js
+node_js: "6"
+before_script: script/bootstrap
 
 notifications:
   email: false

@@ -253,7 +253,7 @@ function pjax(options) {
 
     // If $.pjax.defaults.version is a function, invoke it first.
     // Otherwise it can be a static string.
-    var currentVersion = (typeof $.pjax.defaults.version === 'function') ?
+    var currentVersion = typeof $.pjax.defaults.version === 'function' ?
       $.pjax.defaults.version() :
       $.pjax.defaults.version
 
@@ -293,13 +293,13 @@ function pjax(options) {
     }
 
     // Only blur the focus if the focused element is within the container.
-    var blurFocus = $.contains(options.container, document.activeElement)
+    var blurFocus = $.contains(context, document.activeElement)
 
     // Clear out any focused controls before inserting new page contents.
     if (blurFocus) {
       try {
         document.activeElement.blur()
-      } catch (e) { }
+      } catch (e) { /* ignore */ }
     }
 
     if (container.title) document.title = container.title
@@ -492,7 +492,7 @@ function onPjaxPopstate(event) {
 
       // Force reflow/relayout before the browser tries to restore the
       // scroll position.
-      container[0].offsetHeight
+      container[0].offsetHeight // eslint-disable-line no-unused-expressions
     } else {
       locationReplace(location.href)
     }
@@ -566,7 +566,7 @@ function cloneContents(container) {
   // Unmark script tags as already being eval'd so they can get executed again
   // when restored from cache. HAXX: Uses jQuery internal method.
   cloned.find('script').each(function(){
-    if (!this.src) jQuery._data(this, 'globalEval', false)
+    if (!this.src) $._data(this, 'globalEval', false)
   })
   return cloned.contents()
 }
@@ -575,7 +575,7 @@ function cloneContents(container) {
 //
 // Returns sanitized url.href String.
 function stripInternalParams(url) {
-  url.search = url.search.replace(/([?&])(_pjax|_)=[^&]*/g, '')
+  url.search = url.search.replace(/([?&])(_pjax|_)=[^&]*/g, '').replace(/^&/, '')
   return url.href.replace(/\?($|#)/, '$1')
 }
 
@@ -665,12 +665,14 @@ function extractContainer(data, xhr, options) {
   var serverUrl = xhr.getResponseHeader('X-PJAX-URL')
   obj.url = serverUrl ? stripInternalParams(parseURL(serverUrl)) : options.requestUrl
 
+  var $head, $body
   // Attempt to parse response html into elements
   if (fullDocument) {
-    var $head = $(parseHTML(data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)[0]))
-    var $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
+    $body = $(parseHTML(data.match(/<body[^>]*>([\s\S.]*)<\/body>/i)[0]))
+    var head = data.match(/<head[^>]*>([\s\S.]*)<\/head>/i)
+    $head = head != null ? $(parseHTML(head[0])) : $body
   } else {
-    var $head = $body = $(parseHTML(data))
+    $head = $body = $(parseHTML(data))
   }
 
   // If response data is empty, return fast
@@ -682,12 +684,11 @@ function extractContainer(data, xhr, options) {
   obj.title = findAll($head, 'title').last().text()
 
   if (options.fragment) {
+    var $fragment = $body
     // If they specified a fragment, look for it in the response
     // and pull it out.
-    if (options.fragment === 'body') {
-      var $fragment = $body
-    } else {
-      var $fragment = findAll($body, options.fragment).first()
+    if (options.fragment !== 'body') {
+      $fragment = findAll($fragment, options.fragment).first()
     }
 
     if ($fragment.length) {
@@ -796,8 +797,8 @@ function cachePop(direction, id, value) {
   }
 
   pushStack.push(id)
-  if (id = popStack.pop())
-    delete cacheMapping[id]
+  id = popStack.pop()
+  if (id) delete cacheMapping[id]
 
   // Trim whichever stack we just pushed to to max cache length.
   trimCacheStack(pushStack, pjax.defaults.maxCacheLength)
@@ -893,6 +894,10 @@ $.support.pjax =
   // pushState isn't reliable on iOS until 5.
   !navigator.userAgent.match(/((iPod|iPhone|iPad).+\bOS\s+[1-4]\D|WebApps\/.+CFNetwork)/)
 
-$.support.pjax ? enable() : disable()
+if ($.support.pjax) {
+  enable()
+} else {
+  disable()
+}
 
 })(jQuery)
