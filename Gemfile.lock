@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    rack (1.5.2)
+    rack (1.6.11)
     rack-protection (1.5.3)
       rack
     sinatra (1.4.5)
