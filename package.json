@@ -10,7 +10,7 @@
     "jquery.pjax.js"
   ],
   "devDependencies": {
-    "eslint": "^3.19.0"
+    "eslint": "^6.5.1"
   },
   "scripts": {
     "test": "./script/test"
